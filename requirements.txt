@@ -1,0 +1,19 @@
+Django==6.1.1
+django-cors-headers==4.9.0
+ImageIO==2.38.0
+imageio-ffmpeg==0.6.0
+joblib==1.6.0
+# Intel macOS: torch 2.2.2 is the last official x86_64 build and needs numpy 1.x.
+# Use Python 3.12 (not 3.14). On Apple Silicon / Linux, newer torch+numpy 2.x is fine.
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+pillow==12.3.0
+scikit-learn==1.5.2
+scipy==1.13.1
+torch==2.2.2
+torchvision==0.17.2
+ultralytics>=8.3.0,<9
+# Keep headless OpenCV; ultralytics may try to pull opencv-python which needs numpy 2.x.
+# If that happens: pip uninstall opencv-python && pip install opencv-python-headless==4.10.0.84
+xgboost==3.4.1
+pyserial==3.5
