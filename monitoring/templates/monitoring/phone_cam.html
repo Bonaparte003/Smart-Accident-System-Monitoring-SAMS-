@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>SAMS camera</title>
+  <link rel="icon" href="/static/monitoring/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0b0d10;
+      color: #f2f4f7;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid #222831;
+    }
+    header strong { letter-spacing: 0.04em; }
+    #status { font-size: 0.85rem; color: #9aa4b2; text-align: right; }
+    #status.ok { color: #3dd68c; }
+    #status.err { color: #ff6b6b; }
+    .stage {
+      position: relative;
+      flex: 1;
+      background: #000;
+      overflow: hidden;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+    }
+    .actions {
+      padding: 1rem;
+      display: grid;
+      gap: 0.65rem;
+    }
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 0.95rem 1rem;
+      font-size: 1.05rem;
+      font-weight: 650;
+      background: #f2f4f7;
+      color: #0b0d10;
+    }
+    button:disabled { opacity: 0.45; }
+    button.ghost {
+      background: transparent;
+      color: #f2f4f7;
+      border: 1px solid #333b46;
+    }
+    .err-box, .warn-box {
+      margin: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      line-height: 1.45;
+    }
+    .err-box { background: #2a1215; color: #ffb4b4; }
+    .warn-box { background: #2a2412; color: #ffd38a; }
+  </style>
+</head>
+<body>
+  {% if not valid %}
+  <div class="err-box">
+    This QR session expired or is invalid. On the Mac, open <strong>Vision lab → Live phone</strong> to show a fresh QR, then scan again.
+  </div>
+  {% else %}
+  <div id="insecure" class="warn-box" hidden>
+    This page is not HTTPS, so the phone browser will block the camera.
+    On the Mac run <code>./hardware/tools/hw.sh run</code>, rescan the QR, then tap
+    <strong>Advanced → Proceed</strong> for the certificate warning.
+  </div>
+  <header>
+    <strong>SAMS</strong>
+    <span id="status">Tap Start camera</span>
+  </header>
+  <div class="stage">
+    <video id="preview" playsinline muted autoplay></video>
+  </div>
+  <div class="actions">
+    <button type="button" id="start">Start camera</button>
+    <button type="button" class="ghost" id="stop" disabled>Stop</button>
+  </div>
+  <script>
+    const token = "{{ token|escapejs }}";
+    const statusEl = document.getElementById("status");
+    const video = document.getElementById("preview");
+    const startBtn = document.getElementById("start");
+    const stopBtn = document.getElementById("stop");
+    const insecureEl = document.getElementById("insecure");
+    let stream = null;
+    let timer = null;
+    let canvas = null;
+
+    if (!window.isSecureContext) {
+      insecureEl.hidden = false;
+      setStatus("Needs HTTPS", "err");
+      startBtn.disabled = true;
+    }
+
+    function setStatus(msg, kind) {
+      statusEl.textContent = msg;
+      statusEl.className = kind || "";
+    }
+
+    async function ackJoin() {
+      await fetch(`/cam/${token}/join/`, { method: "POST" });
+    }
+
+    async function pushFrame() {
+      if (!stream || !video.videoWidth) return;
+      if (!canvas) canvas = document.createElement("canvas");
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+      const maxSide = 720;
+      const scale = Math.min(1, maxSide / Math.max(w, h));
+      canvas.width = Math.round(w * scale);
+      canvas.height = Math.round(h * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.save();
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
+      if (!blob) return;
+      const form = new FormData();
+      form.append("frame", blob, "frame.jpg");
+      const res = await fetch(`/cam/${token}/frame/`, { method: "POST", body: form });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Upload failed (${res.status})`);
+      }
+    }
+
+    async function start() {
+      if (!window.isSecureContext) {
+        setStatus("Needs HTTPS", "err");
+        return;
+      }
+      startBtn.disabled = true;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+        });
+        video.srcObject = stream;
+        await video.play();
+        await ackJoin();
+        stopBtn.disabled = false;
+        setStatus("Streaming to SAMS…", "ok");
+        clearInterval(timer);
+        timer = setInterval(async () => {
+          try {
+            await pushFrame();
+            setStatus("Streaming to SAMS…", "ok");
+          } catch (err) {
+            setStatus(String(err.message || err), "err");
+          }
+        }, 850);
+        await pushFrame();
+      } catch (err) {
+        startBtn.disabled = false;
+        setStatus(String(err.message || err), "err");
+      }
+    }
+
+    function stop() {
+      clearInterval(timer);
+      timer = null;
+      if (stream) {
+        stream.getTracks().forEach((t) => t.stop());
+        stream = null;
+      }
+      video.srcObject = null;
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      setStatus("Stopped");
+    }
+
+    startBtn.addEventListener("click", start);
+    stopBtn.addEventListener("click", stop);
+    if (window.isSecureContext) start().catch(() => {});
+  </script>
+  {% endif %}
+</body>
+</html>

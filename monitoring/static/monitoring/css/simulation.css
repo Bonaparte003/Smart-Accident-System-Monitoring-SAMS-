@@ -1,0 +1,280 @@
+:root {
+  --bg: #0b0d10;
+  --panel: #14181e;
+  --panel-border: #242a33;
+  --text: #e8edf4;
+  --muted: #8b95a5;
+  --accent: #3d8bfd;
+  --caution: #e6b422;
+  --danger: #e25b4a;
+  --normal: #3ecf8e;
+  --vision: #f0c14a;
+  --vib: #d86bb8;
+  --font: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+.app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, #12161c 0%, #0b0d10 100%);
+}
+
+.brand { display: flex; align-items: baseline; gap: 0.75rem; }
+.brand-mark {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 1.1rem;
+}
+.brand-sub { color: var(--muted); font-size: 0.85rem; }
+
+.topbar-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.status-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #555;
+}
+.status-dot.ok { background: var(--normal); box-shadow: 0 0 8px rgba(62, 207, 142, 0.5); }
+.status-dot.err { background: var(--danger); }
+
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr min(340px, 34vw);
+  min-height: 0;
+}
+
+.stage-panel {
+  position: relative;
+  min-height: 520px;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(61, 139, 253, 0.08), transparent 45%),
+    radial-gradient(ellipse at 70% 80%, rgba(226, 91, 74, 0.06), transparent 40%),
+    #0e1217;
+  border-right: 1px solid var(--panel-border);
+}
+
+#viewport {
+  position: absolute;
+  inset: 0;
+}
+#viewport canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.overlay-toggles {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.toggle, .camera-presets button, .scenario-btns button {
+  appearance: none;
+  border: 1px solid var(--panel-border);
+  background: rgba(20, 24, 30, 0.88);
+  color: var(--muted);
+  font: 500 0.75rem var(--font);
+  padding: 0.4rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.toggle.active { color: var(--text); border-color: #3a4656; background: #1a222c; }
+.toggle[data-overlay="vision"].active { color: var(--vision); }
+.toggle[data-overlay="vibration"].active { color: var(--vib); }
+.toggle[data-overlay="fusion"].active { color: var(--caution); }
+
+.fusion-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  min-width: 140px;
+  padding: 0.7rem 0.9rem;
+  background: rgba(14, 18, 23, 0.9);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  text-align: right;
+}
+.fusion-label {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+.fusion-conf {
+  margin-top: 0.15rem;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.fusion-badge.state-NORMAL .fusion-label { color: var(--normal); }
+.fusion-badge.state-CAUTION .fusion-label { color: var(--caution); }
+.fusion-badge.state-DANGER .fusion-label { color: var(--danger); }
+
+.camera-presets {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--panel);
+  overflow: auto;
+}
+
+.panel {
+  padding: 1.1rem 1.15rem 1.25rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+.panel h2 {
+  margin: 0 0 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.9rem;
+}
+.slider-row strong { font-family: var(--mono); font-weight: 500; color: var(--accent); }
+.slider-row input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+.check input { accent-color: var(--accent); }
+
+.scenarios { margin-top: 1rem; }
+.scenarios-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.scenario-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+.scenario-btns button:hover,
+.camera-presets button:hover,
+.toggle:hover {
+  border-color: #4a5668;
+  color: var(--text);
+}
+
+.hud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.hud-tile {
+  padding: 0.65rem 0.7rem;
+  background: #0e1217;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+.hud-k {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+.hud-v {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.hud-fusion .hud-v { color: var(--caution); }
+.hud-fusion.state-NORMAL .hud-v { color: var(--normal); }
+.hud-fusion.state-CAUTION .hud-v { color: var(--caution); }
+.hud-fusion.state-DANGER .hud-v { color: var(--danger); }
+
+.proba { margin-top: 0.9rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.proba-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 42px;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  font-family: var(--mono);
+  color: var(--muted);
+}
+.bar {
+  height: 6px;
+  background: #1a212b;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--muted);
+  transition: width 0.25s ease;
+}
+#bar-normal { background: var(--normal); }
+#bar-caution { background: var(--caution); }
+#bar-danger { background: var(--danger); }
+.proba-row em { font-style: normal; text-align: right; color: var(--text); }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .stage-panel {
+    min-height: 420px;
+    border-right: none;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .brand-sub { display: none; }
+}

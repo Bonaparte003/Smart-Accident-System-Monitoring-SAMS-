@@ -1,0 +1,368 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAMS — Safety Monitoring</title>
+  <link rel="icon" href="{% static 'monitoring/favicon.svg' %}" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'monitoring/css/app.css' %}" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="nav">
+      <div class="nav-brand">
+        <div>
+          <span class="logo">SAMS</span>
+          <span class="logo-sub">Safety Monitoring</span>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <p class="nav-section">Operations</p>
+        <button type="button" class="nav-item active" data-page="simulation">
+          <span class="nav-ico" aria-hidden="true"></span>Simulation
+        </button>
+
+        <p class="nav-section">Model labs</p>
+        <button type="button" class="nav-item" data-page="vision">
+          <span class="nav-ico" aria-hidden="true"></span>Vision lab
+        </button>
+        <button type="button" class="nav-item" data-page="vibration">
+          <span class="nav-ico" aria-hidden="true"></span>Vibration lab
+        </button>
+
+        <p class="nav-section">System</p>
+        <button type="button" class="nav-item" data-page="logs">
+          <span class="nav-ico" aria-hidden="true"></span>Activity log
+        </button>
+      </nav>
+
+      <div class="nav-foot">
+        <label class="sound-toggle">
+          <input type="checkbox" id="sound-enabled" checked />
+          <span>Alert sounds</span>
+        </label>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <span class="eyebrow" id="page-eyebrow">Operations</span>
+          <span class="topbar-sep" aria-hidden="true">/</span>
+          <span class="topbar-page" id="page-crumb">Simulation</span>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <!-- Simulation -->
+        <section class="page active" id="page-simulation">
+          <header class="page-head">
+            <div>
+              <h1>Workcell simulation</h1>
+              <p>Interactive digital twin with live fusion risk classification.</p>
+            </div>
+            <div class="fusion-chip" id="fusion-badge">
+              <span class="fusion-k">Fusion output</span>
+              <strong id="fusion-label">—</strong>
+              <span id="fusion-conf">Confidence —</span>
+            </div>
+          </header>
+
+          <div class="sim-grid">
+            <div class="stage card">
+              <div class="overlay-toggles">
+                <button type="button" class="chip active" data-overlay="vision">Vision</button>
+                <button type="button" class="chip active" data-overlay="vibration">Vibration</button>
+                <button type="button" class="chip active" data-overlay="fusion">Fusion</button>
+              </div>
+              <div id="viewport"></div>
+              <div class="cam-preview" id="cam-preview">
+                <div class="cam-preview-head">
+                  <span class="cam-live">LIVE</span>
+                  <span>CAM-01 · CCTV</span>
+                </div>
+                <canvas id="cam-preview-canvas" width="320" height="200"></canvas>
+                <div class="cam-preview-meta" id="cam-preview-meta">Hard hat: —</div>
+              </div>
+              <div class="camera-presets">
+                <button type="button" data-cam="orbit">Orbit</button>
+                <button type="button" data-cam="top">Top</button>
+                <button type="button" data-cam="side">Side</button>
+                <button type="button" data-cam="operator">Operator</button>
+                <button type="button" data-cam="cctv">CCTV</button>
+              </div>
+            </div>
+
+            <div class="sim-side">
+              <div class="card">
+                <h2>Scene controls</h2>
+                <label class="field">
+                  <span>Worker distance <em id="distance-value">1.8 m</em></span>
+                  <input id="distance" type="range" min="0.3" max="5.0" step="0.05" value="1.8" />
+                </label>
+                <div class="check-list">
+                  <label class="check"><input id="approaching" type="checkbox" checked /> Worker approaching</label>
+                  <label class="check"><input id="machine-active" type="checkbox" checked /> Machine active</label>
+                  <label class="check" id="abnormal-vib-wrap">
+                    <input id="abnormal-vib" type="checkbox" /> Abnormal vibration
+                    <span class="live-note" id="abnormal-vib-live-note" hidden>(from live MPU6050)</span>
+                  </label>
+                </div>
+                <div class="divider"></div>
+                <p class="field-label">Mannequin wearings (PPE)</p>
+                <div class="check-list" id="wearings-list">
+                  <label class="check"><input id="wear-hard-hat" type="checkbox" checked /> Hard hat</label>
+                  <label class="check"><input id="wear-vest" type="checkbox" checked /> Safety vest</label>
+                  <label class="check"><input id="wear-goggles" type="checkbox" checked /> Safety goggles</label>
+                  <label class="check"><input id="wear-gloves" type="checkbox" checked /> Gloves</label>
+                </div>
+                <div class="divider"></div>
+                <p class="field-label">Scripted paths</p>
+                <div class="btn-row scenarios">
+                  <button type="button" class="btn path-normal" data-scenario="normal_pass">Normal pass</button>
+                  <button type="button" class="btn path-caution" data-scenario="cautious_approach">Cautious approach</button>
+                  <button type="button" class="btn path-slow" data-scenario="slow_approach">Slow approach</button>
+                  <button type="button" class="btn path-fast" data-scenario="fast_approach">Fast approach</button>
+                  <button type="button" class="btn path-danger" data-scenario="danger_entry">Danger entry</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h2>Live status</h2>
+                <div class="caution-banner" id="caution-banner" hidden>
+                  <strong>CAUTION</strong>
+                  <span id="caution-banner-text">Worker inside caution zone — proceed carefully.</span>
+                </div>
+                <div class="hud-grid">
+                  <article class="hud"><span>Vision</span><strong id="hud-vision-v">—</strong></article>
+                  <article class="hud"><span>PPE</span><strong id="hud-ppe-v">—</strong></article>
+                  <article class="hud"><span>Vibration</span><strong id="hud-vibration-v">—</strong></article>
+                  <article class="hud"><span>Zone</span><strong id="hud-zone-v">—</strong></article>
+                  <article class="hud hud-fusion" id="hud-fusion"><span>Fusion</span><strong id="hud-fusion-v">—</strong></article>
+                </div>
+                <div class="ppe-track" id="ppe-track">
+                  <div class="ppe-row" data-ppe="hard_hat"><span>Hard hat</span><em>—</em></div>
+                  <div class="ppe-row" data-ppe="vest"><span>Safety vest</span><em>—</em></div>
+                  <div class="ppe-row" data-ppe="goggles"><span>Goggles</span><em>—</em></div>
+                  <div class="ppe-row" data-ppe="gloves"><span>Gloves</span><em>—</em></div>
+                </div>
+                <div class="proba">
+                  <div class="proba-row"><span>NORMAL</span><div class="bar"><i id="bar-normal"></i></div><em id="pct-normal">—</em></div>
+                  <div class="proba-row"><span>CAUTION</span><div class="bar"><i id="bar-caution"></i></div><em id="pct-caution">—</em></div>
+                  <div class="proba-row"><span>DANGER</span><div class="bar"><i id="bar-danger"></i></div><em id="pct-danger">—</em></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Vision lab -->
+        <section class="page" id="page-vision">
+          <header class="page-head">
+            <div>
+              <h1>Vision lab</h1>
+              <p>Upload workplace video or stream your phone — YOLOv8 detects people with bounding boxes.</p>
+            </div>
+            <div class="model-tag" id="vision-model-tag">yolov8n_person</div>
+          </header>
+
+          <div class="lab-grid">
+            <div class="card">
+              <h2>Camera source</h2>
+              <div class="mode-row" id="vision-mode-row">
+                <button type="button" class="btn mode-btn active" id="vision-mode-upload" data-mode="upload">Upload</button>
+                <button type="button" class="btn mode-btn" id="vision-mode-live" data-mode="live">Live phone</button>
+                <span class="hw-pill" id="cam-status-pill">upload</span>
+              </div>
+              <p class="mode-hint" id="vision-mode-hint">Drop a workplace clip to sample frames through YOLOv8 person detection.</p>
+
+              <div id="vision-upload-controls">
+                <div class="dropzone" id="vision-drop" role="button" tabindex="0">
+                  <input type="file" id="vision-file" accept="video/mp4,video/quicktime,video/webm,.mp4,.mov,.webm" hidden />
+                  <strong>Drop a video here</strong>
+                  <span>or click to browse · mp4 / mov / webm</span>
+                </div>
+                <video id="vision-player" controls playsinline></video>
+                <div class="btn-row tight">
+                  <button type="button" class="btn primary" id="vision-analyze">Analyze frames</button>
+                  <span class="hint" id="vision-status">Waiting for upload</span>
+                </div>
+              </div>
+
+              <div id="vision-live-controls" hidden>
+                <div class="qr-join-panel" id="qr-join-panel">
+                  <div id="cam-qr" class="cam-qr" aria-label="Scan this QR with your phone"></div>
+                  <p class="mode-hint" id="cam-hint">On the phone: scan QR → accept the certificate warning → Allow camera. Mac and phone must share Wi‑Fi. Server must be HTTPS (<code>./hardware/tools/hw.sh run</code>).</p>
+                  <code class="cam-join-url" id="cam-join-url" hidden></code>
+                </div>
+                <div class="btn-row tight">
+                  <button type="button" class="btn primary" id="cam-show-qr">Show QR</button>
+                  <button type="button" class="btn" id="cam-stop" disabled>Disconnect</button>
+                </div>
+                <p class="mode-hint" id="cam-status-msg" hidden></p>
+              </div>
+            </div>
+            <div class="card">
+              <h2 id="vision-results-title">Detections</h2>
+              <div id="vision-live-preview" class="cam-live-panel" hidden>
+                <img id="cam-preview-img" alt="Live phone frame with detections" />
+                <div class="hud-grid spaced">
+                  <article class="hud"><span>Detection</span><strong id="cam-label">—</strong></article>
+                  <article class="hud"><span>Confidence</span><strong id="cam-conf">—</strong></article>
+                  <article class="hud"><span>Persons</span><strong id="cam-count">—</strong></article>
+                  <article class="hud"><span>Link</span><strong id="cam-host">—</strong></article>
+                </div>
+              </div>
+              <div id="vision-results" class="frame-grid empty-state">Upload a video to see person detections on sampled frames.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Vibration lab -->
+        <section class="page" id="page-vibration">
+          <header class="page-head">
+            <div>
+              <h1>Vibration lab</h1>
+              <p>Simulate amplitudes or stream a live MPU6050 window into the classifier.</p>
+            </div>
+            <div class="model-tag" id="vib-model-tag">vib_exp01_random_forest</div>
+          </header>
+
+          <div class="lab-grid">
+            <div class="card">
+              <h2>Sensor controls</h2>
+              <div class="mode-row" id="vib-mode-row">
+                <button type="button" class="btn mode-btn active" id="vib-mode-simulate" data-mode="simulate">Simulate</button>
+                <button type="button" class="btn mode-btn" id="vib-mode-live" data-mode="live">Live</button>
+                <button type="button" class="btn primary" id="hw-buzz-test">Test buzzer</button>
+                <span class="hw-pill" id="hw-status-pill">simulate · serial</span>
+              </div>
+              <p class="mode-hint" id="vib-mode-hint">Slider amplitudes synthesize a window for the vibration model.</p>
+              <p class="mode-hint" id="hw-buzz-test-status" hidden></p>
+
+              <div id="vib-simulate-controls">
+                <label class="field">
+                  <span>X amplitude <em id="x-amp-val">0.05</em></span>
+                  <input id="x-amp" type="range" min="0.01" max="1.5" step="0.01" value="0.05" />
+                </label>
+                <label class="field">
+                  <span>Y amplitude <em id="y-amp-val">0.05</em></span>
+                  <input id="y-amp" type="range" min="0.01" max="1.5" step="0.01" value="0.05" />
+                </label>
+                <label class="field">
+                  <span>Z amplitude <em id="z-amp-val">0.05</em></span>
+                  <input id="z-amp" type="range" min="0.01" max="1.5" step="0.01" value="0.05" />
+                </label>
+                <label class="field">
+                  <span>Frequency <em id="freq-val">5.0 Hz</em></span>
+                  <input id="freq-hz" type="range" min="1" max="20" step="0.5" value="5" />
+                </label>
+                <div class="btn-row">
+                  <button type="button" class="btn" id="vib-normal">Preset: normal</button>
+                  <button type="button" class="btn danger-outline" id="vib-spike">Preset: spike</button>
+                  <button type="button" class="btn primary" id="vib-run">Run model</button>
+                </div>
+              </div>
+
+              <div id="vib-live-controls" hidden>
+                <div class="check-list">
+                  <label class="check"><input id="hw-buzzer-enabled" type="checkbox" checked /> Buzzer enabled</label>
+                  <label class="check"><input id="hw-buzzer-auto" type="checkbox" checked /> Auto-buzz on risk</label>
+                </div>
+                <div class="btn-row">
+                  <button type="button" class="btn" id="hw-buzz-off">Buzz off</button>
+                  <button type="button" class="btn" id="hw-buzz-caution">Buzz caution</button>
+                  <button type="button" class="btn danger-outline" id="hw-buzz-danger">Buzz danger</button>
+                </div>
+
+                <details class="hw-optional">
+                  <summary>Optional LEDs (not required)</summary>
+                  <div class="led-row" aria-label="Status LEDs">
+                    <span class="led green" id="led-green" title="Green — NORMAL"></span>
+                    <span class="led yellow" id="led-yellow" title="Yellow — CAUTION"></span>
+                    <span class="led red" id="led-red" title="Red — DANGER"></span>
+                    <em id="led-label">LEDs off</em>
+                  </div>
+                  <div class="check-list">
+                    <label class="check"><input id="hw-leds-enabled" type="checkbox" /> LEDs enabled</label>
+                    <label class="check"><input id="hw-leds-auto" type="checkbox" /> Auto-LEDs on risk</label>
+                  </div>
+                  <div class="btn-row">
+                    <button type="button" class="btn" id="hw-led-green">Green</button>
+                    <button type="button" class="btn" id="hw-led-yellow">Yellow</button>
+                    <button type="button" class="btn danger-outline" id="hw-led-red">Red</button>
+                    <button type="button" class="btn" id="hw-led-off">LEDs off</button>
+                  </div>
+                </details>
+
+                <p class="mode-hint">MPU6050 + buzzer on <strong>D8 ↔ GND</strong>. Set <code>SAMS_HW_SERIAL_PORT</code>, flash <code>hardware/firmware/</code>, then press <strong>Test buzzer</strong>.</p>
+              </div>
+            </div>
+            <div class="card">
+              <h2>Live waveform + prediction</h2>
+              <canvas id="vib-canvas" width="640" height="220"></canvas>
+              <div class="hud-grid spaced">
+                <article class="hud"><span>State</span><strong id="vib-label">—</strong></article>
+                <article class="hud"><span>Confidence</span><strong id="vib-conf">—</strong></article>
+                <article class="hud"><span>X RMS</span><strong id="vib-xrms">—</strong></article>
+                <article class="hud"><span>Y RMS</span><strong id="vib-yrms">—</strong></article>
+              </div>
+              <div class="proba spaced">
+                <div class="proba-row"><span>NORMAL</span><div class="bar"><i id="vib-bar-n"></i></div><em id="vib-pct-n">—</em></div>
+                <div class="proba-row"><span>ABNORMAL</span><div class="bar"><i id="vib-bar-a"></i></div><em id="vib-pct-a">—</em></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Logs -->
+        <section class="page" id="page-logs">
+          <header class="page-head">
+            <div>
+              <h1>Activity log</h1>
+              <p>Event stream from simulation and model lab requests.</p>
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn" id="logs-refresh">Refresh</button>
+              <button type="button" class="btn" id="logs-clear">Clear</button>
+            </div>
+          </header>
+          <div class="card log-help">
+            <p class="help-title">Where to see logs</p>
+            <ol>
+              <li><strong>Here</strong> — live feed from <code>GET /api/logs/</code></li>
+              <li><strong>Django terminal</strong> — console running <code>python manage.py runserver</code></li>
+            </ol>
+          </div>
+          <div class="card">
+            <div id="log-list" class="log-list empty-state">No events yet. Use Simulation, Vision, or Vibration to generate activity.</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="vision-lightbox" class="lightbox" hidden>
+    <button type="button" class="lightbox-close" id="vision-lightbox-close" aria-label="Close zoom">×</button>
+    <figure class="lightbox-figure">
+      <img id="vision-lightbox-img" alt="Zoomed frame" />
+      <figcaption id="vision-lightbox-caption"></figcaption>
+    </figure>
+  </div>
+
+  <script type="module" src="{% static 'monitoring/js/app.js' %}?v=phoneqr3"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAMS — Workcell Simulation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'monitoring/css/simulation.css' %}" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark">SAMS</span>
+        <span class="brand-sub">Smart Automated Monitoring System</span>
+      </div>
+      <div class="topbar-meta">
+        <span id="model-badge">Loading model…</span>
+        <span id="api-status" class="status-dot" title="API status"></span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="stage-panel">
+        <div class="overlay-toggles" role="group" aria-label="Overlay filters">
+          <button type="button" class="toggle active" data-overlay="vision">Vision</button>
+          <button type="button" class="toggle active" data-overlay="vibration">Vibration</button>
+          <button type="button" class="toggle active" data-overlay="fusion">Fusion</button>
+        </div>
+
+        <div id="viewport"></div>
+
+        <div class="fusion-badge" id="fusion-badge">
+          <div class="fusion-label" id="fusion-label">—</div>
+          <div class="fusion-conf" id="fusion-conf">Confidence —</div>
+        </div>
+
+        <div class="camera-presets">
+          <button type="button" data-cam="orbit">Orbit</button>
+          <button type="button" data-cam="top">Top</button>
+          <button type="button" data-cam="side">Side</button>
+          <button type="button" data-cam="operator">Operator</button>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="panel">
+          <h2>Scene Controls</h2>
+          <label class="slider-row">
+            <span>Worker distance <strong id="distance-value">1.8 m</strong></span>
+            <input id="distance" type="range" min="0.3" max="5.0" step="0.05" value="1.8" />
+          </label>
+          <label class="check"><input id="approaching" type="checkbox" checked /> Worker approaching machine</label>
+          <label class="check"><input id="machine-active" type="checkbox" checked /> Machine active</label>
+          <label class="check"><input id="abnormal-vib" type="checkbox" /> Abnormal vibration</label>
+
+          <div class="scenarios">
+            <span class="scenarios-label">Scripted paths</span>
+            <div class="scenario-btns">
+              <button type="button" data-scenario="normal_pass">Normal pass</button>
+              <button type="button" data-scenario="slow_approach">Slow approach</button>
+              <button type="button" data-scenario="fast_approach">Fast approach</button>
+              <button type="button" data-scenario="danger_entry">Danger entry</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Live Status</h2>
+          <div class="hud-grid">
+            <article class="hud-tile" id="hud-vision">
+              <span class="hud-k">Vision</span>
+              <span class="hud-v" id="hud-vision-v">—</span>
+            </article>
+            <article class="hud-tile" id="hud-vibration">
+              <span class="hud-k">Vibration</span>
+              <span class="hud-v" id="hud-vibration-v">—</span>
+            </article>
+            <article class="hud-tile" id="hud-zone">
+              <span class="hud-k">Zone</span>
+              <span class="hud-v" id="hud-zone-v">—</span>
+            </article>
+            <article class="hud-tile hud-fusion" id="hud-fusion">
+              <span class="hud-k">Fusion</span>
+              <span class="hud-v" id="hud-fusion-v">—</span>
+            </article>
+          </div>
+          <div class="proba" id="proba">
+            <div class="proba-row"><span>NORMAL</span><div class="bar"><i id="bar-normal"></i></div><em id="pct-normal">—</em></div>
+            <div class="proba-row"><span>CAUTION</span><div class="bar"><i id="bar-caution"></i></div><em id="pct-caution">—</em></div>
+            <div class="proba-row"><span>DANGER</span><div class="bar"><i id="bar-danger"></i></div><em id="pct-danger">—</em></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="{% static 'monitoring/js/simulation.js' %}"></script>
+</body>
+</html>

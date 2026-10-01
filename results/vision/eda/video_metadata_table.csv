@@ -1,0 +1,692 @@
+label,split,filepath,relpath,duration,fps,width,height,n_frames,size_bytes
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr1.mp4,data/0_tr1.mp4,14.015304,24.83,1920,1080,348,25865947
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr10.mp4,data/0_tr10.mp4,15.022151,24.83,1920,1080,373,29372683
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr100.mp4,data/0_tr100.mp4,8.014499,24.83,1920,1080,199,14633315
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr101.mp4,data/0_tr101.mp4,8.014499,24.83,1920,1080,199,14612449
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr102.mp4,data/0_tr102.mp4,8.014499,24.83,1920,1080,199,14593021
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr103.mp4,data/0_tr103.mp4,8.014499,24.83,1920,1080,199,14545217
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr104.mp4,data/0_tr104.mp4,8.014499,24.83,1920,1080,199,14521835
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr105.mp4,data/0_tr105.mp4,8.014499,24.83,1920,1080,199,14439732
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr106.mp4,data/0_tr106.mp4,8.981071,24.83,1920,1080,223,15663355
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr107.mp4,data/0_tr107.mp4,8.981071,24.83,1920,1080,223,15553423
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr108.mp4,data/0_tr108.mp4,9.021345,24.83,1920,1080,224,18407437
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr109.mp4,data/0_tr109.mp4,9.021345,24.83,1920,1080,224,17335860
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr11.mp4,data/0_tr11.mp4,15.022151,24.83,1920,1080,373,29149989
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr110.mp4,data/0_tr110.mp4,9.021345,24.83,1920,1080,224,17099392
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr111.mp4,data/0_tr111.mp4,9.021345,24.83,1920,1080,224,17041657
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr112.mp4,data/0_tr112.mp4,9.021345,24.83,1920,1080,224,16644992
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr113.mp4,data/0_tr113.mp4,9.021345,24.83,1920,1080,224,16583180
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr114.mp4,data/0_tr114.mp4,9.021345,24.83,1920,1080,224,16537511
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr115.mp4,data/0_tr115.mp4,9.021345,24.83,1920,1080,224,15969258
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr116.mp4,data/0_tr116.mp4,9.021345,24.83,1920,1080,224,15915360
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr117.mp4,data/0_tr117.mp4,9.021345,24.83,1920,1080,224,15891541
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr118.mp4,data/0_tr118.mp4,9.021345,24.83,1920,1080,224,15884090
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr119.mp4,data/0_tr119.mp4,9.021345,24.83,1920,1080,224,15876776
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr12.mp4,data/0_tr12.mp4,15.022151,24.83,1920,1080,373,29030686
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr120.mp4,data/0_tr120.mp4,9.021345,24.83,1920,1080,224,15691223
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr121.mp4,data/0_tr121.mp4,9.021345,24.83,1920,1080,224,15669738
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr122.mp4,data/0_tr122.mp4,10.4421,24.99497120491488,1920,1080,261,5932563
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr123.mp4,data/0_tr123.mp4,10.443371,25.087684115224736,1920,1080,262,5719678
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr124.mp4,data/0_tr124.mp4,10.443625,24.991321362687213,1920,1080,261,5994329
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr125.mp4,data/0_tr125.mp4,10.444286,24.989740095395696,1920,1080,261,5750037
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr126.mp4,data/0_tr126.mp4,10.444185,24.989983354262186,1920,1080,261,4802100
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr127.mp4,data/0_tr127.mp4,10.444998,24.9880374159261,1920,1080,261,3980674
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr128.mp4,data/0_tr128.mp4,10.44571,25.082068052635677,1920,1080,262,3021735
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr129.mp4,data/0_tr129.mp4,10.445049,24.987915804842437,1920,1080,261,3140233
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr13.mp4,data/0_tr13.mp4,15.022151,24.83,1920,1080,373,29023562
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr130.mp4,data/0_tr130.mp4,10.446574,24.98426802267585,1920,1080,261,6596264
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr131.mp4,data/0_tr131.mp4,10.446574,24.98426802267585,1920,1080,261,3700093
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr132.mp4,data/0_tr132.mp4,10.447387,24.982322974294597,1920,1080,261,6103105
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr133.mp4,data/0_tr133.mp4,10.447285,25.078284732798426,1920,1080,262,5868987
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr134.mp4,data/0_tr134.mp4,10.44815,24.98049976646427,1920,1080,261,6530026
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr135.mp4,data/0_tr135.mp4,10.44876,24.9790413917917,1920,1080,261,6804066
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr136.mp4,data/0_tr136.mp4,10.448099,24.98062130537378,1920,1080,261,5432185
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr137.mp4,data/0_tr137.mp4,10.449573,24.977097157089762,1920,1080,261,3768015
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr138.mp4,data/0_tr138.mp4,10.449522,24.88152050709515,1920,1080,260,5462652
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr139.mp4,data/0_tr139.mp4,10.450234,24.879826050579588,1920,1080,260,7096758
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr14.mp4,data/0_tr14.mp4,15.022151,24.83,1920,1080,373,28103675
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr140.mp4,data/0_tr140.mp4,10.450336,25.070965419619707,1920,1080,262,5738173
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr141.mp4,data/0_tr141.mp4,10.450336,24.975274711911236,1920,1080,261,5975833
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr142.mp4,data/0_tr142.mp4,10.451708,24.971994980691225,1920,1080,261,4825185
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr143.mp4,data/0_tr143.mp4,10.451047,25.069258194588336,1920,1080,262,3120796
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr144.mp4,data/0_tr144.mp4,10.451911,25.06718544817859,1920,1080,262,3038316
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr145.mp4,data/0_tr145.mp4,10.48,22.900763358778626,1920,1080,240,6203190
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr146.mp4,data/0_tr146.mp4,10.515962,23.393010102963213,1920,1080,246,7036570
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr147.mp4,data/0_tr147.mp4,11.035038,24.83,1920,1080,274,23190572
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr148.mp4,data/0_tr148.mp4,11.035038,24.83,1920,1080,274,22735171
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr149.mp4,data/0_tr149.mp4,11.035038,24.83,1920,1080,274,20055600
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr15.mp4,data/0_tr15.mp4,16.975806,24.8,1920,1080,421,31544785
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr150.mp4,data/0_tr150.mp4,11.035038,24.83,1920,1080,274,19929198
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr151.mp4,data/0_tr151.mp4,11.961337,24.83,1920,1080,297,24474872
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr152.mp4,data/0_tr152.mp4,11.961337,24.83,1920,1080,297,23022679
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr153.mp4,data/0_tr153.mp4,11.961337,24.83,1920,1080,297,22963078
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr154.mp4,data/0_tr154.mp4,11.961337,24.83,1920,1080,297,22912085
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr155.mp4,data/0_tr155.mp4,11.961337,24.83,1920,1080,297,22744789
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr156.mp4,data/0_tr156.mp4,11.961337,24.83,1920,1080,297,22699289
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr157.mp4,data/0_tr157.mp4,11.961337,24.83,1920,1080,297,22698613
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr158.mp4,data/0_tr158.mp4,11.961337,24.83,1920,1080,297,22682305
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr159.mp4,data/0_tr159.mp4,12.001611,24.83,1920,1080,298,24141636
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr16.mp4,data/0_tr16.mp4,16.975806,24.8,1920,1080,421,34584860
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr160.mp4,data/0_tr160.mp4,12.001611,24.83,1920,1080,298,24099375
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr161.mp4,data/0_tr161.mp4,12.001611,24.83,1920,1080,298,23027274
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr162.mp4,data/0_tr162.mp4,12.001611,24.83,1920,1080,298,22898960
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr163.mp4,data/0_tr163.mp4,12.001611,24.83,1920,1080,298,22574955
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr164.mp4,data/0_tr164.mp4,12.001611,24.83,1920,1080,298,22573054
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr165.mp4,data/0_tr165.mp4,12.968184,24.83,1920,1080,322,25677552
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr166.mp4,data/0_tr166.mp4,12.968184,24.83,1920,1080,322,23817585
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr167.mp4,data/0_tr167.mp4,13.008458,24.83,1920,1080,323,24809904
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr168.mp4,data/0_tr168.mp4,13.008458,24.83,1920,1080,323,24710832
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr169.mp4,data/0_tr169.mp4,13.008458,24.83,1920,1080,323,24657510
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr17.mp4,data/0_tr17.mp4,16.975806,24.8,1920,1080,421,32897397
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr170.mp4,data/0_tr170.mp4,13.008458,24.83,1920,1080,323,24335501
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr171.mp4,data/0_tr171.mp4,13.008458,24.83,1920,1080,323,24093596
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr172.mp4,data/0_tr172.mp4,13.008458,24.83,1920,1080,323,23915166
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr173.mp4,data/0_tr173.mp4,13.008458,24.83,1920,1080,323,23689976
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr174.mp4,data/0_tr174.mp4,13.008458,24.83,1920,1080,323,23597514
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr175.mp4,data/0_tr175.mp4,13.97503,24.83,1920,1080,347,25730739
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr176.mp4,data/0_tr176.mp4,13.97503,24.83,1920,1080,347,25439169
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr177.mp4,data/0_tr177.mp4,14.015304,24.83,1920,1080,348,25940920
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr178.mp4,data/0_tr178.mp4,14.015304,24.83,1920,1080,348,25939407
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr18.mp4,data/0_tr18.mp4,17.016129,24.8,1920,1080,422,32716245
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr19.mp4,data/0_tr19.mp4,17.016129,24.8,1920,1080,422,31628262
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr2.mp4,data/0_tr2.mp4,14.015304,24.83,1920,1080,348,25761663
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr20.mp4,data/0_tr20.mp4,4.993959,24.83,1920,1080,124,10460946
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr21.mp4,data/0_tr21.mp4,4.993959,24.83,1920,1080,124,10320590
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr22.mp4,data/0_tr22.mp4,4.993959,24.83,1920,1080,124,10092296
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr23.mp4,data/0_tr23.mp4,4.993959,24.83,1920,1080,124,9897435
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr24.mp4,data/0_tr24.mp4,4.993959,24.83,1920,1080,124,9883465
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr25.mp4,data/0_tr25.mp4,4.993959,24.83,1920,1080,124,9846068
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr26.mp4,data/0_tr26.mp4,4.993959,24.83,1920,1080,124,9621387
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr27.mp4,data/0_tr27.mp4,4.993959,24.83,1920,1080,124,9147497
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr28.mp4,data/0_tr28.mp4,5.034233,24.83,1920,1080,125,10978010
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr29.mp4,data/0_tr29.mp4,5.034233,24.83,1920,1080,125,10638369
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr3.mp4,data/0_tr3.mp4,14.015304,24.83,1920,1080,348,25664883
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr30.mp4,data/0_tr30.mp4,5.034233,24.83,1920,1080,125,10629579
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr31.mp4,data/0_tr31.mp4,5.034233,24.83,1920,1080,125,10451300
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr32.mp4,data/0_tr32.mp4,5.034233,24.83,1920,1080,125,10033788
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr33.mp4,data/0_tr33.mp4,5.034233,24.83,1920,1080,125,9684347
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr34.mp4,data/0_tr34.mp4,5.034233,24.83,1920,1080,125,9068838
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr35.mp4,data/0_tr35.mp4,5.034233,24.83,1920,1080,125,9029960
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr36.mp4,data/0_tr36.mp4,5.034233,24.83,1920,1080,125,8975258
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr37.mp4,data/0_tr37.mp4,5.034233,24.83,1920,1080,125,8949157
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr38.mp4,data/0_tr38.mp4,5.034233,24.83,1920,1080,125,8945785
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr39.mp4,data/0_tr39.mp4,5.034233,24.83,1920,1080,125,8882950
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr4.mp4,data/0_tr4.mp4,14.015304,24.83,1920,1080,348,25521475
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr40.mp4,data/0_tr40.mp4,5.034233,24.83,1920,1080,125,8862541
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr41.mp4,data/0_tr41.mp4,5.034233,24.83,1920,1080,125,8844738
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr42.mp4,data/0_tr42.mp4,5.034233,24.83,1920,1080,125,8842380
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr43.mp4,data/0_tr43.mp4,5.034233,24.83,1920,1080,125,8265096
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr44.mp4,data/0_tr44.mp4,5.034233,24.83,1920,1080,125,8109917
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr45.mp4,data/0_tr45.mp4,6.935484,24.8,1920,1080,172,13699160
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr46.mp4,data/0_tr46.mp4,6.975806,24.8,1920,1080,173,14062245
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr47.mp4,data/0_tr47.mp4,6.975806,24.8,1920,1080,173,15405075
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr48.mp4,data/0_tr48.mp4,6.975806,24.8,1920,1080,173,13892571
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr49.mp4,data/0_tr49.mp4,6.975806,24.8,1920,1080,173,13981474
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr5.mp4,data/0_tr5.mp4,14.015304,24.83,1920,1080,348,25517975
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr50.mp4,data/0_tr50.mp4,6.975806,24.8,1920,1080,173,14086308
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr51.mp4,data/0_tr51.mp4,6.975806,24.8,1920,1080,173,14042754
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr52.mp4,data/0_tr52.mp4,6.975806,24.8,1920,1080,173,14056111
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr53.mp4,data/0_tr53.mp4,6.975806,24.8,1920,1080,173,14078704
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr54.mp4,data/0_tr54.mp4,6.975806,24.8,1920,1080,173,14656296
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr55.mp4,data/0_tr55.mp4,6.975806,24.8,1920,1080,173,15252230
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr56.mp4,data/0_tr56.mp4,6.975806,24.8,1920,1080,173,14146244
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr57.mp4,data/0_tr57.mp4,6.975806,24.8,1920,1080,173,14183528
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr58.mp4,data/0_tr58.mp4,6.975806,24.8,1920,1080,173,13771208
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr59.mp4,data/0_tr59.mp4,6.975806,24.8,1920,1080,173,13403197
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr6.mp4,data/0_tr6.mp4,14.015304,24.83,1920,1080,348,25140318
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr60.mp4,data/0_tr60.mp4,6.975806,24.8,1920,1080,173,14492010
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr61.mp4,data/0_tr61.mp4,6.975806,24.8,1920,1080,173,13380512
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr62.mp4,data/0_tr62.mp4,6.975806,24.8,1920,1080,173,13450649
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr63.mp4,data/0_tr63.mp4,6.975806,24.8,1920,1080,173,14409443
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr64.mp4,data/0_tr64.mp4,6.975806,24.8,1920,1080,173,13330255
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr65.mp4,data/0_tr65.mp4,6.975806,24.8,1920,1080,173,14254738
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr66.mp4,data/0_tr66.mp4,6.975806,24.8,1920,1080,173,14398381
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr67.mp4,data/0_tr67.mp4,6.975806,24.8,1920,1080,173,12419664
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr68.mp4,data/0_tr68.mp4,6.975806,24.8,1920,1080,173,13315428
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr69.mp4,data/0_tr69.mp4,6.975806,24.8,1920,1080,173,14167871
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr7.mp4,data/0_tr7.mp4,14.981877,24.83,1920,1080,372,29728557
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr70.mp4,data/0_tr70.mp4,6.975806,24.8,1920,1080,173,13480717
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr71.mp4,data/0_tr71.mp4,6.975806,24.8,1920,1080,173,13947460
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr72.mp4,data/0_tr72.mp4,6.975806,24.8,1920,1080,173,13971419
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr73.mp4,data/0_tr73.mp4,6.975806,24.8,1920,1080,173,13910198
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr74.mp4,data/0_tr74.mp4,6.975806,24.8,1920,1080,173,13993677
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr75.mp4,data/0_tr75.mp4,6.975806,24.8,1920,1080,173,13929453
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr76.mp4,data/0_tr76.mp4,6.975806,24.8,1920,1080,173,14102570
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr77.mp4,data/0_tr77.mp4,6.975806,24.8,1920,1080,173,13814936
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr78.mp4,data/0_tr78.mp4,6.975806,24.8,1920,1080,173,14130819
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr79.mp4,data/0_tr79.mp4,7.016129,24.8,1920,1080,174,14290098
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr8.mp4,data/0_tr8.mp4,14.981877,24.83,1920,1080,372,29707251
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr80.mp4,data/0_tr80.mp4,7.016129,24.8,1920,1080,174,13586163
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr81.mp4,data/0_tr81.mp4,7.016129,24.8,1920,1080,174,13368133
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr82.mp4,data/0_tr82.mp4,7.016129,24.8,1920,1080,174,13480634
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr83.mp4,data/0_tr83.mp4,7.016129,24.8,1920,1080,174,13324819
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr84.mp4,data/0_tr84.mp4,7.016129,24.8,1920,1080,174,13830695
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr85.mp4,data/0_tr85.mp4,7.016129,24.8,1920,1080,174,13668515
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr86.mp4,data/0_tr86.mp4,7.016129,24.8,1920,1080,174,13562925
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr87.mp4,data/0_tr87.mp4,7.016129,24.8,1920,1080,174,13708360
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr88.mp4,data/0_tr88.mp4,7.016129,24.8,1920,1080,174,13915537
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr89.mp4,data/0_tr89.mp4,7.016129,24.8,1920,1080,174,14040201
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr9.mp4,data/0_tr9.mp4,15.022151,24.83,1920,1080,373,29411627
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr90.mp4,data/0_tr90.mp4,7.016129,24.8,1920,1080,174,13992436
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr91.mp4,data/0_tr91.mp4,7.016129,24.8,1920,1080,174,14044217
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr92.mp4,data/0_tr92.mp4,7.974225,24.83,1920,1080,198,14366590
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr93.mp4,data/0_tr93.mp4,8.014499,24.83,1920,1080,199,16504997
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr94.mp4,data/0_tr94.mp4,8.014499,24.83,1920,1080,199,16250357
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr95.mp4,data/0_tr95.mp4,8.014499,24.83,1920,1080,199,15475362
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr96.mp4,data/0_tr96.mp4,8.014499,24.83,1920,1080,199,15457702
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr97.mp4,data/0_tr97.mp4,8.014499,24.83,1920,1080,199,15412368
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr98.mp4,data/0_tr98.mp4,8.014499,24.83,1920,1080,199,15314689
+Safe Walkway Violation,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_tr99.mp4,data/0_tr99.mp4,8.014499,24.83,1920,1080,199,15234548
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr1.mp4,data/1_tr1.mp4,6.975806,24.8,1920,1080,173,14056111
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr10.mp4,data/1_tr10.mp4,6.975806,24.8,1920,1080,173,13732646
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr11.mp4,data/1_tr11.mp4,6.975806,24.8,1920,1080,173,13450649
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr12.mp4,data/1_tr12.mp4,6.975806,24.8,1920,1080,173,14409443
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr13.mp4,data/1_tr13.mp4,6.975806,24.8,1920,1080,173,13098300
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr14.mp4,data/1_tr14.mp4,6.975806,24.8,1920,1080,173,13330255
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr15.mp4,data/1_tr15.mp4,6.975806,24.8,1920,1080,173,12419664
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr16.mp4,data/1_tr16.mp4,6.975806,24.8,1920,1080,173,12995787
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr17.mp4,data/1_tr17.mp4,6.975806,24.8,1920,1080,173,13286453
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr18.mp4,data/1_tr18.mp4,6.975806,24.8,1920,1080,173,13315428
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr19.mp4,data/1_tr19.mp4,20.806452,24.8,1920,1080,516,38869433
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr2.mp4,data/1_tr2.mp4,6.975806,24.8,1920,1080,173,14439019
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr20.mp4,data/1_tr20.mp4,20.766129,24.8,1920,1080,515,38857561
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr21.mp4,data/1_tr21.mp4,17.016129,24.8,1920,1080,422,31366092
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr22.mp4,data/1_tr22.mp4,17.016129,24.8,1920,1080,422,32559183
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr23.mp4,data/1_tr23.mp4,17.016129,24.8,1920,1080,422,31732937
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr24.mp4,data/1_tr24.mp4,16.975806,24.8,1920,1080,421,31370619
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr25.mp4,data/1_tr25.mp4,16.975806,24.8,1920,1080,421,32867051
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr26.mp4,data/1_tr26.mp4,16.014522,24.79,1920,1080,397,29068443
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr27.mp4,data/1_tr27.mp4,15.0,24.8,1920,1080,372,27413553
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr28.mp4,data/1_tr28.mp4,15.0,24.8,1920,1080,372,27872413
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr29.mp4,data/1_tr29.mp4,14.981877,24.83,1920,1080,372,29728557
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr3.mp4,data/1_tr3.mp4,6.975806,24.8,1920,1080,173,14256241
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr30.mp4,data/1_tr30.mp4,13.029447,24.79,1920,1080,323,23799524
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr31.mp4,data/1_tr31.mp4,13.024194,24.8,1920,1080,323,25442209
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr32.mp4,data/1_tr32.mp4,13.008458,24.83,1920,1080,323,24757934
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr33.mp4,data/1_tr33.mp4,13.008458,24.83,1920,1080,323,24740662
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr34.mp4,data/1_tr34.mp4,13.008458,24.83,1920,1080,323,24335501
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr35.mp4,data/1_tr35.mp4,12.989109,24.79,1920,1080,322,24501858
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr36.mp4,data/1_tr36.mp4,12.001611,24.83,1920,1080,298,22448219
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr37.mp4,data/1_tr37.mp4,11.980637,24.79,1920,1080,297,21784134
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr38.mp4,data/1_tr38.mp4,11.02074,24.59,1920,1080,271,22522963
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr39.mp4,data/1_tr39.mp4,11.02074,24.59,1920,1080,271,21921214
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr4.mp4,data/1_tr4.mp4,6.975806,24.8,1920,1080,173,14087132
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr40.mp4,data/1_tr40.mp4,11.02074,24.59,1920,1080,271,21431680
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr41.mp4,data/1_tr41.mp4,11.02074,24.59,1920,1080,271,20346064
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr42.mp4,data/1_tr42.mp4,10.980073,24.59,1920,1080,270,19694740
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr43.mp4,data/1_tr43.mp4,10.980073,24.59,1920,1080,270,19784113
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr44.mp4,data/1_tr44.mp4,10.980073,24.59,1920,1080,270,19412071
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr45.mp4,data/1_tr45.mp4,10.980073,24.59,1920,1080,270,18857981
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr46.mp4,data/1_tr46.mp4,10.980073,24.59,1920,1080,270,21508224
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr47.mp4,data/1_tr47.mp4,10.980073,24.59,1920,1080,270,21938753
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr48.mp4,data/1_tr48.mp4,10.980073,24.59,1920,1080,270,19318410
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr49.mp4,data/1_tr49.mp4,10.972166,24.79,1920,1080,272,20686541
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr5.mp4,data/1_tr5.mp4,6.975806,24.8,1920,1080,173,13771208
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr50.mp4,data/1_tr50.mp4,10.972166,24.79,1920,1080,272,22538662
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr51.mp4,data/1_tr51.mp4,10.898739,24.59,1920,1080,268,19704600
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr52.mp4,data/1_tr52.mp4,10.451759,24.97187352570681,1920,1080,261,5383497
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr53.mp4,data/1_tr53.mp4,10.449675,25.072550908224123,1920,1080,262,5805682
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr54.mp4,data/1_tr54.mp4,10.444439,25.085119948603886,1920,1080,262,5723290
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr55.mp4,data/1_tr55.mp4,10.443371,25.087684115224736,1920,1080,262,5719678
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr56.mp4,data/1_tr56.mp4,10.436865,24.911696231138645,1920,1080,260,6430112
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr57.mp4,data/1_tr57.mp4,10.433611,23.673490864799025,1920,1080,247,6311011
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr58.mp4,data/1_tr58.mp4,10.42619,24.841290272252127,1920,1080,259,5389685
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr59.mp4,data/1_tr59.mp4,10.426088,24.841532505777614,1920,1080,259,5432555
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr6.mp4,data/1_tr6.mp4,6.975806,24.8,1920,1080,173,13403197
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr60.mp4,data/1_tr60.mp4,10.425478,24.93890487103223,1920,1080,260,5924464
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr61.mp4,data/1_tr61.mp4,10.417751,25.05339175750715,1920,1080,261,3116192
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr62.mp4,data/1_tr62.mp4,10.417243,22.75074172392255,1920,1080,237,4686165
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr63.mp4,data/1_tr63.mp4,10.416328,24.9608120638329,1920,1080,260,5637493
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr64.mp4,data/1_tr64.mp4,10.415464,23.81075000122015,1920,1080,248,5348440
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr65.mp4,data/1_tr65.mp4,10.413379,24.96787924940933,1920,1080,260,4593144
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr66.mp4,data/1_tr66.mp4,10.36,25.0,1920,1080,259,4544481
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr67.mp4,data/1_tr67.mp4,10.32,25.0,1920,1080,258,5477884
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr68.mp4,data/1_tr68.mp4,10.004034,24.79,1920,1080,248,18713201
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr69.mp4,data/1_tr69.mp4,9.07624,24.79,1920,1080,225,17674794
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr7.mp4,data/1_tr7.mp4,6.975806,24.8,1920,1080,173,13380512
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr70.mp4,data/1_tr70.mp4,9.035902,24.79,1920,1080,224,16942010
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr71.mp4,data/1_tr71.mp4,9.028892,24.92,1920,1080,225,17118197
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr72.mp4,data/1_tr72.mp4,9.028892,24.92,1920,1080,225,16982745
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr73.mp4,data/1_tr73.mp4,9.021345,24.83,1920,1080,224,17335860
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr74.mp4,data/1_tr74.mp4,9.021345,24.83,1920,1080,224,17041657
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr75.mp4,data/1_tr75.mp4,9.021345,24.83,1920,1080,224,15969258
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr76.mp4,data/1_tr76.mp4,9.021345,24.83,1920,1080,224,15891541
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr77.mp4,data/1_tr77.mp4,9.021345,24.83,1920,1080,224,15884090
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr78.mp4,data/1_tr78.mp4,9.021345,24.83,1920,1080,224,15669738
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr79.mp4,data/1_tr79.mp4,8.988764,24.92,1920,1080,224,16828801
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr8.mp4,data/1_tr8.mp4,6.975806,24.8,1920,1080,173,13507734
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr80.mp4,data/1_tr80.mp4,7.987092,24.79,1920,1080,198,13683342
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr81.mp4,data/1_tr81.mp4,7.971303,25.09,1920,1080,200,15061228
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr82.mp4,data/1_tr82.mp4,7.744783,24.92,1920,1080,193,15352878
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr83.mp4,data/1_tr83.mp4,7.260992,24.79,1920,1080,180,13478957
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr84.mp4,data/1_tr84.mp4,7.018959,24.79,1920,1080,174,12932694
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr85.mp4,data/1_tr85.mp4,7.016129,24.8,1920,1080,174,13433426
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr86.mp4,data/1_tr86.mp4,7.016129,24.8,1920,1080,174,14102534
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr87.mp4,data/1_tr87.mp4,7.016129,24.8,1920,1080,174,14106558
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr88.mp4,data/1_tr88.mp4,6.975806,24.8,1920,1080,173,14645366
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr89.mp4,data/1_tr89.mp4,6.975806,24.8,1920,1080,173,13004617
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr9.mp4,data/1_tr9.mp4,6.975806,24.8,1920,1080,173,13336400
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr90.mp4,data/1_tr90.mp4,6.975806,24.8,1920,1080,173,15405075
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr91.mp4,data/1_tr91.mp4,6.975806,24.8,1920,1080,173,13892571
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr92.mp4,data/1_tr92.mp4,6.975806,24.8,1920,1080,173,13295368
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr93.mp4,data/1_tr93.mp4,6.975806,24.8,1920,1080,173,14515250
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr94.mp4,data/1_tr94.mp4,6.975806,24.8,1920,1080,173,12516084
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr95.mp4,data/1_tr95.mp4,6.975806,24.8,1920,1080,173,14201760
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr96.mp4,data/1_tr96.mp4,6.975806,24.8,1920,1080,173,14113588
+Unauthorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_tr97.mp4,data/1_tr97.mp4,6.975806,24.8,1920,1080,173,14042754
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr1.mp4,data/2_tr1.mp4,6.217617,25.09,1920,1080,156,10816951
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr10.mp4,data/2_tr10.mp4,3.996803,25.02,1920,1080,100,7340207
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr100.mp4,data/2_tr100.mp4,7.0,25.0,1920,1080,175,12542592
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr101.mp4,data/2_tr101.mp4,7.0,25.0,1920,1080,175,12355821
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr102.mp4,data/2_tr102.mp4,7.0,25.0,1920,1080,175,12700698
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr103.mp4,data/2_tr103.mp4,7.0,25.0,1920,1080,175,13881490
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr104.mp4,data/2_tr104.mp4,7.0,25.0,1920,1080,175,13396844
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr105.mp4,data/2_tr105.mp4,7.0,25.0,1920,1080,175,13175354
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr106.mp4,data/2_tr106.mp4,7.0,25.0,1920,1080,175,11294741
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr107.mp4,data/2_tr107.mp4,7.034373,25.02,1920,1080,176,13432588
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr108.mp4,data/2_tr108.mp4,7.034373,25.02,1920,1080,176,13601781
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr109.mp4,data/2_tr109.mp4,7.034373,25.02,1920,1080,176,12674265
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr11.mp4,data/2_tr11.mp4,3.996803,25.02,1920,1080,100,8059389
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr110.mp4,data/2_tr110.mp4,7.971303,25.09,1920,1080,200,13901444
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr111.mp4,data/2_tr111.mp4,7.993605,25.02,1920,1080,200,16262317
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr112.mp4,data/2_tr112.mp4,7.993605,25.02,1920,1080,200,13627647
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr113.mp4,data/2_tr113.mp4,7.993605,25.02,1920,1080,200,15335680
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr114.mp4,data/2_tr114.mp4,8.033573,25.02,1920,1080,201,15563185
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr115.mp4,data/2_tr115.mp4,8.033573,25.02,1920,1080,201,16361972
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr116.mp4,data/2_tr116.mp4,8.323329,24.99,1920,1080,208,16941663
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr117.mp4,data/2_tr117.mp4,8.323329,24.99,1920,1080,208,14661082
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr118.mp4,data/2_tr118.mp4,8.323329,24.99,1920,1080,208,15400230
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr119.mp4,data/2_tr119.mp4,8.363345,24.99,1920,1080,209,16489281
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr12.mp4,data/2_tr12.mp4,3.996803,25.02,1920,1080,100,8137269
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr120.mp4,data/2_tr120.mp4,8.992806,25.02,1920,1080,225,16443048
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr121.mp4,data/2_tr121.mp4,9.032774,25.02,1920,1080,226,15887054
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr122.mp4,data/2_tr122.mp4,10.031974,25.02,1920,1080,251,18876224
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr123.mp4,data/2_tr123.mp4,10.415514,25.05877185276289,1920,1080,261,4066343
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr124.mp4,data/2_tr124.mp4,10.425478,24.93890487103223,1920,1080,260,5924464
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr125.mp4,data/2_tr125.mp4,11.031175,25.02,1920,1080,276,22074218
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr126.mp4,data/2_tr126.mp4,12.030376,25.02,1920,1080,301,21709417
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr127.mp4,data/2_tr127.mp4,2.56,25.0,1920,1080,64,5144170
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr128.mp4,data/2_tr128.mp4,2.957634,25.02,1920,1080,74,5042547
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr129.mp4,data/2_tr129.mp4,2.997602,25.02,1920,1080,75,5587363
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr13.mp4,data/2_tr13.mp4,4.0,25.0,1920,1080,100,8258752
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr14.mp4,data/2_tr14.mp4,4.0,25.0,1920,1080,100,7756308
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr15.mp4,data/2_tr15.mp4,4.0,25.0,1920,1080,100,8342817
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr16.mp4,data/2_tr16.mp4,4.0,25.0,1920,1080,100,7924701
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr17.mp4,data/2_tr17.mp4,4.0,25.0,1920,1080,100,7228742
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr18.mp4,data/2_tr18.mp4,4.0,25.0,1920,1080,100,6925560
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr19.mp4,data/2_tr19.mp4,4.0,25.0,1920,1080,100,8150306
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr2.mp4,data/2_tr2.mp4,3.003604,24.97,1920,1080,75,5348202
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr20.mp4,data/2_tr20.mp4,4.0,25.0,1920,1080,100,8640622
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr21.mp4,data/2_tr21.mp4,4.0,25.0,1920,1080,100,8005582
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr22.mp4,data/2_tr22.mp4,4.0,25.0,1920,1080,100,7700818
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr23.mp4,data/2_tr23.mp4,4.0,25.0,1920,1080,100,6888889
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr24.mp4,data/2_tr24.mp4,4.0,25.0,1920,1080,100,6924141
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr25.mp4,data/2_tr25.mp4,4.0,25.0,1920,1080,100,7049706
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr26.mp4,data/2_tr26.mp4,4.0,25.0,1920,1080,100,7084796
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr27.mp4,data/2_tr27.mp4,4.0,25.0,1920,1080,100,8050357
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr28.mp4,data/2_tr28.mp4,4.004806,24.97,1920,1080,100,7150609
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr29.mp4,data/2_tr29.mp4,4.031936,25.05,1920,1080,101,7311609
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr3.mp4,data/2_tr3.mp4,3.03757,25.02,1920,1080,76,5419499
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr30.mp4,data/2_tr30.mp4,4.036771,25.02,1920,1080,101,7365786
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr31.mp4,data/2_tr31.mp4,4.036771,25.02,1920,1080,101,6953240
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr32.mp4,data/2_tr32.mp4,4.036771,25.02,1920,1080,101,7421925
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr33.mp4,data/2_tr33.mp4,4.984051,25.08,1920,1080,125,8704783
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr34.mp4,data/2_tr34.mp4,4.984051,25.08,1920,1080,125,10146555
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr35.mp4,data/2_tr35.mp4,4.984051,25.08,1920,1080,125,10086156
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr36.mp4,data/2_tr36.mp4,4.984051,25.08,1920,1080,125,8703658
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr37.mp4,data/2_tr37.mp4,4.984051,25.08,1920,1080,125,8793103
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr38.mp4,data/2_tr38.mp4,4.984051,25.08,1920,1080,125,10145316
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr39.mp4,data/2_tr39.mp4,4.984051,25.08,1920,1080,125,8902741
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr4.mp4,data/2_tr4.mp4,3.03757,25.02,1920,1080,76,5471480
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr40.mp4,data/2_tr40.mp4,4.984051,25.08,1920,1080,125,8744623
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr41.mp4,data/2_tr41.mp4,4.984051,25.08,1920,1080,125,10155654
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr42.mp4,data/2_tr42.mp4,4.984051,25.08,1920,1080,125,10089865
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr43.mp4,data/2_tr43.mp4,4.996003,25.02,1920,1080,125,10330173
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr44.mp4,data/2_tr44.mp4,4.996003,25.02,1920,1080,125,10225069
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr45.mp4,data/2_tr45.mp4,4.996003,25.02,1920,1080,125,9146419
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr46.mp4,data/2_tr46.mp4,5.021921,25.09,1920,1080,126,10327223
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr47.mp4,data/2_tr47.mp4,5.021921,25.09,1920,1080,126,8875297
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr48.mp4,data/2_tr48.mp4,5.023923,25.08,1920,1080,126,8630715
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr49.mp4,data/2_tr49.mp4,5.023923,25.08,1920,1080,126,8751325
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr5.mp4,data/2_tr5.mp4,3.03757,25.02,1920,1080,76,6192900
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr50.mp4,data/2_tr50.mp4,5.023923,25.08,1920,1080,126,9324540
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr51.mp4,data/2_tr51.mp4,5.023923,25.08,1920,1080,126,10291207
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr52.mp4,data/2_tr52.mp4,5.023923,25.08,1920,1080,126,8834907
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr53.mp4,data/2_tr53.mp4,5.023923,25.08,1920,1080,126,10376987
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr54.mp4,data/2_tr54.mp4,5.023923,25.08,1920,1080,126,8475749
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr55.mp4,data/2_tr55.mp4,5.023923,25.08,1920,1080,126,8833650
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr56.mp4,data/2_tr56.mp4,5.023923,25.08,1920,1080,126,8848170
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr57.mp4,data/2_tr57.mp4,5.023923,25.08,1920,1080,126,10054757
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr58.mp4,data/2_tr58.mp4,5.023923,25.08,1920,1080,126,9024999
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr59.mp4,data/2_tr59.mp4,5.023923,25.08,1920,1080,126,8888091
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr6.mp4,data/2_tr6.mp4,3.524229,24.97,1920,1080,88,7141565
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr60.mp4,data/2_tr60.mp4,5.023923,25.08,1920,1080,126,8789468
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr61.mp4,data/2_tr61.mp4,5.023923,25.08,1920,1080,126,9367370
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr62.mp4,data/2_tr62.mp4,5.023923,25.08,1920,1080,126,9073661
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr63.mp4,data/2_tr63.mp4,5.023923,25.08,1920,1080,126,9641928
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr64.mp4,data/2_tr64.mp4,5.035971,25.02,1920,1080,126,8914302
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr65.mp4,data/2_tr65.mp4,5.035971,25.02,1920,1080,126,9296903
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr66.mp4,data/2_tr66.mp4,5.035971,25.02,1920,1080,126,10269008
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr67.mp4,data/2_tr67.mp4,5.988024,25.05,1920,1080,150,11191545
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr68.mp4,data/2_tr68.mp4,5.988024,25.05,1920,1080,150,10273740
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr69.mp4,data/2_tr69.mp4,5.988024,25.05,1920,1080,150,10493106
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr7.mp4,data/2_tr7.mp4,3.996803,25.02,1920,1080,100,8304819
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr70.mp4,data/2_tr70.mp4,5.988024,25.05,1920,1080,150,10612367
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr71.mp4,data/2_tr71.mp4,5.988024,25.05,1920,1080,150,12210039
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr72.mp4,data/2_tr72.mp4,5.988024,25.05,1920,1080,150,11490126
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr73.mp4,data/2_tr73.mp4,5.995204,25.02,1920,1080,150,10700927
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr74.mp4,data/2_tr74.mp4,5.995204,25.02,1920,1080,150,11506832
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr75.mp4,data/2_tr75.mp4,6.027944,25.05,1920,1080,151,12350511
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr76.mp4,data/2_tr76.mp4,6.027944,25.05,1920,1080,151,12170466
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr77.mp4,data/2_tr77.mp4,6.027944,25.05,1920,1080,151,12474557
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr78.mp4,data/2_tr78.mp4,6.027944,25.05,1920,1080,151,10619425
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr79.mp4,data/2_tr79.mp4,6.027944,25.05,1920,1080,151,11396596
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr8.mp4,data/2_tr8.mp4,3.996803,25.02,1920,1080,100,7049491
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr80.mp4,data/2_tr80.mp4,6.027944,25.05,1920,1080,151,12349348
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr81.mp4,data/2_tr81.mp4,6.027944,25.05,1920,1080,151,12309259
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr82.mp4,data/2_tr82.mp4,6.027944,25.05,1920,1080,151,12334448
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr83.mp4,data/2_tr83.mp4,6.035172,25.02,1920,1080,151,11065288
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr84.mp4,data/2_tr84.mp4,6.2,25.0,1920,1080,155,12222019
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr85.mp4,data/2_tr85.mp4,6.933868,24.95,1920,1080,173,13903137
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr86.mp4,data/2_tr86.mp4,6.933868,24.95,1920,1080,173,11655269
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr87.mp4,data/2_tr87.mp4,6.942215,24.92,1920,1080,173,12993606
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr88.mp4,data/2_tr88.mp4,6.942215,24.92,1920,1080,173,13617231
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr89.mp4,data/2_tr89.mp4,6.973948,24.95,1920,1080,174,14170889
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr9.mp4,data/2_tr9.mp4,3.996803,25.02,1920,1080,100,6897017
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr90.mp4,data/2_tr90.mp4,6.97489,25.09,1920,1080,175,13939880
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr91.mp4,data/2_tr91.mp4,6.994404,25.02,1920,1080,175,14897254
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr92.mp4,data/2_tr92.mp4,6.994404,25.02,1920,1080,175,13264285
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr93.mp4,data/2_tr93.mp4,6.994404,25.02,1920,1080,175,12855083
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr94.mp4,data/2_tr94.mp4,6.994404,25.02,1920,1080,175,14859044
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr95.mp4,data/2_tr95.mp4,7.0,25.0,1920,1080,175,13860370
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr96.mp4,data/2_tr96.mp4,7.0,25.0,1920,1080,175,14329514
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr97.mp4,data/2_tr97.mp4,7.0,25.0,1920,1080,175,12082920
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr98.mp4,data/2_tr98.mp4,7.0,25.0,1920,1080,175,12635865
+Opened Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_tr99.mp4,data/2_tr99.mp4,7.0,25.0,1920,1080,175,12555310
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr1.mp4,data/3_tr1.mp4,13.0,25.0,1920,1080,325,33132492
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr10.mp4,data/3_tr10.mp4,10.04,25.0,1920,1080,251,25800607
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr11.mp4,data/3_tr11.mp4,10.0,25.0,1920,1080,250,24318209
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr12.mp4,data/3_tr12.mp4,10.0,25.0,1920,1080,250,24179486
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr13.mp4,data/3_tr13.mp4,10.0,25.0,1920,1080,250,24310525
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr14.mp4,data/3_tr14.mp4,10.0,25.0,1920,1080,250,24182077
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr15.mp4,data/3_tr15.mp4,10.0,25.0,1920,1080,250,26564293
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr16.mp4,data/3_tr16.mp4,10.0,25.0,1920,1080,250,25386847
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr17.mp4,data/3_tr17.mp4,10.0,25.0,1920,1080,250,24382605
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr18.mp4,data/3_tr18.mp4,9.0,25.0,1920,1080,225,22164973
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr19.mp4,data/3_tr19.mp4,9.0,25.0,1920,1080,225,23314913
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr2.mp4,data/3_tr2.mp4,12.0,25.0,1920,1080,300,29575301
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr20.mp4,data/3_tr20.mp4,8.04,25.0,1920,1080,201,20414637
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr21.mp4,data/3_tr21.mp4,8.0,25.0,1920,1080,200,20850199
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr22.mp4,data/3_tr22.mp4,7.0,25.0,1920,1080,175,16021780
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr23.mp4,data/3_tr23.mp4,7.0,25.0,1920,1080,175,16884514
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr24.mp4,data/3_tr24.mp4,6.0,25.0,1920,1080,150,13357999
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr25.mp4,data/3_tr25.mp4,6.0,25.0,1920,1080,150,13907825
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr26.mp4,data/3_tr26.mp4,6.0,25.0,1920,1080,150,15721839
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr27.mp4,data/3_tr27.mp4,5.0,25.0,1920,1080,125,11533656
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr28.mp4,data/3_tr28.mp4,5.0,25.0,1920,1080,125,12317493
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr29.mp4,data/3_tr29.mp4,5.0,25.0,1920,1080,125,11661546
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr3.mp4,data/3_tr3.mp4,11.0,25.0,1920,1080,275,26449643
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr30.mp4,data/3_tr30.mp4,5.0,25.0,1920,1080,125,11884419
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr31.mp4,data/3_tr31.mp4,5.0,25.0,1920,1080,125,11558291
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr32.mp4,data/3_tr32.mp4,5.0,25.0,1920,1080,125,12074342
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr33.mp4,data/3_tr33.mp4,5.0,25.0,1920,1080,125,12235915
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr34.mp4,data/3_tr34.mp4,5.0,25.0,1920,1080,125,12258538
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr35.mp4,data/3_tr35.mp4,4.4,25.0,1920,1080,110,11014144
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr36.mp4,data/3_tr36.mp4,4.0,25.0,1920,1080,100,9683731
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr37.mp4,data/3_tr37.mp4,4.0,25.0,1920,1080,100,9624823
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr38.mp4,data/3_tr38.mp4,4.0,25.0,1920,1080,100,9570296
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr39.mp4,data/3_tr39.mp4,4.0,25.0,1920,1080,100,10318245
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr4.mp4,data/3_tr4.mp4,11.0,25.0,1920,1080,275,27019888
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr40.mp4,data/3_tr40.mp4,4.0,25.0,1920,1080,100,9211837
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr41.mp4,data/3_tr41.mp4,4.0,25.0,1920,1080,100,9409286
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr42.mp4,data/3_tr42.mp4,4.0,25.0,1920,1080,100,10275035
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr43.mp4,data/3_tr43.mp4,3.04,25.0,1920,1080,76,8198792
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr44.mp4,data/3_tr44.mp4,3.0,25.0,1920,1080,75,7316117
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr45.mp4,data/3_tr45.mp4,3.0,25.0,1920,1080,75,7182718
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr46.mp4,data/3_tr46.mp4,3.0,25.0,1920,1080,75,7435030
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr47.mp4,data/3_tr47.mp4,3.0,25.0,1920,1080,75,7482995
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr48.mp4,data/3_tr48.mp4,3.0,25.0,1920,1080,75,8235900
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr5.mp4,data/3_tr5.mp4,11.0,25.0,1920,1080,275,28108117
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr6.mp4,data/3_tr6.mp4,11.0,25.0,1920,1080,275,28335332
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr7.mp4,data/3_tr7.mp4,11.0,25.0,1920,1080,275,28010675
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr8.mp4,data/3_tr8.mp4,11.0,25.0,1920,1080,275,27125738
+Carrying Overload with Forklift,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_tr9.mp4,data/3_tr9.mp4,10.04,25.0,1920,1080,251,25046888
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr1.mp4,data/4_tr1.mp4,12.605042,24.99,1920,1080,315,22466611
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr10.mp4,data/4_tr10.mp4,10.441135,24.805733259330665,1920,1080,259,5908475
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr11.mp4,data/4_tr11.mp4,10.451149,24.973331063498627,1920,1080,261,5094510
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr12.mp4,data/4_tr12.mp4,10.434425,22.80911597634289,1920,1080,238,7044150
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr13.mp4,data/4_tr13.mp4,10.413481,25.063664853993576,1920,1080,261,3240413
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr14.mp4,data/4_tr14.mp4,10.428375,24.93197560773494,1920,1080,260,4802972
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr15.mp4,data/4_tr15.mp4,10.449624,25.07267287719213,1920,1080,262,4490936
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr16.mp4,data/4_tr16.mp4,7.8,25.0,1920,1080,195,15871628
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr17.mp4,data/4_tr17.mp4,9.021345,24.83,1920,1080,224,18346517
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr18.mp4,data/4_tr18.mp4,11.035038,24.83,1920,1080,274,21348794
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr19.mp4,data/4_tr19.mp4,8.014499,24.83,1920,1080,199,14890327
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr2.mp4,data/4_tr2.mp4,8.483393,24.99,1920,1080,212,15008800
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr20.mp4,data/4_tr20.mp4,7.047926,24.83,1920,1080,175,13340582
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr21.mp4,data/4_tr21.mp4,8.981071,24.83,1920,1080,223,17102944
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr22.mp4,data/4_tr22.mp4,11.035038,24.83,1920,1080,274,22321746
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr23.mp4,data/4_tr23.mp4,8.014499,24.83,1920,1080,199,15289073
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr24.mp4,data/4_tr24.mp4,8.900524,24.83,1920,1080,221,16902186
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr25.mp4,data/4_tr25.mp4,8.014499,24.83,1920,1080,199,15409356
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr26.mp4,data/4_tr26.mp4,6.041079,24.83,1920,1080,150,11437515
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr27.mp4,data/4_tr27.mp4,10.028192,24.83,1920,1080,249,18994786
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr28.mp4,data/4_tr28.mp4,14.055578,24.83,1920,1080,349,27165938
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr29.mp4,data/4_tr29.mp4,10.028192,24.83,1920,1080,249,19080033
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr3.mp4,data/4_tr3.mp4,4.17503,24.91,1920,1080,104,6742439
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr30.mp4,data/4_tr30.mp4,9.625453,24.83,1920,1080,239,17281389
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr31.mp4,data/4_tr31.mp4,4.027386,24.83,1920,1080,100,7199308
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr32.mp4,data/4_tr32.mp4,7.047926,24.83,1920,1080,175,12693585
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr33.mp4,data/4_tr33.mp4,9.665727,24.83,1920,1080,240,18399650
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr34.mp4,data/4_tr34.mp4,7.8,25.0,1920,1080,195,15755252
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr35.mp4,data/4_tr35.mp4,7.76,25.0,1920,1080,194,15668015
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr36.mp4,data/4_tr36.mp4,12.20298,24.83,1920,1080,303,23206443
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr37.mp4,data/4_tr37.mp4,12.20298,24.83,1920,1080,303,24117708
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr38.mp4,data/4_tr38.mp4,12.162706,24.83,1920,1080,302,22004869
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr39.mp4,data/4_tr39.mp4,12.162706,24.83,1920,1080,302,22406927
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr4.mp4,data/4_tr4.mp4,4.17503,24.91,1920,1080,104,8339585
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr40.mp4,data/4_tr40.mp4,8.370044,24.97,1920,1080,209,15330783
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr41.mp4,data/4_tr41.mp4,8.329996,24.97,1920,1080,208,14197178
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr42.mp4,data/4_tr42.mp4,8.329996,24.97,1920,1080,208,17232865
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr43.mp4,data/4_tr43.mp4,13.898845,25.11,1920,1080,349,25302552
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr44.mp4,data/4_tr44.mp4,13.898845,25.11,1920,1080,349,28769685
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr45.mp4,data/4_tr45.mp4,7.048984,25.11,1920,1080,177,12601391
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr46.mp4,data/4_tr46.mp4,10.991637,25.11,1920,1080,276,21776456
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr47.mp4,data/4_tr47.mp4,15.636219,25.07,1920,1080,392,29010935
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr48.mp4,data/4_tr48.mp4,15.636219,25.07,1920,1080,392,28506707
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr49.mp4,data/4_tr49.mp4,6.96,25.0,1920,1080,174,14235764
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr5.mp4,data/4_tr5.mp4,4.17503,24.91,1920,1080,104,8837454
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr50.mp4,data/4_tr50.mp4,6.92,25.0,1920,1080,173,12187253
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr6.mp4,data/4_tr6.mp4,20.838323,25.05,1920,1080,522,42290441
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr7.mp4,data/4_tr7.mp4,6.962785,24.99,1920,1080,174,14224247
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr8.mp4,data/4_tr8.mp4,6.962785,24.99,1920,1080,174,14298647
+Safe Walkway,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_tr9.mp4,data/4_tr9.mp4,6.922769,24.99,1920,1080,173,11613839
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr1.mp4,data/5_tr1.mp4,6.946108,25.05,1920,1080,174,12493783
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr10.mp4,data/5_tr10.mp4,7.974482,25.08,1920,1080,200,15587294
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr11.mp4,data/5_tr11.mp4,4.14673,25.08,1920,1080,104,7514418
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr12.mp4,data/5_tr12.mp4,5.01002,24.95,1920,1080,125,8803262
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr13.mp4,data/5_tr13.mp4,4.96994,24.95,1920,1080,124,10213477
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr14.mp4,data/5_tr14.mp4,5.01002,24.95,1920,1080,125,9707953
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr15.mp4,data/5_tr15.mp4,11.039743,24.91,1920,1080,275,21406354
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr16.mp4,data/5_tr16.mp4,9.112806,24.91,1920,1080,227,16771978
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr17.mp4,data/5_tr17.mp4,10.446421,24.88890619069401,1920,1080,260,5230203
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr18.mp4,data/5_tr18.mp4,10.419225,24.95387062307591,1920,1080,260,5076020
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr19.mp4,data/5_tr19.mp4,10.442812,23.65263275747088,1920,1080,247,4946801
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr2.mp4,data/5_tr2.mp4,6.946108,25.05,1920,1080,174,12448983
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr20.mp4,data/5_tr20.mp4,10.415616,24.29044978916133,1920,1080,253,6628508
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr21.mp4,data/5_tr21.mp4,15.008026,24.92,1920,1080,374,27534121
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr22.mp4,data/5_tr22.mp4,14.967897,24.92,1920,1080,373,27291642
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr23.mp4,data/5_tr23.mp4,14.004815,24.92,1920,1080,349,25238306
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr3.mp4,data/5_tr3.mp4,7.821229,25.06,1920,1080,196,14554615
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr4.mp4,data/5_tr4.mp4,7.821229,25.06,1920,1080,196,15160379
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr5.mp4,data/5_tr5.mp4,12.068966,24.94,1920,1080,301,24343337
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr6.mp4,data/5_tr6.mp4,13.896676,24.97,1920,1080,347,24473765
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr7.mp4,data/5_tr7.mp4,8.014354,25.08,1920,1080,201,16362751
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr8.mp4,data/5_tr8.mp4,8.014354,25.08,1920,1080,201,16259160
+Authorized Intervention,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_tr9.mp4,data/5_tr9.mp4,8.014354,25.08,1920,1080,201,14575116
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr1.mp4,data/6_tr1.mp4,6.004804,24.98,1920,1080,150,16011336
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr10.mp4,data/6_tr10.mp4,3.078768,25.01,1920,1080,77,4863146
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr11.mp4,data/6_tr11.mp4,3.038784,25.01,1920,1080,76,6901494
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr12.mp4,data/6_tr12.mp4,3.026683,25.11,1920,1080,76,8639069
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr13.mp4,data/6_tr13.mp4,3.009631,24.92,1920,1080,75,5165040
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr14.mp4,data/6_tr14.mp4,2.440976,24.99,1920,1080,61,4208404
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr15.mp4,data/6_tr15.mp4,1.393867,25.11,1920,1080,35,4165557
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr16.mp4,data/6_tr16.mp4,10.452572,24.874260175174957,1920,1080,260,5180128
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr17.mp4,data/6_tr17.mp4,10.439762,25.000569700688022,1920,1080,261,5921280
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr18.mp4,data/6_tr18.mp4,8.065811,24.92,1920,1080,201,13329703
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr19.mp4,data/6_tr19.mp4,7.237105,25.01,1920,1080,181,13377791
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr2.mp4,data/6_tr2.mp4,5.226047,24.11,1920,1080,126,13348973
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr3.mp4,data/6_tr3.mp4,5.216693,24.92,1920,1080,130,8560542
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr4.mp4,data/6_tr4.mp4,5.0,25.0,1920,1080,125,8299651
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr5.mp4,data/6_tr5.mp4,4.238305,25.01,1920,1080,106,7895219
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr6.mp4,data/6_tr6.mp4,4.003203,24.98,1920,1080,100,11819798
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr7.mp4,data/6_tr7.mp4,4.001601,24.99,1920,1080,100,6930046
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr8.mp4,data/6_tr8.mp4,3.988831,25.07,1920,1080,100,7245164
+Closed Panel Cover,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_tr9.mp4,data/6_tr9.mp4,3.078768,25.01,1920,1080,77,7759505
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr1.mp4,data/7_tr1.mp4,10.128984,25.07655166562541,1920,1080,254,5780534
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr10.mp4,data/7_tr10.mp4,5.056308,25.117142488819255,1920,1080,127,3197760
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr11.mp4,data/7_tr11.mp4,4.055391,25.151707796335895,1920,1080,102,2956468
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr12.mp4,data/7_tr12.mp4,4.036864,24.77170537245631,1920,1080,100,2824701
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr13.mp4,data/7_tr13.mp4,4.018401,25.13437747388355,1920,1080,101,2847117
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr14.mp4,data/7_tr14.mp4,3.839677,25.002101985208252,1920,1080,96,2344987
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr15.mp4,data/7_tr15.mp4,2.115391,24.581748347305833,1920,1080,52,1591226
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr16.mp4,data/7_tr16.mp4,2.111797,24.62358033369095,1920,1080,52,1864654
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr17.mp4,data/7_tr17.mp4,12.124453,25.07329583164189,1920,1080,304,7110415
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr18.mp4,data/7_tr18.mp4,12.113594,24.930669315206316,1920,1080,302,7009450
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr19.mp4,data/7_tr19.mp4,11.968984,25.064783326697256,1920,1080,300,6773624
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr2.mp4,data/7_tr2.mp4,9.148984,24.920798927476582,1920,1080,228,5286674
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr20.mp4,data/7_tr20.mp4,11.24,25.0,1920,1080,281,5760010
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr21.mp4,data/7_tr21.mp4,11.138984,25.047166833825457,1920,1080,279,6384758
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr22.mp4,data/7_tr22.mp4,10.845391,25.079778995973232,1920,1080,272,6680959
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr3.mp4,data/7_tr3.mp4,9.108984,24.920451134268195,1920,1080,227,5153396
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr4.mp4,data/7_tr4.mp4,8.134453,25.078514420722044,1920,1080,204,4545049
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr5.mp4,data/7_tr5.mp4,7.119063,24.862824283394055,1920,1080,177,4469854
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr6.mp4,data/7_tr6.mp4,7.07,25.035360678925034,1920,1080,177,3636255
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr7.mp4,data/7_tr7.mp4,6.938125,25.078821727772272,1920,1080,174,4853309
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr8.mp4,data/7_tr8.mp4,6.081797,25.15703880689044,1920,1080,153,3494447
+Safe Carrying,train,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_tr9.mp4,data/7_tr9.mp4,6.060805,24.91418045459031,1920,1080,151,3355445
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te1.mp4,data/0_te1.mp4,14.981877,24.83,1920,1080,372,30187027
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te10.mp4,data/0_te10.mp4,6.975806,24.8,1920,1080,173,14645366
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te11.mp4,data/0_te11.mp4,6.975806,24.8,1920,1080,173,13004617
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te12.mp4,data/0_te12.mp4,7.974225,24.83,1920,1080,198,14525189
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te13.mp4,data/0_te13.mp4,7.974225,24.83,1920,1080,198,14472217
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te14.mp4,data/0_te14.mp4,7.974225,24.83,1920,1080,198,14452856
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te15.mp4,data/0_te15.mp4,8.981071,24.83,1920,1080,223,17970652
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te16.mp4,data/0_te16.mp4,8.981071,24.83,1920,1080,223,16166097
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te17.mp4,data/0_te17.mp4,8.981071,24.83,1920,1080,223,16140720
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te18.mp4,data/0_te18.mp4,9.021345,24.83,1920,1080,224,17658719
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te19.mp4,data/0_te19.mp4,9.021345,24.83,1920,1080,224,17644422
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te2.mp4,data/0_te2.mp4,14.981877,24.83,1920,1080,372,30070458
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te20.mp4,data/0_te20.mp4,9.021345,24.83,1920,1080,224,17611195
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te21.mp4,data/0_te21.mp4,10.4512,24.112064437051306,1920,1080,252,6455941
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te22.mp4,data/0_te22.mp4,10.452623,21.525697389409796,1920,1080,225,8233347
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te23.mp4,data/0_te23.mp4,10.477582,23.001489459767605,1920,1080,241,6391494
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te24.mp4,data/0_te24.mp4,11.961337,24.83,1920,1080,297,23968015
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te25.mp4,data/0_te25.mp4,11.961337,24.83,1920,1080,297,23600438
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te26.mp4,data/0_te26.mp4,11.961337,24.83,1920,1080,297,23592375
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te27.mp4,data/0_te27.mp4,12.001611,24.83,1920,1080,298,24559026
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te28.mp4,data/0_te28.mp4,12.001611,24.83,1920,1080,298,24431174
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te29.mp4,data/0_te29.mp4,12.968184,24.83,1920,1080,322,23650008
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te3.mp4,data/0_te3.mp4,14.981877,24.83,1920,1080,372,29997017
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te30.mp4,data/0_te30.mp4,13.97503,24.83,1920,1080,347,27068272
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te31.mp4,data/0_te31.mp4,13.97503,24.83,1920,1080,347,26846612
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te32.mp4,data/0_te32.mp4,13.97503,24.83,1920,1080,347,26808431
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te4.mp4,data/0_te4.mp4,15.022151,24.83,1920,1080,373,30137102
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te5.mp4,data/0_te5.mp4,15.022151,24.83,1920,1080,373,30079830
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te6.mp4,data/0_te6.mp4,15.022151,24.83,1920,1080,373,30022072
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te7.mp4,data/0_te7.mp4,16.975806,24.8,1920,1080,421,31370619
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te8.mp4,data/0_te8.mp4,16.975806,24.8,1920,1080,421,31659015
+Safe Walkway Violation,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/0_te9.mp4,data/0_te9.mp4,17.016129,24.8,1920,1080,422,33474374
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te1.mp4,data/1_te1.mp4,16.975806,24.8,1920,1080,421,31659015
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te10.mp4,data/1_te10.mp4,10.980073,24.59,1920,1080,270,19883612
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te11.mp4,data/1_te11.mp4,7.946753,24.79,1920,1080,197,14069069
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te2.mp4,data/1_te2.mp4,20.766129,24.8,1920,1080,515,39793383
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te3.mp4,data/1_te3.mp4,15.0,24.8,1920,1080,372,27365437
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te4.mp4,data/1_te4.mp4,13.008458,24.83,1920,1080,323,24710832
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te5.mp4,data/1_te5.mp4,13.008458,24.83,1920,1080,323,24657510
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te6.mp4,data/1_te6.mp4,12.020976,24.79,1920,1080,298,24814442
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te7.mp4,data/1_te7.mp4,12.001611,24.83,1920,1080,298,22317449
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te8.mp4,data/1_te8.mp4,11.279394,25.09,1920,1080,283,22485523
+Unauthorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/1_te9.mp4,data/1_te9.mp4,11.02074,24.59,1920,1080,271,22724107
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te1.mp4,data/2_te1.mp4,3.712575,25.05,1920,1080,93,7484362
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te10.mp4,data/2_te10.mp4,8.363345,24.99,1920,1080,209,16739919
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te11.mp4,data/2_te11.mp4,8.992806,25.02,1920,1080,225,18621496
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te12.mp4,data/2_te12.mp4,10.414803,25.060484185864897,1920,1080,261,3276638
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te13.mp4,data/2_te13.mp4,2.997602,25.02,1920,1080,75,6182901
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te2.mp4,data/2_te2.mp4,4.984051,25.08,1920,1080,125,8687500
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te3.mp4,data/2_te3.mp4,4.996003,25.02,1920,1080,125,10206864
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te4.mp4,data/2_te4.mp4,5.035971,25.02,1920,1080,126,9617742
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te5.mp4,data/2_te5.mp4,5.988024,25.05,1920,1080,150,11919758
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te6.mp4,data/2_te6.mp4,6.942215,24.92,1920,1080,173,12755832
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te7.mp4,data/2_te7.mp4,7.0,25.0,1920,1080,175,12958019
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te8.mp4,data/2_te8.mp4,7.0,25.0,1920,1080,175,14396661
+Opened Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/2_te9.mp4,data/2_te9.mp4,7.034373,25.02,1920,1080,176,14427862
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te1.mp4,data/3_te1.mp4,10.0,25.0,1920,1080,250,24506317
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te2.mp4,data/3_te2.mp4,11.0,25.0,1920,1080,275,27570762
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te3.mp4,data/3_te3.mp4,7.0,25.0,1920,1080,175,17262081
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te4.mp4,data/3_te4.mp4,6.0,25.0,1920,1080,150,13717683
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te5.mp4,data/3_te5.mp4,5.0,25.0,1920,1080,125,12541606
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te6.mp4,data/3_te6.mp4,5.0,25.0,1920,1080,125,11763310
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te7.mp4,data/3_te7.mp4,4.0,25.0,1920,1080,100,9916088
+Carrying Overload with Forklift,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/3_te8.mp4,data/3_te8.mp4,3.0,25.0,1920,1080,75,7313545
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te1.mp4,data/4_te1.mp4,6.92,25.0,1920,1080,173,13209619
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te10.mp4,data/4_te10.mp4,10.028192,24.83,1920,1080,249,18819095
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te11.mp4,data/4_te11.mp4,12.001611,24.83,1920,1080,298,23262344
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te12.mp4,data/4_te12.mp4,7.007652,24.83,1920,1080,174,14176101
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te13.mp4,data/4_te13.mp4,8.578333,24.83,1920,1080,213,16492425
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te14.mp4,data/4_te14.mp4,6.000805,24.83,1920,1080,149,11298692
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te15.mp4,data/4_te15.mp4,8.014499,24.83,1920,1080,199,15241360
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te16.mp4,data/4_te16.mp4,7.047926,24.83,1920,1080,175,13922304
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te17.mp4,data/4_te17.mp4,9.625453,24.83,1920,1080,239,17443033
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te18.mp4,data/4_te18.mp4,12.20298,24.83,1920,1080,303,23419329
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te19.mp4,data/4_te19.mp4,15.062424,24.83,1920,1080,374,28558205
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te2.mp4,data/4_te2.mp4,4.17503,24.91,1920,1080,104,7160485
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te20.mp4,data/4_te20.mp4,7.76,25.0,1920,1080,194,15925589
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te21.mp4,data/4_te21.mp4,8.370044,24.97,1920,1080,209,16876346
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te22.mp4,data/4_te22.mp4,8.329996,24.97,1920,1080,208,16802127
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te23.mp4,data/4_te23.mp4,13.898845,25.11,1920,1080,349,27460228
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te24.mp4,data/4_te24.mp4,13.0227,25.11,1920,1080,327,24776886
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te25.mp4,data/4_te25.mp4,8.044604,25.11,1920,1080,202,16495570
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te3.mp4,data/4_te3.mp4,4.17503,24.91,1920,1080,104,8583038
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te4.mp4,data/4_te4.mp4,10.443371,25.087684115224736,1920,1080,262,5719678
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te5.mp4,data/4_te5.mp4,10.43961,25.09672392972615,1920,1080,262,4217183
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te6.mp4,data/4_te6.mp4,10.413329,24.968001132530475,1920,1080,260,5016344
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te7.mp4,data/4_te7.mp4,10.449522,24.88152050709515,1920,1080,260,5462652
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te8.mp4,data/4_te8.mp4,10.43229,24.92262113592952,1920,1080,260,5965896
+Safe Walkway,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/4_te9.mp4,data/4_te9.mp4,10.477582,23.001489459767605,1920,1080,241,6391494
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te1.mp4,data/5_te1.mp4,6.946108,25.05,1920,1080,174,12384656
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te10.mp4,data/5_te10.mp4,4.96994,24.95,1920,1080,124,9610993
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te11.mp4,data/5_te11.mp4,5.01002,24.95,1920,1080,125,10117769
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te12.mp4,data/5_te12.mp4,10.42014,24.8557113935166,1920,1080,259,5446207
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te13.mp4,data/5_te13.mp4,10.448099,24.98062130537378,1920,1080,261,5432185
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te14.mp4,data/5_te14.mp4,10.32,25.0,1920,1080,258,5488449
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te15.mp4,data/5_te15.mp4,15.008026,24.92,1920,1080,374,27617294
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te2.mp4,data/5_te2.mp4,7.821229,25.06,1920,1080,196,14124725
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te3.mp4,data/5_te3.mp4,7.821229,25.06,1920,1080,196,15968573
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te4.mp4,data/5_te4.mp4,8.781075,24.94,1920,1080,219,17192609
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te5.mp4,data/5_te5.mp4,13.936724,24.97,1920,1080,348,27209586
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te6.mp4,data/5_te6.mp4,13.896676,24.97,1920,1080,347,28009658
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te7.mp4,data/5_te7.mp4,7.974482,25.08,1920,1080,200,14746031
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te8.mp4,data/5_te8.mp4,8.014354,25.08,1920,1080,201,16355357
+Authorized Intervention,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/5_te9.mp4,data/5_te9.mp4,5.01002,24.95,1920,1080,125,8904104
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te1.mp4,data/6_te1.mp4,5.216693,24.92,1920,1080,130,8426130
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te10.mp4,data/6_te10.mp4,1.84,25.0,1920,1080,46,3308650
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te11.mp4,data/6_te11.mp4,10.441135,24.805733259330665,1920,1080,259,5908475
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te12.mp4,data/6_te12.mp4,10.436814,24.911817566349914,1920,1080,260,2979560
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te13.mp4,data/6_te13.mp4,6.023135,25.07,1920,1080,151,10689888
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te2.mp4,data/6_te2.mp4,5.184571,24.11,1920,1080,125,14782527
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te3.mp4,data/6_te3.mp4,4.012841,24.92,1920,1080,100,6655865
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te4.mp4,data/6_te4.mp4,4.001601,24.99,1920,1080,100,6358610
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te5.mp4,data/6_te5.mp4,4.0,25.0,1920,1080,100,7069743
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te6.mp4,data/6_te6.mp4,3.611557,24.92,1920,1080,90,7243751
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te7.mp4,data/6_te7.mp4,3.049759,24.92,1920,1080,76,4758636
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te8.mp4,data/6_te8.mp4,3.026683,25.11,1920,1080,76,8890505
+Closed Panel Cover,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/6_te9.mp4,data/6_te9.mp4,2.986858,25.11,1920,1080,75,8433507
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te1.mp4,data/7_te1.mp4,7.118984,24.86309713244735,1920,1080,177,4458655
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te2.mp4,data/7_te2.mp4,6.072656,24.865560272738968,1920,1080,151,3592468
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te3.mp4,data/7_te3.mp4,4.039259,25.252158468597365,1920,1080,102,2440216
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te4.mp4,data/7_te4.mp4,4.008984,25.19341323199844,1920,1080,101,2396553
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te5.mp4,data/7_te5.mp4,3.148984,24.7698910859156,1920,1080,78,2621699
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te6.mp4,data/7_te6.mp4,12.04,25.0,1920,1080,301,6273180
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te7.mp4,data/7_te7.mp4,11.96,25.0,1920,1080,299,6123406
+Safe Carrying,test,/content/SAMS/datasets/vision/safe_unsafe/hf_snapshot/data/7_te8.mp4,data/7_te8.mp4,10.147187,24.933017153767977,1920,1080,253,6234955

@@ -1,0 +1,39 @@
+{
+  "task": "fusion_risk_classification",
+  "dataset": "synthetic_rule_guided",
+  "num_experiments": 4,
+  "primary_metric": "danger_recall",
+  "secondary_metric": "f1_macro",
+  "best_experiment_id": "fusion_exp01_random_forest",
+  "best_approach": "Classical baseline \u2014 Random Forest on fusion features",
+  "best_metrics": {
+    "accuracy": 1.0,
+    "f1_macro": 1.0,
+    "danger_recall": 1.0,
+    "danger_precision": 1.0,
+    "false_alarm_rate": 0.0
+  },
+  "class_names": [
+    "NORMAL",
+    "CAUTION",
+    "DANGER"
+  ],
+  "feature_cols": [
+    "worker_detected",
+    "worker_distance",
+    "inside_caution_zone",
+    "inside_danger_zone",
+    "worker_speed",
+    "approaching_machine",
+    "vision_confidence",
+    "machine_active",
+    "vibration_state",
+    "vibration_anomaly_score"
+  ],
+  "zones_m": {
+    "caution": 2.0,
+    "danger": 0.8
+  },
+  "models_dir": "/content/drive/MyDrive/SAMS/models/fusion",
+  "generated_at_utc": "2026-09-28T11:03:13.998101+00:00"
+}

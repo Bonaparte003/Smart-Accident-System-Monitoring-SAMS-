@@ -1,0 +1,17 @@
+split,label,binary,n
+test,Authorized Intervention,safe,45
+test,Carrying Overload with Forklift,unsafe,24
+test,Closed Panel Cover,safe,38
+test,Opened Panel Cover,unsafe,39
+test,Safe Carrying,safe,24
+test,Safe Walkway,safe,73
+test,Safe Walkway Violation,unsafe,93
+test,Unauthorized Intervention,unsafe,33
+train,Authorized Intervention,safe,68
+train,Carrying Overload with Forklift,unsafe,144
+train,Closed Panel Cover,safe,57
+train,Opened Panel Cover,unsafe,387
+train,Safe Carrying,safe,66
+train,Safe Walkway,safe,148
+train,Safe Walkway Violation,unsafe,530
+train,Unauthorized Intervention,unsafe,290
