@@ -15,6 +15,7 @@ _LABEL_TO_LED: dict[str, LedColor] = {
     "CAUTION": "yellow",
     "ABNORMAL": "yellow",
     "DANGER": "red",
+    "DEGRADED": "yellow",
 }
 
 _CMD: dict[LedColor, str] = {

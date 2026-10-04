@@ -14,6 +14,7 @@ from .buzzer import get_buzzer
 from .config import HardwareConfig, load_config
 from .leds import get_leds
 from .mpu6050 import AccelSource, SerialMPU6050
+from .presence import get_presence
 
 logger = logging.getLogger("hardware.stream")
 
@@ -46,6 +47,7 @@ class AccelStream:
         self._last_prediction: dict[str, Any] | None = None
         self._buzzer_auto = self.config.buzzer_auto
         self._leds_auto = self.config.leds_auto
+        self._machine_on = False
 
     def status(self) -> dict[str, Any]:
         with self._lock:
@@ -65,6 +67,7 @@ class AccelStream:
                 "last_sample_at": self._last_sample_at,
                 "buzzer_auto": self._buzzer_auto,
                 "leds_auto": self._leds_auto,
+                "machine_on": self._machine_on,
                 "last_label": (self._last_prediction or {}).get("label"),
                 "serial_port": self.config.serial_port or None,
             }
@@ -90,6 +93,14 @@ class AccelStream:
     def set_leds_auto(self, on: bool) -> None:
         self._leds_auto = bool(on)
 
+    def set_machine_on(self, on: bool) -> None:
+        """Explicit run switch. A vibration sample does not turn the machine on."""
+        self._machine_on = bool(on)
+
+    @property
+    def machine_on(self) -> bool:
+        return self._machine_on
+
     @property
     def buzzer_auto(self) -> bool:
         return self._buzzer_auto
@@ -102,6 +113,7 @@ class AccelStream:
         if self._thread and self._thread.is_alive():
             return
         self.stop()
+        get_presence().reset()
         self._stop.clear()
         self._source = SerialMPU6050(
             port=self.config.serial_port,
@@ -115,10 +127,12 @@ class AccelStream:
             self._source = None
             get_buzzer().attach_writer(None)
             get_leds().attach_writer(None)
-            logger.exception("Failed to open MPU6050 serial")
+            logger.warning("Failed to open MPU6050 serial: %s", exc)
             raise
         get_buzzer().attach_writer(self._source.write_line)
         get_leds().attach_writer(self._source.write_line)
+        if get_leds().enabled:
+            get_leds().set_color("green")
         self._started_at = time.time()
         self._thread = threading.Thread(target=self._run, name="sams-mpu6050", daemon=True)
         self._thread.start()
@@ -152,6 +166,7 @@ class AccelStream:
             except Exception:  # noqa: BLE001
                 pass
             self._source = None
+        get_presence().reset()
         with self._lock:
             self._buf.clear()
 
@@ -165,6 +180,7 @@ class AccelStream:
                     self._samples_total += 1
                     self._last_sample_at = time.time()
                     self._last_error = None
+                get_presence().note_sample()
             except Exception as exc:  # noqa: BLE001
                 self._last_error = str(exc)
                 logger.warning("MPU6050 read error: %s", exc)
@@ -180,12 +196,6 @@ class AccelStream:
     def record_prediction(self, result: dict[str, Any]) -> None:
         with self._lock:
             self._last_prediction = result
-        if self.mode == "live":
-            apply_risk_actuators(
-                result.get("label"),
-                buzzer=self._buzzer_auto,
-                leds=self._leds_auto,
-            )
 
     def last_prediction(self) -> dict[str, Any] | None:
         with self._lock:

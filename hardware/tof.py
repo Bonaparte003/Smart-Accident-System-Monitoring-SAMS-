@@ -1,6 +1,6 @@
 """Time-of-flight ranging for near-field worker distance.
 
-Vision NN covers long range; ToF owns the close band (see distance_estimation fuse).
+Vision covers range beyond 5 m. A ToF reading at or under 5 m replaces that estimate.
 
 Reading order:
 1. Explicit override via ``SAMS_HW_TOF_M`` (lab injection / tests)
@@ -29,7 +29,8 @@ class ToFSensor:
         self._lock = threading.Lock()
         self._latest_m: float | None = None
         self._latest_ts: float = 0.0
-        self._stale_s = float(os.environ.get("SAMS_HW_TOF_STALE_S", "0.75"))
+        self._log_ts: float = 0.0
+        self._stale_s = float(os.environ.get("SAMS_HW_TOF_STALE_S", "2.0"))
         self._enabled = os.environ.get("SAMS_HW_TOF_ENABLED", "true").strip().lower() in {
             "1",
             "true",
@@ -55,9 +56,18 @@ class ToFSensor:
             return False
         if metres <= 0.01 or metres > 20.0:
             return False
+        now = time.monotonic()
         with self._lock:
             self._latest_m = metres
-            self._latest_ts = time.monotonic()
+            self._latest_ts = now
+            should_log = now - self._log_ts >= 1.0
+            if should_log:
+                self._log_ts = now
+        from .presence import get_presence
+
+        get_presence().note_tof(metres)
+        if should_log:
+            logger.info("ToF %.2f m", metres)
         return True
 
     def push_metres(self, metres: float) -> None:

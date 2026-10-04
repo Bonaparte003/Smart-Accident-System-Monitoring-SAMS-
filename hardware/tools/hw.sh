@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-# Terminal workflow for SAMS hardware (Arduino Uno + CH340 on usbserial).
-# Usage:
-#   ./hardware/tools/hw.sh flash-buzzer   # buzzer-only debug sketch
-#   ./hardware/tools/hw.sh flash         # full MPU6050 + buzzer sketch
-#   ./hardware/tools/hw.sh test          # send B1/B0, expect ACK
-#   ./hardware/tools/hw.sh run           # start Django with serial port set
 
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -33,18 +27,19 @@ case "$cmd" in
     source "$ROOT/myenv/bin/activate"
     python hardware/tools/buzzer_test.py --port "$PORT"
     ;;
+  test-leds)
+    echo ">>> LED cycle on $PORT (green D5, yellow D6, red D7)"
+    # shellcheck disable=SC1091
+    source "$ROOT/myenv/bin/activate"
+    python hardware/tools/led_test.py --port "$PORT"
+    ;;
   run)
-    echo ">>> Django HTTPS on 0.0.0.0:8000 (phone camera needs TLS)"
+    echo ">>> Uvicorn on port 8000 (HTTPS; phone camera needs it)"
     # shellcheck disable=SC1091
     source "$ROOT/myenv/bin/activate"
     export SAMS_HW_SERIAL_PORT="$PORT"
     export SAMS_HTTPS=1
-    CERT="$ROOT/hardware/certs/cert.pem"
-    KEY="$ROOT/hardware/certs/key.pem"
-    if [[ ! -f "$CERT" || ! -f "$KEY" ]]; then
-      "$ROOT/hardware/tools/gen_certs.sh"
-    fi
-    python "$ROOT/hardware/tools/run_https.py" --addr 0.0.0.0 --port 8000 --cert "$CERT" --key "$KEY"
+    python "$ROOT/manage.py" runserver 0.0.0.0:8000
     ;;
   certs)
     "$ROOT/hardware/tools/gen_certs.sh"
@@ -62,8 +57,9 @@ SAMS hardware terminal helper
   ./hardware/tools/hw.sh test
   ./hardware/tools/hw.sh flash
   ./hardware/tools/hw.sh test
+  ./hardware/tools/hw.sh test-leds   # green, yellow, red, then off
   ./hardware/tools/hw.sh certs   # regenerate HTTPS cert for current LAN IP
-  ./hardware/tools/hw.sh run     # HTTPS Django (required for phone camera QR)
+  ./hardware/tools/hw.sh run     # uvicorn HTTPS (phone camera needs the https URL)
 
 Board FQBN default: arduino:avr:uno  (override with SAMS_HW_FQBN)
 EOF

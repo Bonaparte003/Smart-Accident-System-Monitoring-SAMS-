@@ -16,6 +16,7 @@ _LABEL_TO_STATE: dict[str, BuzzerState] = {
     "CAUTION": "caution",
     "ABNORMAL": "caution",
     "DANGER": "danger",
+    "DEGRADED": "caution",
 }
 
 _CMD: dict[BuzzerState, str] = {
@@ -24,7 +25,6 @@ _CMD: dict[BuzzerState, str] = {
     "danger": "B2",
 }
 
-# Keep a short spike audible even if the label flips back to NORMAL quickly.
 _MIN_ON_S = {"caution": 1.2, "danger": 1.6}
 
 
@@ -97,7 +97,6 @@ class Buzzer:
                 )
             self.enabled = True
             self._cancel_hold_locked()
-            # Repeat so the MCU is more likely to catch B1 while streaming accel.
             for _ in range(3):
                 self._write("B1")
             self._state = "caution"
@@ -118,7 +117,6 @@ class Buzzer:
         with self._lock:
             self._hold_timer = None
             self._hold_until = 0.0
-            # Leave current pattern until next label update; do not force off.
 
     def _cancel_hold_locked(self) -> None:
         if self._hold_timer is not None:
@@ -129,14 +127,13 @@ class Buzzer:
     def _apply(self, state: BuzzerState) -> None:
         prev = self._state
         self._state = state
-        # Avoid flooding the MCU with repeated B0/B1 (was drowning commands).
         if prev == state and state == "off":
             return
         cmd = _CMD[state]
         if self._write is not None:
             try:
                 self._write(cmd)
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.warning("Buzzer write failed: %s", exc)
         if prev != state:
             logger.info("Buzzer → %s", state)

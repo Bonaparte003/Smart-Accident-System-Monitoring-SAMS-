@@ -124,6 +124,9 @@ class SerialMPU6050(AccelSource):
             if not line:
                 continue
             if line.startswith("#"):
+                from .presence import get_presence
+
+                get_presence().note_line(line)
                 logger.info("MCU RX %s", line)
                 continue
             # Optional ToF firmware lines: TOF:1.23

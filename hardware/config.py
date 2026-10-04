@@ -21,9 +21,9 @@ class HardwareConfig:
     window_size: int = 100
     buzzer_auto: bool = True
     buzzer_enabled: bool = True
-    # LEDs are optional hardware — off until you wire them
-    leds_auto: bool = False
-    leds_enabled: bool = False
+    # Green is the idle state. Caution and danger replace it.
+    leds_auto: bool = True
+    leds_enabled: bool = True
     # Android phone over Wi‑Fi (IP Webcam base URL, e.g. http://192.168.1.20:8080)
     camera_url: str = ""
     camera_user: str = ""
@@ -39,8 +39,8 @@ def load_config() -> HardwareConfig:
         window_size=int(os.environ.get("SAMS_HW_WINDOW_SIZE", "100")),
         buzzer_auto=_env_bool("SAMS_HW_BUZZER_AUTO", True),
         buzzer_enabled=_env_bool("SAMS_HW_BUZZER_ENABLED", True),
-        leds_auto=_env_bool("SAMS_HW_LEDS_AUTO", False),
-        leds_enabled=_env_bool("SAMS_HW_LEDS_ENABLED", False),
+        leds_auto=_env_bool("SAMS_HW_LEDS_AUTO", True),
+        leds_enabled=_env_bool("SAMS_HW_LEDS_ENABLED", True),
         camera_url=os.environ.get("SAMS_CAM_URL", "").strip(),
         camera_user=os.environ.get("SAMS_CAM_USER", "").strip(),
         camera_password=os.environ.get("SAMS_CAM_PASSWORD", ""),
