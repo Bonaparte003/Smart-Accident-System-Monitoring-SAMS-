@@ -1,7 +1,13 @@
-"""Pose-geometry inspired residual NN for far-range person distance.
+"""Person distance from a measured body or the time-of-flight sensor.
 
-Close range is intended for a time-of-flight sensor; vision NN covers longer range.
-Z ≈ Z0 * exp(fθ(features)), where Z0 is the pinhole prior from person height in the frame.
+Live range is published only in two cases:
+- the sensor beam hits that person's torso, or
+- the head and both ankles are visible, so the trained distance network
+  (residual on the pinhole prior, Z = Z0 * exp(delta)) has a full body to read.
+
+The served network is the one with the lowest test MAE in its metadata. A
+network fine-tuned on this site's own sensor/body pairs (``site/``) wins over
+the public-dataset experiments. A partial body publishes no distance.
 """
 
 from __future__ import annotations
@@ -9,6 +15,7 @@ from __future__ import annotations
 import json
 import logging
 import math
+import os
 import threading
 from dataclasses import dataclass
 from pathlib import Path
@@ -32,7 +39,6 @@ def _project_root() -> Path:
         pass
     return Path(__file__).resolve().parents[2]
 
-# COCO-17 indices used when pose keypoints are available
 _NOSE, _L_SHO, _R_SHO = 0, 5, 6
 _L_HIP, _R_HIP = 11, 12
 _L_ANK, _R_ANK = 15, 16
@@ -57,15 +63,12 @@ FEATURE_NAMES: list[str] = [
 ]
 
 FEATURE_DIM = len(FEATURE_NAMES)
-DEFAULT_CALIB = {
-    "fy_px": 720.0,
-    "person_height_m": 1.70,
-    "min_dist_m": 0.5,
-    "max_dist_m": 12.0,
-    "tof_near_m": 1.5,
-    "tof_far_m": 2.5,
-    "hidden": [64, 32],
-}
+_CALIB_KEYS = (
+    "fy_px",
+    "person_height_m",
+    "tof_near_m",
+    "hidden",
+)
 
 
 @dataclass
@@ -73,10 +76,11 @@ class DistanceEstimate:
     distance_m: float
     z0_m: float
     vision_m: float
-    source: str  # vision_nn | tof | blend | heuristic
+    source: str
     confidence: float
     method: str
     features: dict[str, float] | None = None
+    body_m: float | None = None
 
     def as_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {
@@ -104,7 +108,6 @@ class ResidualDistanceMLP(nn.Module):
             prev = h
         layers.append(nn.Linear(prev, 1))
         self.net = nn.Sequential(*layers)
-        # Near-identity bootstrap: residual ≈ 0 → Z ≈ Z0
         nn.init.zeros_(self.net[-1].weight)
         nn.init.zeros_(self.net[-1].bias)
 
@@ -126,55 +129,203 @@ def calib_path() -> Path:
     return _vision_dir() / "calib.json"
 
 
+def _residual_experiments() -> list[tuple[float, Path, dict[str, Any]]]:
+    found = []
+    for folder in sorted(_vision_dir().glob("*")):
+        meta_path = folder / "metadata.json"
+        if not (folder / "model.pt").is_file() or not meta_path.is_file():
+            continue
+        try:
+            meta = json.loads(meta_path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        if "exp(delta)" not in str(meta.get("formula", "")) or "absolute" in folder.name:
+            continue
+        mae = (meta.get("metrics_test") or {}).get("mae")
+        if mae is None:
+            continue
+        found.append((float(mae), folder, meta))
+    return sorted(found, key=lambda item: item[0])
+
+
+def served_model() -> dict[str, Any]:
+    """Which distance weights live inference uses, and why."""
+    custom = os.environ.get("SAMS_DISTANCE_WEIGHTS", "").strip()
+    if custom:
+        return {"path": Path(custom), "experiment_id": "custom", "mae_m": None, "hidden": None}
+    site = _vision_dir() / "site"
+    if (site / "model.pt").is_file():
+        meta = json.loads((site / "metadata.json").read_text()) if (site / "metadata.json").is_file() else {}
+        return {
+            "path": site / "model.pt",
+            "experiment_id": meta.get("experiment_id", "site"),
+            "mae_m": (meta.get("metrics_test") or {}).get("mae"),
+            "hidden": meta.get("hidden"),
+        }
+    ranked = _residual_experiments()
+    if ranked:
+        mae, folder, meta = ranked[0]
+        return {"path": folder / "model.pt", "experiment_id": folder.name, "mae_m": mae, "hidden": meta.get("hidden")}
+    return {"path": _vision_dir() / "distance_nn.pt", "experiment_id": "distance_nn", "mae_m": None, "hidden": None}
+
+
 def weights_path() -> Path:
-    return _vision_dir() / "distance_nn.pt"
+    return served_model()["path"]
 
 
 def load_calib() -> dict[str, Any]:
+    """Pinhole calibration written by the distance notebook. Nothing is filled in here."""
     global _calib
     if _calib is not None:
         return _calib
     path = calib_path()
-    data = dict(DEFAULT_CALIB)
-    if path.is_file():
-        try:
-            with path.open() as f:
-                data.update(json.load(f))
-        except (OSError, json.JSONDecodeError) as exc:
-            logger.warning("distance calib load failed: %s", exc)
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Distance calibration missing at {path}. "
+            "Write it with notebooks/04_vision_distance_estimation_training.ipynb"
+        )
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"Distance calibration at {path} could not be read") from exc
+    missing = [key for key in _CALIB_KEYS if key not in data]
+    if missing:
+        raise ValueError(f"Distance calibration at {path} is missing {missing}")
     _calib = data
     return _calib
-
-
-def save_default_calib(path: Path | None = None) -> Path:
-    out = path or calib_path()
-    out.parent.mkdir(parents=True, exist_ok=True)
-    payload = dict(DEFAULT_CALIB)
-    payload["feature_names"] = FEATURE_NAMES
-    payload["feature_dim"] = FEATURE_DIM
-    payload["formula"] = "Z = Z0 * exp(f_theta(x)), Z0 = fy * H / h_px"
-    with out.open("w") as f:
-        json.dump(payload, f, indent=2)
-    return out
 
 
 def pinhole_z0_m(
     height_px: float,
     *,
+    image_h: float | None = None,
     fy_px: float | None = None,
     person_height_m: float | None = None,
-    min_dist_m: float | None = None,
-    max_dist_m: float | None = None,
 ) -> float:
-    """Classical prior: Z0 = (fy * H_person) / h_pixels."""
+    """Z0 = fy * H / h_px, with fy taken from the exported calibration.
+
+    When the calibration records the image height it was measured at, fy is
+    scaled to the frame in front of the camera. Both fy and pixel height grow
+    together when a frame is only resized.
+    """
     calib = load_calib()
-    fy = float(fy_px if fy_px is not None else calib["fy_px"])
     h_person = float(person_height_m if person_height_m is not None else calib["person_height_m"])
-    z_min = float(min_dist_m if min_dist_m is not None else calib["min_dist_m"])
-    z_max = float(max_dist_m if max_dist_m is not None else calib["max_dist_m"])
     h = max(1.0, float(height_px))
-    z0 = (fy * h_person) / h
-    return float(min(z_max, max(z_min, z0)))
+    fy = float(fy_px if fy_px is not None else calib["fy_px"])
+    ref_h = calib.get("fy_image_h")
+    if image_h and ref_h:
+        fy *= float(image_h) / float(ref_h)
+    return float((fy * h_person) / h)
+
+
+def _confident_point(keypoints, index: int, min_conf: float = 0.3) -> tuple[float, float] | None:
+    if not keypoints or index >= len(keypoints) or len(keypoints[index]) < 3:
+        return None
+    x, y, conf = float(keypoints[index][0]), float(keypoints[index][1]), float(keypoints[index][2])
+    if conf < min_conf:
+        return None
+    return x, y
+
+
+def stature_px(keypoints) -> float | None:
+    """Pixel height from the head to both ankles. None unless all three are visible."""
+    nose = _confident_point(keypoints, _NOSE)
+    left_eye = _confident_point(keypoints, 1)
+    right_eye = _confident_point(keypoints, 2)
+    if nose is not None:
+        head_y = nose[1]
+    elif left_eye is not None and right_eye is not None:
+        head_y = (left_eye[1] + right_eye[1]) * 0.5
+    else:
+        return None
+    left_ankle = _confident_point(keypoints, _L_ANK)
+    right_ankle = _confident_point(keypoints, _R_ANK)
+    if left_ankle is None or right_ankle is None:
+        return None
+    foot_y = (left_ankle[1] + right_ankle[1]) * 0.5
+    height = foot_y - head_y
+    if height < 10.0:
+        return None
+    return float(height)
+
+
+def aim_hits(region: Sequence[float] | None, image_wh: tuple[int, int], aim: tuple[float, float] = (0.5, 0.5)) -> bool:
+    """True when the sensor aim point (image center) lies inside the torso."""
+    if not region or len(region) < 4:
+        return False
+    width, height = image_wh
+    ax = float(aim[0]) * max(1, width)
+    ay = float(aim[1]) * max(1, height)
+    return float(region[0]) <= ax <= float(region[2]) and float(region[1]) <= ay <= float(region[3])
+
+
+def _keypoint_box(keypoints) -> list[float] | None:
+    points = [(float(p[0]), float(p[1])) for p in keypoints or [] if len(p) >= 3 and float(p[2]) >= 0.3]
+    if len(points) < 2:
+        return None
+    xs, ys = [p[0] for p in points], [p[1] for p in points]
+    return [min(xs), min(ys), max(xs), max(ys)]
+
+
+def _body_estimate(keypoints, image_wh, box, det_conf) -> tuple[float, float, dict[str, float], float, str] | None:
+    """Network range from a full body: (vision_m, z0_m, features, confidence, method)."""
+    if stature_px(keypoints) is None:
+        return None
+    box = box or _keypoint_box(keypoints)
+    if box is None:
+        return None
+    try:
+        vision_m, z0_m, named, conf = predict_vision_distance(box, image_wh, det_conf=det_conf, keypoints=keypoints)
+        return vision_m, z0_m, named, conf, f"residual_mlp:{served_model()['experiment_id']}"
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("distance network unavailable: %s", exc)
+        return None
+
+
+def measure_person(
+    keypoints,
+    image_wh: tuple[int, int],
+    *,
+    tof_m: float | None = None,
+    sensor_aimed: bool = False,
+    box: Sequence[float] | None = None,
+    det_conf: float = 1.0,
+) -> DistanceEstimate | None:
+    """Return a sensor range, or the network range from a full body. Nothing else."""
+    body = _body_estimate(keypoints, image_wh, list(box) if box is not None else None, det_conf)
+    calib = load_calib()
+    sensor_max = float(calib["tof_near_m"])
+    sensor_ok = (
+        sensor_aimed
+        and tof_m is not None
+        and math.isfinite(float(tof_m))
+        and 0.05 < float(tof_m) <= sensor_max
+    )
+    if sensor_ok:
+        body_m = body[0] if body else None
+        return DistanceEstimate(
+            distance_m=float(tof_m),
+            z0_m=body[1] if body else float(tof_m),
+            vision_m=body_m if body_m is not None else float(tof_m),
+            source="tof",
+            confidence=0.95,
+            method="tof_on_torso",
+            features=body[2] if body else None,
+            body_m=body_m,
+        )
+    if body is None:
+        return None
+    vision_m, z0_m, named, conf, method = body
+    return DistanceEstimate(
+        distance_m=float(vision_m),
+        z0_m=float(z0_m),
+        vision_m=float(vision_m),
+        source="vision",
+        confidence=conf,
+        method=method,
+        features=named,
+        body_m=float(vision_m),
+    )
 
 
 def _midpoint(a: Sequence[float] | None, b: Sequence[float] | None) -> tuple[float, float, float] | None:
@@ -246,7 +397,7 @@ def extract_features(
             torso_rel = abs(hips[1] - shoulders[1]) / max(1, h)
             pose_available = 1.0
 
-    z0 = pinhole_z0_m(height_px)
+    z0 = pinhole_z0_m(height_px, image_h=h)
     inv_rel_h = 1.0 / max(rel_h, 1e-3)
     feats = np.array(
         [
@@ -281,18 +432,18 @@ def get_model() -> ResidualDistanceMLP:
         if _model is not None:
             return _model
         calib = load_calib()
-        hidden = tuple(calib.get("hidden", DEFAULT_CALIB["hidden"]))
+        served = served_model()
+        hidden = tuple(served.get("hidden") or calib["hidden"])
         model = ResidualDistanceMLP(FEATURE_DIM, hidden)
-        path = weights_path()
-        if path.is_file():
-            try:
-                state = torch.load(path, map_location="cpu", weights_only=True)
-                model.load_state_dict(state)
-                logger.info("Loaded distance NN from %s", path)
-            except Exception as exc:  # noqa: BLE001
-                logger.warning("distance NN load failed (%s); using identity residual", exc)
-        else:
-            logger.info("No distance_nn.pt yet — residual ≈ 0 (Z ≈ Z0 pinhole)")
+        path = served["path"]
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"Distance weights not found at {path}. "
+                "Train notebooks/04_vision_distance_estimation_training.ipynb"
+            )
+        state = torch.load(path, map_location="cpu", weights_only=True)
+        model.load_state_dict(state)
+        logger.info("Loaded distance NN from %s", path)
         model.eval()
         _model = model
         return _model
@@ -317,100 +468,10 @@ def predict_vision_distance(
     feats, z0, named = extract_features(
         box_xyxy, image_wh, det_conf=det_conf, keypoints=keypoints
     )
-    calib = load_calib()
-    z_min = float(calib["min_dist_m"])
-    z_max = float(calib["max_dist_m"])
     model = get_model()
     with torch.no_grad():
         x = torch.from_numpy(feats).unsqueeze(0)
         delta = float(model(x).item())
-    # Soft clamp residual so a wild net cannot explode
-    delta = max(-1.5, min(1.5, delta))
-    vision = z0 * math.exp(delta)
-    vision = float(min(z_max, max(z_min, vision)))
-    # Confidence: higher when pose present and Z0 in mid/far band
-    conf = 0.55 + 0.15 * named["pose_available"] + 0.15 * min(1.0, named["det_conf"])
-    if vision >= float(calib["tof_near_m"]):
-        conf += 0.1
-    conf = float(min(0.95, conf))
-    return vision, z0, named, conf
+    vision = float(z0 * math.exp(delta))
+    return vision, z0, named, float(named["det_conf"])
 
-
-def fuse_with_tof(
-    vision_m: float,
-    *,
-    z0_m: float,
-    vision_conf: float,
-    features: dict[str, float] | None = None,
-    tof_m: float | None = None,
-    tof_valid: bool | None = None,
-) -> DistanceEstimate:
-    """Gate: ToF for near, NN for far, blend in between."""
-    calib = load_calib()
-    d_near = float(calib["tof_near_m"])
-    d_far = float(calib["tof_far_m"])
-    method = "residual_mlp_pinhole"
-
-    if tof_valid is None:
-        tof_valid = tof_m is not None and math.isfinite(float(tof_m)) and float(tof_m) > 0.05
-    if tof_valid and tof_m is not None:
-        tof = float(tof_m)
-        if tof <= d_near:
-            return DistanceEstimate(
-                distance_m=tof,
-                z0_m=z0_m,
-                vision_m=vision_m,
-                source="tof",
-                confidence=0.95,
-                method=method,
-                features=features,
-            )
-        if tof <= d_far:
-            # Smooth blend: weight ToF more when closer
-            t = (tof - d_near) / max(1e-3, d_far - d_near)
-            w_tof = 1.0 - t
-            blended = w_tof * tof + t * vision_m
-            return DistanceEstimate(
-                distance_m=float(blended),
-                z0_m=z0_m,
-                vision_m=vision_m,
-                source="blend",
-                confidence=float(0.7 * w_tof + vision_conf * t),
-                method=method,
-                features=features,
-            )
-
-    return DistanceEstimate(
-        distance_m=vision_m,
-        z0_m=z0_m,
-        vision_m=vision_m,
-        source="vision_nn",
-        confidence=vision_conf,
-        method=method,
-        features=features,
-    )
-
-
-def estimate_person_distance(
-    box_xyxy: Sequence[float],
-    image_wh: tuple[int, int],
-    *,
-    det_conf: float = 1.0,
-    keypoints: Sequence[Sequence[float]] | None = None,
-    tof_m: float | None = None,
-) -> DistanceEstimate:
-    vision, z0, feats, conf = predict_vision_distance(
-        box_xyxy, image_wh, det_conf=det_conf, keypoints=keypoints
-    )
-    return fuse_with_tof(
-        vision, z0_m=z0, vision_conf=conf, features=feats, tof_m=tof_m
-    )
-
-
-def heuristic_distance_m(box_xyxy: Sequence[float], image_h: int) -> float:
-    """Legacy fallback (bbox relative height)."""
-    calib = load_calib()
-    y1, y2 = float(box_xyxy[1]), float(box_xyxy[3])
-    rel_h = max(1e-3, (y2 - y1) / max(1, image_h))
-    dist = 0.65 / rel_h
-    return float(min(calib["max_dist_m"], max(calib["min_dist_m"], dist)))

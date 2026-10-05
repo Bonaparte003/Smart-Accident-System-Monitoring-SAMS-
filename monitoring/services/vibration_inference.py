@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import threading
 from pathlib import Path
 from typing import Any
@@ -14,6 +15,22 @@ from scipy.stats import kurtosis, skew
 
 SAMPLE_RATE_HZ = 50.0
 WINDOW_SIZE = 100
+DEFAULT_UNUSUAL_MAG_STD = 0.28
+
+
+def unusual_std() -> float:
+    raw = os.environ.get("SAMS_VIB_UNUSUAL_STD", "").strip()
+    if not raw:
+        return DEFAULT_UNUSUAL_MAG_STD
+    try:
+        return float(raw)
+    except ValueError:
+        return DEFAULT_UNUSUAL_MAG_STD
+
+
+def unusual_shake(feats: dict[str, float]) -> bool:
+    """True when this window's motion is a hard or irregular shake, in g."""
+    return float(feats.get("mag_std", 0.0)) >= unusual_std()
 
 FEATURE_COLS = [
     "x_mean", "x_std", "x_rms", "x_max", "x_min", "x_ptp", "x_energy", "x_var",
@@ -55,7 +72,7 @@ def get_model():
                         with (folder / "metadata.json").open() as f:
                             _metadata = json.load(f)
                         break
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         errors.append(f"{folder.name}: {exc}")
                 if _model is None:
                     raise RuntimeError("Could not load vibration model. " + " | ".join(errors))
@@ -137,7 +154,6 @@ def predict_from_amplitudes(
     z_amp: float = 0.05,
     freq_hz: float = 5.0,
 ) -> dict[str, Any]:
-    # Noise scales with amplitude so quiet settings stay clearly NORMAL.
     noise = 0.003 + 0.04 * max(x_amp, y_amp, z_amp)
     win = synthesize_window(
         x_amp=x_amp,
@@ -164,7 +180,6 @@ def _lab_score_from_controls(controls: dict[str, Any], feats: dict[str, float]) 
     y_amp = float(controls.get("y_amp", 0.05))
     z_amp = float(controls.get("z_amp", 0.05))
     intensity = 0.55 * x_amp + 0.55 * y_amp + 0.25 * z_amp + 1.8 * float(feats.get("mag_std", 0.0))
-    # Soft probability curve — crosses ~0.5 near intensity 0.30
     abnormal_p = float(1.0 / (1.0 + np.exp(-(intensity - 0.30) * 10.0)))
     abnormal_p = min(0.99, max(0.01, abnormal_p))
     probabilities = {"NORMAL": 1.0 - abnormal_p, "ABNORMAL": abnormal_p}
@@ -193,24 +208,22 @@ def predict_from_window(win: np.ndarray, controls: dict[str, Any] | None = None)
             "model_id": get_metadata().get("experiment_id"),
             "note": "Pickle may be sklearn-version-skewed; lab label uses calibrated slider score.",
         }
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         model_raw = {"error": str(exc)}
 
+    mag_std = float(feats.get("mag_std", 0.0))
     if controls:
         label, probabilities, abnormal_p = _lab_score_from_controls(controls, feats)
         decision = "lab_calibrated"
     else:
-        if model_raw and "label" in model_raw:
-            label = model_raw["label"]
-            probabilities = model_raw["probabilities"]
-            abnormal_p = float(probabilities.get("ABNORMAL", 0.0))
-            decision = "model"
-        else:
-            label, probabilities, abnormal_p = _lab_score_from_controls(
-                {"x_amp": feats["x_std"], "y_amp": feats["y_std"], "z_amp": feats["z_std"]},
-                feats,
-            )
-            decision = "lab_calibrated_fallback"
+        shake = unusual_shake(feats)
+        label = "ABNORMAL" if shake else "NORMAL"
+        abnormal_p = mag_std
+        probabilities = {
+            "NORMAL": 0.05 if shake else 0.95,
+            "ABNORMAL": 0.95 if shake else 0.05,
+        }
+        decision = "board"
 
     series = {
         "x": win[:, 0].tolist(),
@@ -230,4 +243,5 @@ def predict_from_window(win: np.ndarray, controls: dict[str, Any] | None = None)
         "controls": controls,
         "series": series,
         "feature_snapshot": {k: round(feats[k], 4) for k in ("x_rms", "y_rms", "z_rms", "mag_rms", "mag_std")},
+        "mag_std": round(mag_std, 4),
     }

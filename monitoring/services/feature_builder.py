@@ -6,12 +6,12 @@ from typing import Any
 
 from .fusion_inference import CAUTION_ZONE_M, DANGER_ZONE_M
 
-PPE_ITEMS = ("hard_hat", "vest", "goggles", "gloves")
+PPE_ITEMS = ("hard_hat", "vest", "gloves", "boots")
 PPE_LABELS = {
     "hard_hat": "Hard hat",
     "vest": "Safety vest",
-    "goggles": "Goggles",
     "gloves": "Gloves",
+    "boots": "Safety shoes",
 }
 
 
@@ -23,8 +23,8 @@ def build_features(
     abnormal_vibration: bool = False,
     hard_hat: bool = True,
     vest: bool = True,
-    goggles: bool = True,
     gloves: bool = True,
+    boots: bool = True,
     worker_detected: bool | None = None,
     worker_speed: float | None = None,
     vision_confidence: float | None = None,
@@ -43,8 +43,8 @@ def build_features(
     wearings = {
         "hard_hat": bool(hard_hat),
         "vest": bool(vest),
-        "goggles": bool(goggles),
         "gloves": bool(gloves),
+        "boots": bool(boots),
     }
 
     if worker_detected is None:
@@ -85,8 +85,8 @@ def build_features(
         "vibration_anomaly_score": vibration_anomaly_score,
         "hard_hat": 1.0 if wearings["hard_hat"] else 0.0,
         "vest": 1.0 if wearings["vest"] else 0.0,
-        "goggles": 1.0 if wearings["goggles"] else 0.0,
         "gloves": 1.0 if wearings["gloves"] else 0.0,
+        "boots": 1.0 if wearings["boots"] else 0.0,
         "ppe_complete": 1.0 if missing_count == 0 else 0.0,
         "ppe_missing_count": float(missing_count),
     }
