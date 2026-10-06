@@ -1,0 +1,87 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SAMS{% endblock %}</title>
+  <link rel="icon" href="{% static 'monitoring/favicon.svg' %}?v=plus" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="{% static 'monitoring/css/review.css' %}?v=32" />
+  <script>
+    try {
+      if (localStorage.getItem("sams-nav") === "open") document.documentElement.classList.add("nav-open");
+    } catch (err) {}
+  </script>
+</head>
+<body class="{% block body_class %}app{% endblock %}">
+  {% block body %}
+  <header class="topbar">
+    <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="sams-rail" aria-label="Expand menu">
+      <i class="fa-solid fa-bars" aria-hidden="true"></i>
+    </button>
+    <a class="topbar-brand" href="{% url 'review_entrance' %}">SAMS</a>
+    <span class="topbar-side" aria-hidden="true"></span>
+  </header>
+  <div class="shell">
+    <nav class="rail" id="sams-rail" aria-label="SAMS">
+      <a class="rail-link{% if nav == 'home' %} is-on{% endif %}" href="{% url 'review_entrance' %}" title="Home"{% if nav == 'home' %} aria-current="page"{% endif %}>
+        <i class="fa-solid fa-house" aria-hidden="true"></i>
+        <span class="rail-label">Home</span>
+      </a>
+      <a class="rail-link{% if nav == 'archive' %} is-on{% endif %}" href="{% url 'review_archive' %}" title="Archive"{% if nav == 'archive' %} aria-current="page"{% endif %}>
+        <i class="fa-solid fa-box-archive" aria-hidden="true"></i>
+        <span class="rail-label">Archive</span>
+      </a>
+      <a class="rail-link{% if nav == 'alerts' %} is-on{% endif %}" href="{% url 'review_alerts' %}" title="Alerts"{% if nav == 'alerts' %} aria-current="page"{% endif %}>
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        <span class="rail-label">Alerts</span>
+        {% if alert_count %}<span class="rail-count">{{ alert_count }}</span>{% endif %}
+      </a>
+      <a class="rail-link{% if nav == 'mlops' %} is-on{% endif %}" href="{% url 'review_mlops' %}" title="MLOps"{% if nav == 'mlops' %} aria-current="page"{% endif %}>
+        <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
+        <span class="rail-label">MLOps</span>
+      </a>
+      <a class="rail-link" href="{% url 'app' %}" title="System">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+        <span class="rail-label">System</span>
+      </a>
+      <span class="rail-gap"></span>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'review_logout' %}">
+        {% csrf_token %}
+        <button class="rail-link" type="submit" title="Log out">
+          <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+          <span class="rail-label">Log out</span>
+        </button>
+      </form>
+      {% endif %}
+    </nav>
+    <div class="stage">
+      {% block main %}{% endblock %}
+    </div>
+  </div>
+  <script>
+    (function () {
+      var button = document.getElementById("nav-toggle");
+      if (!button) return;
+      function paint() {
+        var open = document.documentElement.classList.contains("nav-open");
+        button.setAttribute("aria-expanded", open ? "true" : "false");
+        button.setAttribute("aria-label", open ? "Collapse menu" : "Expand menu");
+      }
+      paint();
+      button.addEventListener("click", function () {
+        document.documentElement.classList.toggle("nav-open");
+        var open = document.documentElement.classList.contains("nav-open");
+        try { localStorage.setItem("sams-nav", open ? "open" : "closed"); } catch (err) {}
+        paint();
+      });
+    })();
+  </script>
+  {% endblock %}
+</body>
+</html>

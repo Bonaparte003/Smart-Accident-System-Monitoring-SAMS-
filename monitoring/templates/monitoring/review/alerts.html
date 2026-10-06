@@ -1,0 +1,77 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}Alerts — SAMS{% endblock %}
+{% block main %}
+<section class="library">
+  <header class="head">
+    <h1>Alerts</h1>
+    <p>Live decisions stay here after a restart. Video minutes below are from uploaded recordings.</p>
+  </header>
+  <h2>Live interactions</h2>
+  {% if interactions %}
+  <div class="live-log">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Class</th>
+          <th>What happened</th>
+          <th>Person</th>
+          <th>Distance</th>
+          <th>Machine</th>
+          <th>Vibration</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for event in interactions %}
+        <tr>
+          <td>{{ event.created_at|date:"d M H:i:s" }}</td>
+          <td><span class="sev {{ event.level }}">{{ event.level }}</span></td>
+          <td>{{ event.reason|default:"Clear" }}</td>
+          <td>{% if event.person_id %}{{ event.person_id }}{% else %}—{% endif %}</td>
+          <td>
+            {% if event.distance_m is not None %}
+              {{ event.distance_m|floatformat:2 }} m{% if event.distance_source %} {{ event.distance_source }}{% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td>{% if event.machine_on %}On{% else %}Off{% endif %}</td>
+          <td>{% if event.vibration_unusual %}Unusual{% if event.vibration_score is not None %} · {{ event.vibration_score|floatformat:2 }} g{% endif %}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty">No live interactions yet. A row is saved when the decision changes.</p>
+  {% endif %}
+  <h2>Recorded minutes</h2>
+  {% if rows %}
+  <ul class="alert-board">
+    {% for row in rows %}
+    <li class="alert-card">
+      <a class="alert-shot" href="{% url 'review_recording' row.recording_id %}">
+        {% if row.snapshot %}
+          <img src="{{ row.snapshot.url }}" alt="" />
+        {% else %}
+          <span class="shot-empty" aria-hidden="true"></span>
+        {% endif %}
+        <span class="sev {{ row.level }}">{{ row.level }}</span>
+      </a>
+      <div class="alert-body">
+        <strong>{{ row.summary|default:row.level }}</strong>
+        <span>{{ row.recording.title }} · {{ row.clock }}</span>
+        <form method="post" action="{% url 'review_label' %}">
+          {% csrf_token %}
+          <input type="hidden" name="minute_id" value="{{ row.pk }}" />
+          <input type="hidden" name="next" value="{% url 'review_alerts' %}" />
+          <button type="submit" name="status" value="kept"{% if row.train_status == 'kept' %} class="is-on"{% endif %}>Keep</button>
+          <button type="submit" name="status" value="excluded"{% if row.train_status == 'excluded' %} class="is-on"{% endif %}>Exclude</button>
+        </form>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No alert minutes yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

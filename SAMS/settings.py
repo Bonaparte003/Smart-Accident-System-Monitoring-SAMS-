@@ -46,12 +46,14 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "monitoring.context_processors.review_nav",
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = "SAMS.wsgi.application"
+ASGI_APPLICATION = "SAMS.asgi.application"
 
 DATABASES = {
     "default": {
@@ -74,6 +76,12 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = []
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+LOGIN_URL = "review_entrance"
+LOGIN_REDIRECT_URL = "review_entrance"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

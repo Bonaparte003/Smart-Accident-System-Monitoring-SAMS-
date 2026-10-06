@@ -1,13 +1,24 @@
 from django.urls import path
 
-from . import views
+from . import review_views, views
 
 urlpatterns = [
-    path("", views.app, name="app"),
+    path("", review_views.entrance, name="review_entrance"),
+    path("archive/", review_views.archive, name="review_archive"),
+    path("alerts/", review_views.alerts, name="review_alerts"),
+    path("mlops/", review_views.mlops, name="review_mlops"),
+    path("mlops/label/", review_views.label_minute, name="review_label"),
+    path("mlops/export/", review_views.export_training, name="review_export"),
+    path("logout/", review_views.logout_view, name="review_logout"),
+    path("recordings/<int:pk>/status/", review_views.recording_status, name="review_recording_status"),
+    path("recordings/<int:pk>/", review_views.recording_detail, name="review_recording"),
+    path("system/", views.app, name="app"),
     path("favicon.ico", views.favicon, name="favicon"),
     path("api/health/", views.health, name="api_health"),
     path("api/config/", views.config, name="api_config"),
     path("api/simulate/", views.simulate, name="api_simulate"),
+    path("api/control/live/", views.control_live, name="api_control_live"),
+    path("api/control/fuse/", views.control_fuse, name="api_control_fuse"),
     path("api/fusion/predict/", views.predict_fusion_api, name="api_fusion_predict"),
     path("api/vibration/predict/", views.vibration_predict, name="api_vibration_predict"),
     path("api/vibration/live/", views.vibration_live, name="api_vibration_live"),

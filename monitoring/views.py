@@ -14,6 +14,10 @@ from hardware.wifi_camera import guess_lan_ip
 
 
 from .services import event_log
+from .services.interaction_log import record_interaction
+from .services.recordings import log_line_from_prediction
+from .services.control_center import assemble as assemble_control
+from .services.control_center import decide_alert
 from .services.feature_builder import build_features, build_simulation_response
 from .services.fusion_inference import (
     CAUTION_ZONE_M,
@@ -24,6 +28,7 @@ from .services.fusion_inference import (
     get_model,
     predict_fusion,
 )
+from .services import ppe_inference as ppe
 from .services import vibration_inference as vib
 from .services import vision_inference as vision
 
@@ -44,13 +49,13 @@ def _live_vibration_result():
 
 
 def app(request):
-    """Main SAMS monitoring shell (simulation + model labs)."""
+    """Main SAMS shell. Control Center is the joined safety decision."""
     return render(request, "monitoring/app.html")
 
 
 @require_http_methods(["GET", "HEAD"])
 def favicon(request):
-    return HttpResponseRedirect(static("monitoring/favicon.svg"))
+    return HttpResponseRedirect(static("monitoring/favicon.svg") + "?v=plus")
 
 
 @require_GET
@@ -185,21 +190,20 @@ def simulate(request):
     ):
         distance = float(live_vis["worker_distance_est"])
 
-    # Prefer live PPE model over mannequin toggles when the detector made a decision
     live_ppe = (live_vis or {}).get("ppe") if live_vis else None
     hard_hat = _coerce_bool(body.get("hard_hat"), True)
     vest = _coerce_bool(body.get("vest"), True)
-    goggles = _coerce_bool(body.get("goggles"), True)
     gloves = _coerce_bool(body.get("gloves"), True)
+    boots = _coerce_bool(body.get("boots"), True)
     if live_ppe and live_ppe.get("available") and live_ppe.get("source") == "vision_ppe":
         if "hard_hat" not in body and live_ppe.get("hard_hat") is not None:
             hard_hat = bool(live_ppe["hard_hat"])
         if "vest" not in body and live_ppe.get("vest") is not None:
             vest = bool(live_ppe["vest"])
-        if "goggles" not in body and live_ppe.get("goggles") is not None:
-            goggles = bool(live_ppe["goggles"])
         if "gloves" not in body and live_ppe.get("gloves") is not None:
             gloves = bool(live_ppe["gloves"])
+        if "boots" not in body and live_ppe.get("boots") is not None:
+            boots = bool(live_ppe["boots"])
 
     features = build_features(
         worker_distance=distance,
@@ -208,8 +212,8 @@ def simulate(request):
         abnormal_vibration=abnormal,
         hard_hat=hard_hat,
         vest=vest,
-        goggles=goggles,
         gloves=gloves,
+        boots=boots,
         worker_detected=worker_detected,
         worker_speed=float(body["worker_speed"]) if body.get("worker_speed") is not None else None,
         vision_confidence=vision_confidence,
@@ -254,7 +258,6 @@ def simulate(request):
         payload["hud"]["vision"]["status"] = live_vis["label"]
         payload["hud"]["vision"]["confidence"] = round(float(live_vis["confidence"]), 3)
         if live_vis.get("ppe") and live_vis["ppe"].get("available"):
-            # Override HUD PPE with live detector decisions
             live_ppe = live_vis["ppe"]
             payload["hud"]["ppe"] = {
                 "summary": live_ppe.get("summary"),
@@ -266,7 +269,7 @@ def simulate(request):
                         "worn": live_ppe.get(k),
                         "status": (live_ppe.get("items") or {}).get(k, {}).get("status", "—"),
                     }
-                    for k in ("hard_hat", "vest", "goggles", "gloves")
+                    for k in ("hard_hat", "vest", "gloves", "boots")
                 },
                 "source": "vision_ppe",
             }
@@ -315,6 +318,76 @@ def predict_fusion_api(request):
     fusion = predict_fusion(features)
     event_log.log_event("info", "fusion", f"Predict → {fusion['label']}", **fusion["probabilities"])
     return JsonResponse(build_simulation_response(features, fusion))
+
+
+def _control_payload(vision: dict | None, *, actuate: bool) -> dict:
+    stream = get_stream()
+    vibration = _live_vibration_result() if stream.is_live else None
+    payload = assemble_control(vision, vibration, actuate=actuate and stream.is_live)
+    payload["hardware"] = stream.status()
+    if vibration is None:
+        payload["vibration"] = {
+            "label": None,
+            "ready": False,
+            "detail": "Accelerometer not streaming",
+        }
+    return payload
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def control_fuse(request):
+    """Fusion for one already-classified frame (upload path)."""
+    try:
+        body = _parse_body(request)
+    except ValueError as exc:
+        return JsonResponse({"error": str(exc)}, status=400)
+    vision = body.get("vision") if isinstance(body.get("vision"), dict) else body
+    payload = _control_payload(vision, actuate=False)
+    event_log.log_event(
+        "info",
+        "control",
+        f"{payload['fusion']['label']} · {log_line_from_prediction(vision, payload['fusion']['label'])}",
+        label=payload["fusion"]["label"],
+    )
+    return JsonResponse(payload)
+
+
+@require_GET
+def control_live(request):
+    """Poll: classify the phone frame, read vibration, run fusion."""
+    camera = get_camera()
+    if not camera.is_live:
+        return JsonResponse(
+            {
+                "ready": False,
+                "error": "Scan the QR to start SAMS live.",
+                "camera": camera.status(),
+            }
+        )
+    try:
+        vision = _live_vision_result(classify=True)
+    except Exception as exc:
+        return JsonResponse(
+            {
+                "ready": False,
+                "error": str(exc),
+                "camera": camera.status(),
+            }
+        )
+    payload = _control_payload(vision, actuate=True)
+    record_interaction(payload)
+    decision = (payload.get("fusion") or {}).get("label") or "NORMAL"
+    reason = (payload.get("fusion") or {}).get("reason") or ""
+    line = reason or log_line_from_prediction(vision, decision)
+    message = f"{decision} · {line}" if line else decision
+    if getattr(control_live, "_last", None) != message:
+        control_live._last = message
+        level = "error" if decision == "DANGER" else "warning" if decision in {"CAUTION", "DEGRADED"} else "info"
+        event_log.log_event(level, "control", message, label=decision, reason=reason)
+    payload["ready"] = True
+    payload["camera"] = camera.status()
+    return JsonResponse(payload)
 
 
 @csrf_exempt
@@ -412,10 +485,23 @@ def _public_join_base(request) -> str:
         or os.environ.get("SAMS_HTTPS", "").strip().lower() in {"1", "true", "yes", "on"}
     )
     scheme = "https" if want_https else request.scheme
-    # Always prefer LAN IP so the phone can reach the Mac (not localhost).
     ip = guess_lan_ip()
     port = request.get_port()
     return f"{scheme}://{ip}:{port}"
+
+
+def _apply_live_ppe(pred: dict) -> None:
+    """Copy the per-person PPE decision onto the flat payload fields."""
+    stable = pred.get("ppe")
+    if not isinstance(stable, dict):
+        return
+    pred["hard_hat"] = stable.get("hard_hat")
+    pred["vest"] = stable.get("vest")
+    pred["gloves"] = stable.get("gloves")
+    pred["boots"] = stable.get("boots")
+    pred["ppe_complete"] = stable.get("ppe_complete")
+    pred["ppe_summary"] = stable.get("summary")
+    pred["unsafe"] = stable.get("ppe_complete") is False
 
 
 def _live_vision_result(*, classify: bool = True) -> dict:
@@ -430,8 +516,8 @@ def _live_vision_result(*, classify: bool = True) -> dict:
     }
     if not classify:
         return result
-    pred = vision.predict_image(image)
-    # Keep last prediction small for fusion polling (drop heavy thumbnail/detections payload).
+    pred = vision.predict_image(image, live=True)
+    _apply_live_ppe(pred)
     camera.record_prediction(
         {
             "label": pred["label"],
@@ -452,14 +538,21 @@ def _live_vision_result(*, classify: bool = True) -> dict:
                 "missing": (pred.get("ppe") or {}).get("missing"),
                 "hard_hat": pred.get("hard_hat"),
                 "vest": pred.get("vest"),
-                "goggles": pred.get("goggles"),
                 "gloves": pred.get("gloves"),
+                "boots": pred.get("boots"),
                 "items": (pred.get("ppe") or {}).get("items"),
             },
             "ppe_summary": pred.get("ppe_summary"),
             "ppe_complete": pred.get("ppe_complete"),
             "unsafe": pred.get("unsafe", False),
             "model_id": pred.get("model_id"),
+            "track_id": pred.get("track_id"),
+            "worker_speed": pred.get("worker_speed"),
+            "approach_velocity": pred.get("approach_velocity"),
+            "approaching": pred.get("approaching"),
+            "fall_detected": pred.get("fall_detected"),
+            "fire_score": pred.get("fire_score"),
+            "smoke_score": pred.get("smoke_score"),
         }
     )
     result.update(pred)
@@ -484,12 +577,16 @@ def hardware_camera(request):
 
     action = str(body.get("action") or "").strip().lower()
     if action == "start" or _coerce_bool(body.get("live"), False) or _coerce_bool(body.get("start"), False):
+        ppe.reset_live_votes()
+        vision.reset_tracks()
         base = _public_join_base(request)
         status = camera.start_session(join_base=base)
         event_log.log_event("info", "vision", "Camera QR session started — waiting for phone")
         return JsonResponse({"ok": True, "camera": status, "join_url": status.get("join_url")})
 
     if action == "stop" or ("live" in body and not _coerce_bool(body.get("live"), True)):
+        ppe.reset_live_votes()
+        vision.reset_tracks()
         status = camera.stop_session()
         event_log.log_event("info", "vision", "Camera QR session stopped")
         return JsonResponse({"ok": True, "camera": status})
@@ -509,8 +606,7 @@ def vision_live(request):
     prev = camera.last_prediction()
     try:
         result = _live_vision_result(classify=True)
-    except Exception as exc:  # noqa: BLE001
-        # Waiting for the phone is normal — keep 200 so the UI can poll quietly.
+    except Exception as exc:
         return JsonResponse(
             {
                 "ready": False,
@@ -523,14 +619,19 @@ def vision_live(request):
         )
 
     stream = get_stream()
-    if result.get("unsafe") and stream.buzzer_auto:
-        apply_risk_actuators("DANGER", buzzer=True, leds=stream.leds_auto)
+    if stream.is_live and (stream.buzzer_auto or stream.leds_auto):
+        apply_risk_actuators(
+            decide_alert(result, _live_vibration_result()),
+            buzzer=stream.buzzer_auto,
+            leds=stream.leds_auto,
+        )
 
-    if not prev or prev.get("label") != result.get("label"):
+    line = log_line_from_prediction(result)
+    if not prev or log_line_from_prediction(prev) != line:
         event_log.log_event(
             "warning" if result.get("unsafe") else "info",
             "vision",
-            f"Live cam → {result['label']} ({result['confidence']:.0%})",
+            f"Vision · {line}",
             label=result["label"],
             unsafe=result.get("unsafe"),
         )
@@ -579,7 +680,7 @@ def phone_cam_frame(request, token: str):
         status = camera.push_jpeg(token, data)
     except PermissionError as exc:
         return JsonResponse({"error": str(exc)}, status=403)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return JsonResponse({"error": str(exc)}, status=400)
     return JsonResponse({"ok": True, "camera": status})
 
@@ -592,12 +693,30 @@ def hardware_mode(request):
     except ValueError as exc:
         return JsonResponse({"error": str(exc)}, status=400)
 
-    mode = str(body.get("mode", "simulate")).strip().lower()
+    mode = str(body.get("mode", "")).strip().lower()
+    stream = get_stream()
+    if "machine_on" in body and not mode:
+        stream.set_machine_on(_coerce_bool(body.get("machine_on"), False))
+        event_log.log_event(
+            "info",
+            "hardware",
+            "Machine on" if stream.machine_on else "Machine off",
+            machine_on=stream.machine_on,
+        )
+        return JsonResponse(
+            {
+                "hardware": stream.status(),
+                "buzzer": get_buzzer().status(),
+                "leds": get_leds().status(),
+            }
+        )
+    if not mode:
+        mode = "simulate"
     try:
-        status = get_stream().set_mode(mode)
+        status = stream.set_mode(mode)
     except ValueError as exc:
         return JsonResponse({"error": str(exc)}, status=400)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return JsonResponse({"error": str(exc), "hardware": get_stream().status()}, status=503)
 
     event_log.log_event(
@@ -706,21 +825,25 @@ def hardware_leds(request):
 def vision_predict_frame(request):
     """Detect people in a single frame (multipart file or JSON data_url)."""
     try:
+        track = _coerce_bool(request.POST.get("track"), False)
+        if _coerce_bool(request.POST.get("reset_track"), False):
+            vision.reset_tracks()
+            ppe.reset_live_votes()
         if request.FILES.get("image"):
-            result = vision.predict_image_bytes(request.FILES["image"].read())
+            result = vision.predict_image_bytes(request.FILES["image"].read(), track=track)
         else:
             body = _parse_body(request)
             if not body.get("image"):
                 return JsonResponse({"error": "Provide image file or data_url in `image`"}, status=400)
             result = vision.predict_data_url(body["image"])
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         event_log.log_event("error", "vision", f"Frame predict failed: {exc}")
         return JsonResponse({"error": str(exc), "torch": vision.get_torch_status()}, status=503)
 
     event_log.log_event(
         "warning" if result.get("unsafe") else "info",
         "vision",
-        f"Vision → {result['label']} ({result['confidence']:.0%})",
+        f"Vision · {log_line_from_prediction(result)}",
         label=result["label"],
         confidence=result["confidence"],
     )
@@ -734,11 +857,22 @@ def vision_predict_video(request):
     if not upload:
         return JsonResponse({"error": "Upload a video file as `video`"}, status=400)
     max_frames = int(request.POST.get("max_frames", 8))
+    video_bytes = upload.read()
     try:
-        result = vision.extract_video_frames(upload.read(), max_frames=max_frames)
-    except Exception as exc:  # noqa: BLE001
+        result = vision.extract_video_frames(video_bytes, max_frames=max_frames)
+    except Exception as exc:
         event_log.log_event("error", "vision", f"Video analyze failed: {exc}")
         return JsonResponse({"error": str(exc), "torch": vision.get_torch_status()}, status=400)
+
+    try:
+        from .services.recordings import save_analyzed_video
+
+        saved = save_analyzed_video(video_bytes, upload.name)
+        result["recording_id"] = saved.pk
+        result["recording_url"] = f"/recordings/{saved.pk}/"
+    except Exception as exc:
+        logger.exception("Could not keep the video log")
+        event_log.log_event("error", "vision", f"Video log was not saved: {exc}")
 
     labels = [
         f["prediction"]["label"]

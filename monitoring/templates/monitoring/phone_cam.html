@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>SAMS camera</title>
-  <link rel="icon" href="/static/monitoring/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/static/monitoring/favicon.svg?v=plus" type="image/svg+xml" />
   <style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
@@ -76,7 +76,7 @@
 <body>
   {% if not valid %}
   <div class="err-box">
-    This QR session expired or is invalid. On the Mac, open <strong>Vision lab → Live phone</strong> to show a fresh QR, then scan again.
+    This QR session expired or is invalid. On the Mac, open <strong>Vision → Live phone</strong> and scan the new QR.
   </div>
   {% else %}
   <div id="insecure" class="warn-box" hidden>
@@ -126,7 +126,7 @@
       if (!canvas) canvas = document.createElement("canvas");
       const w = video.videoWidth;
       const h = video.videoHeight;
-      const maxSide = 720;
+      const maxSide = 1280;
       const scale = Math.min(1, maxSide / Math.max(w, h));
       canvas.width = Math.round(w * scale);
       canvas.height = Math.round(h * scale);
@@ -136,7 +136,7 @@
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       ctx.restore();
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.72));
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
       if (!blob) return;
       const form = new FormData();
       form.append("frame", blob, "frame.jpg");

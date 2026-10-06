@@ -1,0 +1,41 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}Archive — SAMS{% endblock %}
+{% block main %}
+<section class="library">
+  <form class="filter-bar" method="get">
+    <h1>Archive</h1>
+    <label>
+      Created from
+      <input type="datetime-local" name="from" value="{{ created_from }}" onchange="this.form.submit()" />
+    </label>
+    <label>
+      Created to
+      <input type="datetime-local" name="to" value="{{ created_to }}" onchange="this.form.submit()" />
+    </label>
+    <label>
+      Severity
+      <select name="severity" onchange="this.form.submit()">
+        <option value="all"{% if severity == 'all' %} selected{% endif %}>All</option>
+        <option value="caution"{% if severity == 'caution' %} selected{% endif %}>Caution</option>
+        <option value="danger"{% if severity == 'danger' %} selected{% endif %}>Danger</option>
+        <option value="clear"{% if severity == 'clear' %} selected{% endif %}>Clear</option>
+      </select>
+    </label>
+  </form>
+  {% if cards %}
+  <ul class="poster-grid">
+    {% for item in cards %}
+    <li>
+      <a class="poster-card" href="{% url 'review_recording' item.id %}" aria-label="{{ item.title }}">
+        {% if item.poster %}
+        <img src="{{ item.poster }}" alt="" />
+        {% endif %}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No videos match these filters.</p>
+  {% endif %}
+</section>
+{% endblock %}

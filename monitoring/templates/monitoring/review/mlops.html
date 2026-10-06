@@ -1,0 +1,123 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}MLOps — SAMS{% endblock %}
+{% block body_class %}app mlops-page{% endblock %}
+{% block main %}
+<section class="desk">
+  <header class="ov-head">
+    <div>
+      <h1>MLOps</h1>
+      <p>Each clip keeps a clean video for the next training run, and a framed copy that carries the log.</p>
+    </div>
+    <div class="desk-actions">
+      <a class="desk-ghost" href="{% url 'review_export' %}?scope=all">Download archive</a>
+      <a class="go-live" href="{% url 'review_export' %}?scope=kept">Download training set</a>
+    </div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi">
+      <span class="kpi-icon" aria-hidden="true"><i class="fa-solid fa-video"></i></span>
+      <span class="kpi-label">Videos on disk</span>
+      <strong>{{ video_count }}</strong>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+      <span class="kpi-label">Frames kept</span>
+      <strong>{{ kept_count }}</strong>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon caution" aria-hidden="true"><i class="fa-solid fa-circle-exclamation"></i></span>
+      <span class="kpi-label">Alerts still pending</span>
+      <strong class="caution-count">{{ pending_count }}</strong>
+    </div>
+    <div class="kpi">
+      <span class="kpi-icon" aria-hidden="true"><i class="fa-solid fa-table-cells-large"></i></span>
+      <span class="kpi-label">Labeled minutes</span>
+      <strong>{{ minute_count }}</strong>
+    </div>
+  </div>
+
+  <div class="desk-grid">
+    <section class="card desk-card">
+      <header class="card-head">
+        <div>
+          <h2>Models in service</h2>
+          <p>The live weights stay as they are.</p>
+        </div>
+      </header>
+      <ul class="desk-models desk-scroll">
+        {% for model in models %}
+        <li>
+          <span class="health-icon" aria-hidden="true">
+            {% if model.name == "Person" %}
+            <i class="fa-solid fa-video"></i>
+            {% elif model.name == "PPE" %}
+            <i class="fa-solid fa-helmet-safety"></i>
+            {% elif model.name == "Distance" %}
+            <i class="fa-solid fa-ruler-horizontal"></i>
+            {% elif model.name == "Vibration" %}
+            <i class="fa-solid fa-gauge-high"></i>
+            {% else %}
+            <i class="fa-solid fa-diagram-project"></i>
+            {% endif %}
+          </span>
+          <span class="model-copy">
+            <strong>{{ model.name }}</strong>
+            <span>{{ model.role }}</span>
+          </span>
+          {% if model.ready %}
+          <span class="health-state is-ok">Ready · {{ model.size_label }}</span>
+          {% else %}
+          <span class="health-state">Weights missing</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card desk-card">
+      <header class="card-head">
+        <div>
+          <h2>Review queue</h2>
+          <p>Kept frames go into the training download.</p>
+        </div>
+      </header>
+      {% if queue %}
+      <ul class="desk-queue desk-scroll">
+        {% for row in queue %}
+        <li class="q-row">
+          <a class="q-main" href="{% url 'review_recording' row.recording_id %}">
+            {% if row.snapshot %}
+            <img class="q-shot" src="{{ row.snapshot.url }}" alt="" />
+            {% else %}
+            <span class="q-shot" aria-hidden="true"></span>
+            {% endif %}
+            <span class="state-ico {{ row.level }}" aria-hidden="true">
+              {% if row.level == "DANGER" %}
+              <i class="fa-solid fa-circle-exclamation"></i>
+              {% else %}
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              {% endif %}
+            </span>
+            <span class="q-copy">
+              <strong>{{ row.recording.title }} · {{ row.clock }}</strong>
+              <span>{{ row.summary }}</span>
+            </span>
+          </a>
+          <form method="post" action="{% url 'review_label' %}">
+            {% csrf_token %}
+            <input type="hidden" name="minute_id" value="{{ row.pk }}" />
+            <input type="hidden" name="next" value="{% url 'review_mlops' %}" />
+            <button type="submit" name="status" value="kept">Keep</button>
+            <button type="submit" name="status" value="excluded">Exclude</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="empty">Nothing waiting. New alert minutes land here after a video is analyzed.</p>
+      {% endif %}
+    </section>
+  </div>
+</section>
+{% endblock %}

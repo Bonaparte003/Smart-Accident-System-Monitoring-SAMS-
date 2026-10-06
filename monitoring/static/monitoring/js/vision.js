@@ -1,5 +1,5 @@
-import { alertForLabel, stopAlerts } from "./sounds.js?v=yolo1";
-import { renderJoinQr } from "./qr-scan.js?v=yolo1";
+import { stopAlerts } from "./sounds.js?v=uploadlive1";
+import { renderJoinQr } from "./qr-scan.js?v=uploadlive1";
 
 const state = {
   mode: "upload",
@@ -102,8 +102,6 @@ export function initVisionLab() {
       }
       renderFrames(data, results, openZoom);
       const hits = (data.frames || []).filter((f) => f.prediction?.worker_detected);
-      if (hits.length) alertForLabel("CAUTION");
-      else stopAlerts();
       const backend = data.torch?.available ? "YOLOv8n" : "model unavailable";
       status.textContent = `${data.frame_count_sampled} frames · ${hits.length} with person · ${backend}`;
     } catch (err) {
@@ -121,26 +119,51 @@ export function initVisionLab() {
 }
 
 function setMode(mode) {
-  if (mode === "upload" && state.liveActive) stopLive();
+  const leavingLive = mode !== "live" && state.liveActive;
   state.mode = mode;
+  if (leavingLive) stopLive();
   document.getElementById("vision-mode-upload").classList.toggle("active", mode === "upload");
   document.getElementById("vision-mode-live").classList.toggle("active", mode === "live");
   document.getElementById("vision-upload-controls").hidden = mode === "live";
   document.getElementById("vision-live-controls").hidden = mode !== "live";
-  document.getElementById("vision-live-preview").hidden = mode !== "live";
-  document.getElementById("vision-results").hidden = mode === "live";
+  document.getElementById("vision-live-preview").hidden = true;
+  document.getElementById("vision-results").hidden = false;
   document.getElementById("vision-results-title").textContent =
     mode === "live" ? "Live phone feed" : "Detections";
   document.getElementById("vision-mode-hint").textContent =
     mode === "live"
-      ? "Your phone scans this QR, opens the camera page, and streams frames to SAMS."
+      ? "Live starts only after the phone scans this QR."
       : "Drop a workplace clip to sample frames through YOLOv8 person detection.";
   if (mode === "upload") {
     updatePill({ live: false });
     stopAlerts();
+    document.getElementById("qr-join-panel")?.classList.remove("linked");
+    const results = document.getElementById("vision-results");
+    if (results && !results.querySelector(".frame-card")) {
+      results.className = "frame-grid empty-state";
+      results.textContent = "Upload a video to see person detections on sampled frames.";
+    }
   } else {
+    showScanGate();
     showQrSession();
   }
+}
+
+function showScanGate() {
+  const results = document.getElementById("vision-results");
+  const preview = document.getElementById("vision-live-preview");
+  if (preview) preview.hidden = true;
+  if (!results) return;
+  results.hidden = false;
+  results.className = "frame-grid empty-state";
+  results.textContent = "Scan the QR with your phone. Live detection starts after the scan.";
+}
+
+function showLiveFeed() {
+  const results = document.getElementById("vision-results");
+  const preview = document.getElementById("vision-live-preview");
+  if (results) results.hidden = true;
+  if (preview) preview.hidden = false;
 }
 
 function showCamMsg(msg, ok = true) {
@@ -233,7 +256,9 @@ async function stopLive() {
     /* ignore */
   }
   updatePill({ live: false });
-  showCamMsg("Disconnected — show QR again when ready.");
+  document.getElementById("qr-join-panel")?.classList.remove("linked");
+  if (state.mode === "live") showScanGate();
+  showCamMsg("Disconnected — scan a new QR to go live again.");
 }
 
 async function pollLive() {
@@ -243,18 +268,20 @@ async function pollLive() {
     const res = await fetch("/api/vision/live/");
     const data = await res.json();
     updatePill(data.camera);
+    const scanned = !!(data.camera?.phone_joined || data.camera?.has_frame);
+    if (!scanned) {
+      showScanGate();
+      showCamMsg("Waiting for the phone to scan the QR…");
+      return;
+    }
     if (data.ready === false || !data.label) {
-      if (data.camera?.phone_joined || data.camera?.has_frame) {
-        showCamMsg(data.error || "Phone linked — waiting for frames…");
-      } else {
-        showCamMsg("Waiting for phone to scan the QR…");
-      }
+      showLiveFeed();
+      showCamMsg(data.error || "Phone linked — waiting for frames…");
       return;
     }
     document.getElementById("qr-join-panel")?.classList.add("linked");
+    showLiveFeed();
     renderLive(data);
-    if (data.worker_detected) alertForLabel("CAUTION");
-    else stopAlerts();
   } catch (err) {
     showCamMsg(String(err.message || err), false);
   } finally {
@@ -273,12 +300,46 @@ function renderLive(data) {
     countEl.textContent = data.person_count != null ? String(data.person_count) : "—";
     countEl.style.color = data.worker_detected ? "#e03121" : "#0b6e4f";
   }
-  document.getElementById("cam-host").textContent = "Phone linked";
+  const distEl = document.getElementById("cam-distance");
+  if (distEl) {
+    const metres =
+      data.worker_detected && data.worker_distance_est != null
+        ? Number(data.worker_distance_est).toFixed(1)
+        : null;
+    const via =
+      data.distance_source === "tof"
+        ? " · sensor"
+        : data.distance_source === "vision"
+          ? " · body"
+          : "";
+    distEl.textContent = metres == null || !via ? "—" : `${metres} m${via}`;
+  }
+  fillPpeTrack(document.getElementById("cam-ppe"), data.ppe);
+  const others = document.getElementById("cam-people");
+  if (others) {
+    const rest = (data.people || []).filter((person) => !person.selected);
+    others.hidden = rest.length === 0;
+    others.textContent = rest
+      .map((person) => `Person ${person.id}: ${person.summary || "—"}`)
+      .join("   ");
+  }
+  const ppeNote = data.ppe?.summary && data.ppe.summary !== "—" ? ` · ${data.ppe.summary}` : "";
   showCamMsg(
     data.worker_detected
-      ? `Live · ${data.label} (${Math.round((data.confidence || 0) * 100)}%)`
+      ? `Live · ${data.label} (${Math.round((data.confidence || 0) * 100)}%)${ppeNote}`
       : "Live · no person in frame",
   );
+}
+
+function fillPpeTrack(root, ppe) {
+  if (!root) return;
+  root.querySelectorAll("[data-ppe]").forEach((row) => {
+    const item = ppe?.items?.[row.dataset.ppe];
+    const em = row.querySelector("em");
+    if (em) em.textContent = item?.status || "—";
+    row.classList.toggle("worn", item?.worn === true);
+    row.classList.toggle("missing", item?.worn === false);
+  });
 }
 
 function renderFrames(data, root, openZoom) {
@@ -299,11 +360,15 @@ function renderFrames(data, root, openZoom) {
     const label = pred?.label || f.error || "No prediction";
     const confText = conf != null ? `${conf}%` : "—";
     const count = pred?.person_count != null ? ` · ${pred.person_count}p` : "";
+    const dist =
+      pred?.worker_distance_est != null ? ` · ${Number(pred.worker_distance_est).toFixed(1)} m` : "";
+    const ppe = pred?.ppe?.summary && pred.ppe.summary !== "—" ? pred.ppe.summary : "";
     card.innerHTML = `
       <img src="${f.thumbnail}" alt="Frame ${f.index}" title="Click to zoom" />
       <div class="meta">
         <strong>${label}</strong>
-        <span>${confText}${count}</span>
+        <span>${confText}${count}${dist}</span>
+        ${ppe ? `<span>${ppe}</span>` : ""}
       </div>
     `;
     const img = card.querySelector("img");

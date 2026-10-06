@@ -1,0 +1,321 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}{{ recording.title }} — SAMS{% endblock %}
+{% block body_class %}app has-chapters{% endblock %}
+{% block main %}
+<section class="watch">
+  <div class="player">
+    <div class="frame">
+      <video
+        id="clip"
+        playsinline
+        preload="metadata"
+        src="{{ play_url }}"
+        data-baked="{% if baked %}1{% else %}0{% endif %}"
+        data-status="{{ recording.render_status }}"
+        data-status-url="{% url 'review_recording_status' recording.pk %}"
+      ></video>
+      <canvas id="overlay" class="overlay" aria-hidden="true"{% if baked %} hidden{% endif %}></canvas>
+    </div>
+    <div class="controls">
+      <button type="button" id="play" aria-label="Play">
+        <i id="icon-play" class="fa-solid fa-play" aria-hidden="true"></i>
+        <i id="icon-pause" class="fa-solid fa-pause" hidden aria-hidden="true"></i>
+      </button>
+      <span class="time" id="time-readout">0:00 / {{ recording.duration_label }}</span>
+      <div class="scrub">
+        <input id="seek" class="seek" type="range" min="0" max="1000" value="0" aria-label="Seek" />
+        <div class="markers">
+          {% for mark in minutes %}
+          <button
+            type="button"
+            class="mark-dot {{ mark.level }}"
+            style="left: {{ mark.pct }}%"
+            data-minute="{{ mark.minute }}"
+            aria-label="{{ mark.clock }}, {{ mark.level }}, {{ mark.line|default:mark.summary }}"
+          ></button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% if not baked %}
+    <p class="hint" id="frame-status">The framed copy is being prepared. Boxes stay on this view until it is ready.</p>
+    {% endif %}
+  </div>
+</section>
+
+<aside class="chapters" aria-label="Logs">
+  <h2>Logs</h2>
+  <label class="person-follow">
+    Follow
+    <select id="person-filter">
+      <option value="">All people</option>
+    </select>
+  </label>
+  <div class="log-list" role="listbox">
+    {% for mark in minutes %}
+    <button
+      type="button"
+      class="log-row{% if mark.problem %} problem {{ mark.level }}{% endif %}"
+      role="option"
+      data-minute="{{ mark.minute }}"
+      aria-label="{{ mark.clock }}, {{ mark.level }}, {{ mark.line|default:mark.summary }}"
+    >
+      {% if mark.ppe %}
+      <span class="ppe-marks">
+        {% for item in mark.ppe %}
+        <span class="ppe-mark{% if item.worn is True %} is-on{% elif item.worn is False %} is-off{% endif %}" title="{{ item.label }} · {{ item.status }}">
+          <i class="fa-solid {{ item.icon }}" aria-hidden="true"></i>
+          <span>{{ item.label }}</span>
+        </span>
+        {% endfor %}
+      </span>
+      {% endif %}
+      <span class="log-line">
+        <span class="state-ico {{ mark.level }}" aria-hidden="true">
+          {% if mark.level == "DANGER" %}
+          <i class="fa-solid fa-circle-exclamation"></i>
+          {% elif mark.level == "CAUTION" or mark.level == "DEGRADED" %}
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          {% else %}
+          <i class="fa-solid fa-circle-check"></i>
+          {% endif %}
+        </span>
+        <span class="ts">{{ mark.clock }}</span>
+        <span class="msg">{{ mark.line|default:mark.summary }}</span>
+      </span>
+    </button>
+    {% endfor %}
+  </div>
+</aside>
+
+{{ minutes|json_script:"minute-data" }}
+<script>
+  const minutes = JSON.parse(document.getElementById("minute-data").textContent);
+  const byMinute = new Map(minutes.map((row) => [row.minute, row]));
+  const clip = document.getElementById("clip");
+  const overlay = document.getElementById("overlay");
+  const seek = document.getElementById("seek");
+  const readout = document.getElementById("time-readout");
+  const playBtn = document.getElementById("play");
+  const logs = [...document.querySelectorAll(".log-list .log-row")];
+  const marks = [...document.querySelectorAll(".mark-dot")];
+  let seeking = false;
+  let lastBoxes = [];
+  let boxSpace = { w: 1, h: 1 };
+
+  function fmt(seconds) {
+    const s = Math.max(0, Math.floor(seconds || 0));
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return m + ":" + String(r).padStart(2, "0");
+  }
+
+  function markOn(nodes, minute) {
+    nodes.forEach((node) => {
+      const on = Number(node.dataset.minute) === minute;
+      node.classList.toggle("is-on", on);
+      if (node.getAttribute("role") === "option") node.setAttribute("aria-selected", on ? "true" : "false");
+      if (node.classList.contains("mark-dot")) node.setAttribute("aria-current", on ? "true" : "false");
+    });
+  }
+
+  function paint(row) {
+    markOn(logs, row.minute);
+    markOn(marks, row.minute);
+  }
+
+  function show(minute) {
+    const row = byMinute.get(minute);
+    if (!row) return;
+    paint(row);
+    const go = () => {
+      if (Number.isFinite(row.offset_s)) clip.currentTime = row.offset_s;
+    };
+    if (clip.readyState >= 1) go();
+    else clip.addEventListener("loadedmetadata", go, { once: true });
+    logs.find((button) => Number(button.dataset.minute) === minute)?.scrollIntoView({ block: "nearest" });
+  }
+
+  function pictureRect() {
+    const vw = clip.videoWidth || 1;
+    const vh = clip.videoHeight || 1;
+    const cw = overlay.clientWidth;
+    const ch = overlay.clientHeight;
+    const scale = Math.min(cw / vw, ch / vh);
+    const w = vw * scale;
+    const h = vh * scale;
+    return { x: (cw - w) / 2, y: (ch - h) / 2, w, h };
+  }
+
+  function drawBoxes() {
+    const rect = pictureRect();
+    const dpr = window.devicePixelRatio || 1;
+    overlay.width = Math.round(overlay.clientWidth * dpr);
+    overlay.height = Math.round(overlay.clientHeight * dpr);
+    const ctx = overlay.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, overlay.clientWidth, overlay.clientHeight);
+    const sx = rect.w / boxSpace.w;
+    const sy = rect.h / boxSpace.h;
+    ctx.lineWidth = 2;
+    ctx.font = "11px Inter, sans-serif";
+    for (const box of lastBoxes) {
+      const x = rect.x + box.xyxy[0] * sx;
+      const y = rect.y + box.xyxy[1] * sy;
+      const w = (box.xyxy[2] - box.xyxy[0]) * sx;
+      const h = (box.xyxy[3] - box.xyxy[1]) * sy;
+      ctx.strokeStyle = box.color;
+      ctx.fillStyle = box.color;
+      ctx.strokeRect(x, y, w, h);
+      const label = box.label;
+      const pad = 4;
+      const tw = ctx.measureText(label).width + pad * 2;
+      ctx.fillRect(x, Math.max(rect.y, y - 16), tw, 16);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(label, x + pad, Math.max(rect.y, y - 16) + 12);
+    }
+  }
+
+  function sampleAt(time) {
+    return [...minutes].reverse().find((row) => Number(row.offset_s) <= time + 0.2) || null;
+  }
+
+  function boxesFor(row) {
+    const follow = personFilter.value;
+    const saved = (row && row.boxes) || [];
+    const drawn = [];
+    for (const box of saved) {
+      if (!box.xyxy) continue;
+      const id = box.track_id == null ? "" : String(box.track_id);
+      if (follow && id !== follow) continue;
+      if (box.kind === "gear") {
+        drawn.push({
+          xyxy: box.xyxy,
+          color: box.missing ? "#c2332a" : "#1f7a45",
+          label: box.label || "ppe",
+        });
+        continue;
+      }
+      const metres = box.distance_m != null ? " " + Number(box.distance_m).toFixed(1) + "m" : "";
+      drawn.push({
+        xyxy: box.xyxy,
+        color: "#e6a100",
+        label: "person " + id + metres,
+      });
+    }
+    return drawn;
+  }
+
+  function drawSample(row) {
+    boxSpace = {
+      w: (row && row.frame_w) || clip.videoWidth || 1,
+      h: (row && row.frame_h) || clip.videoHeight || 1,
+    };
+    lastBoxes = boxesFor(row);
+    drawBoxes();
+  }
+
+  const personFilter = document.getElementById("person-filter");
+  const personIds = new Set();
+  minutes.forEach((row) => (row.people || []).forEach((person) => {
+    if (person.id != null) personIds.add(String(person.id));
+  }));
+  [...personIds].sort((a, b) => Number(a) - Number(b)).forEach((id) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = "Person " + id;
+    personFilter.appendChild(option);
+  });
+  if (!personIds.size) personFilter.parentElement.hidden = true;
+
+  function applyPerson(row) {
+    const button = logs.find((node) => Number(node.dataset.minute) === row.minute);
+    const dot = marks.find((node) => Number(node.dataset.minute) === row.minute);
+    const chosen = personFilter.value;
+    const person = chosen ? (row.people || []).find((item) => String(item.id) === chosen) : null;
+    const present = !chosen || !!person;
+    const level = !present ? "NORMAL" : (person ? (person.level || "NORMAL") : row.level);
+    const line = !present ? "Not in this frame" : (person ? (person.reason || person.summary || "") : (row.line || row.summary || ""));
+    const msg = button?.querySelector(".msg");
+    if (msg) msg.textContent = line;
+    for (const node of [button, dot]) {
+      if (!node) continue;
+      node.classList.remove("NORMAL", "CAUTION", "DANGER", "DEGRADED", "problem");
+      const mark = node.querySelector?.(".state-ico");
+      mark?.classList.remove("NORMAL", "CAUTION", "DANGER", "DEGRADED");
+      if (level && level !== "NORMAL") {
+        node.classList.add("problem", level);
+        mark?.classList.add(level);
+      } else if (mark) {
+        mark.classList.add("NORMAL");
+      }
+    }
+    const ppe = button?.querySelector(".ppe-marks");
+    if (ppe) {
+      ppe.querySelectorAll(".ppe-mark").forEach((item, index) => {
+        const gear = chosen ? person?.ppe?.[index] : row.ppe?.[index];
+        item.classList.toggle("is-on", !!gear && gear.worn === true);
+        item.classList.toggle("is-off", !!gear && gear.worn === false);
+        item.title = gear ? (gear.label || "") + " · " + (gear.status || "—") : "Not in this frame";
+      });
+    }
+  }
+
+  function drawLive(row) {
+    if (clip.dataset.baked === "1") return;
+    drawSample(row);
+  }
+
+  personFilter.addEventListener("change", () => {
+    minutes.forEach(applyPerson);
+    drawLive(sampleAt(clip.currentTime));
+  });
+  logs.forEach((row) => row.addEventListener("click", () => show(Number(row.dataset.minute))));
+  marks.forEach((dot) => dot.addEventListener("click", () => show(Number(dot.dataset.minute))));
+
+  playBtn.addEventListener("click", () => {
+    if (clip.paused) clip.play();
+    else clip.pause();
+  });
+  clip.addEventListener("play", () => {
+    document.getElementById("icon-play").hidden = true;
+    document.getElementById("icon-pause").hidden = false;
+    drawLive(sampleAt(clip.currentTime));
+  });
+  clip.addEventListener("pause", () => {
+    document.getElementById("icon-play").hidden = false;
+    document.getElementById("icon-pause").hidden = true;
+  });
+  clip.addEventListener("timeupdate", () => {
+    const duration = clip.duration || {{ recording.duration_s|default:0 }};
+    if (!seeking && duration) seek.value = String(Math.round((clip.currentTime / duration) * 1000));
+    readout.textContent = fmt(clip.currentTime) + " / " + fmt(duration);
+    const hit = sampleAt(clip.currentTime);
+    if (hit) paint(hit);
+    drawLive(hit);
+  });
+  seek.addEventListener("input", () => {
+    seeking = true;
+    const duration = clip.duration || {{ recording.duration_s|default:0 }};
+    if (duration) clip.currentTime = (Number(seek.value) / 1000) * duration;
+  });
+  seek.addEventListener("change", () => { seeking = false; });
+  window.addEventListener("resize", drawBoxes);
+
+  const firstProblem = minutes.find((row) => row.problem);
+  const start = firstProblem || minutes[0];
+  if (start) show(start.minute);
+  if (clip.dataset.status === "pending") {
+    const wait = setInterval(async () => {
+      try {
+        const res = await fetch(clip.dataset.statusUrl);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status === "ready") location.reload();
+        if (data.status === "failed") clearInterval(wait);
+      } catch (err) {
+      }
+    }, 3000);
+  }
+</script>
+{% endblock %}

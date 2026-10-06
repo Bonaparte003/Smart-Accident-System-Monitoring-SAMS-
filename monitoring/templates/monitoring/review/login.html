@@ -1,0 +1,22 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}Sign in — SAMS{% endblock %}
+{% block body %}
+<div class="signin">
+  <form class="gate" method="post" action="{% url 'review_entrance' %}">
+    {% csrf_token %}
+    <p class="brand">SAMS</p>
+    <h1>Sign in</h1>
+    <p class="lede">Home, the video archive, and the frames kept for the next model.</p>
+    {% if error %}<p class="err" role="alert">{{ error }}</p>{% endif %}
+    <label>
+      Username
+      <input name="username" autocomplete="username" required value="{{ username }}" />
+    </label>
+    <label>
+      Password
+      <input name="password" type="password" autocomplete="current-password" required />
+    </label>
+    <button type="submit">Continue</button>
+  </form>
+</div>
+{% endblock %}
