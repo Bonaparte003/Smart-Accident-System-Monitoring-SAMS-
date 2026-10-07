@@ -1,0 +1,7 @@
+condition,precision,recall,mAP50,mAP50-95,missing recall,mAP50-95 drop vs clean
+clean,0.717,0.599,0.587,0.344,0.487,0.0
+motion blur,0.73,0.55,0.566,0.309,0.403,0.035
+dark,0.683,0.367,0.391,0.216,0.254,0.128
+heavy jpeg,0.688,0.569,0.539,0.305,0.452,0.039
+low resolution,0.665,0.521,0.506,0.27,0.408,0.074
+sensor noise,0.612,0.432,0.394,0.219,0.324,0.125

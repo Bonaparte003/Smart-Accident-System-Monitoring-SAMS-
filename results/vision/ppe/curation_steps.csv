@@ -1,0 +1,9 @@
+step,class,train pool boxes,boxes already selected before this step,images added in this step,boxes after this step
+1,no_boots,88,0,28,88
+2,no_vest,830,0,516,830
+3,boots,1217,6,520,1217
+4,no_helmet,1351,511,475,1351
+5,vest,2330,812,838,2330
+6,helmet,3265,2267,384,3001
+7,no_gloves,4493,433,755,3000
+8,gloves,4730,1687,405,3001

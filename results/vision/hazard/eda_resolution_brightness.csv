@@ -1,0 +1,4 @@
+split,images,median_width,median_height,min_width,max_width,mean_brightness,std_brightness
+train,8717,640.0,439.0,162,4035,100.5,38.0
+val,1538,678.0,449.5,162,4288,98.7,39.0
+test,3941,960.0,608.0,162,3840,94.7,38.9

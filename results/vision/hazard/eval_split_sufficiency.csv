@@ -1,0 +1,3 @@
+class,train boxes,train images,val boxes,val images,test boxes,test images,val has enough,test has enough
+fire,8360,3034,1507,543,2783,1045,True,True
+smoke,5776,5023,1006,866,2153,1935,True,True

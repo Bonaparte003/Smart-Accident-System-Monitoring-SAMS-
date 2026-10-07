@@ -1,0 +1,9 @@
+source,folder,reason,images removed
+cpex,pool,repeat inside the training pool,10
+cpex,pool,same as a val or test image,5
+mend,pool,repeat inside the training pool,18
+mend,pool,same as a val or test image,8
+mend,valcand,same as a test image,1
+wppe,pool,repeat inside the training pool,647
+wppe,pool,same as a val or test image,1824
+wppe,valcand,same as a test image,674

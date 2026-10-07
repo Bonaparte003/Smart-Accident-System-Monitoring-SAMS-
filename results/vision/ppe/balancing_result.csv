@@ -1,0 +1,9 @@
+class,train pool boxes,after real-image selection,after augmentation,target,copies made for this class,real photos copied,status
+helmet,3265,3007,5129,3000,0,0,reached target
+no_helmet,1351,1351,3002,3000,59,59,reached target
+vest,2330,2330,3392,3000,0,0,reached target
+no_vest,830,830,3004,3000,1327,516,reached target
+gloves,4730,3001,4155,3000,0,0,reached target
+no_gloves,4493,3182,3814,3000,0,0,reached target
+boots,1217,1217,3000,3000,708,520,reached target
+no_boots,88,88,963,3000,280,28,short: not enough real photos to copy

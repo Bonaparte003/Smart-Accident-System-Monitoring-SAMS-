@@ -1,0 +1,2 @@
+test set,images,precision,recall,map50,map50_95,fall_map50,fall_map50_95,fall_precision_at_live_conf,fall_recall_at_live_conf,fall_missed_at_live_conf,false_falls_at_live_conf
+all test images,17,0.9968,1.0,0.995,0.9749,0.995,0.9749,1.0,1.0,0,0

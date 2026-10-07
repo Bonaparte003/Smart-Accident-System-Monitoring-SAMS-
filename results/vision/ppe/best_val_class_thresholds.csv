@@ -1,0 +1,13 @@
+class,threshold,rule,precision at threshold,recall at threshold,F1 at threshold
+helmet,0.42,highest F1,0.645,0.676,0.66
+gloves,0.317,highest F1,0.855,0.845,0.85
+vest,0.414,highest F1,0.776,0.776,0.776
+boots,0.296,highest F1,0.763,0.316,0.447
+goggles,0.355,highest F1,0.847,0.728,0.783
+none,0.299,highest F1,0.687,0.358,0.471
+Person,0.411,highest F1,0.919,0.922,0.92
+no_helmet,0.063,highest threshold with recall >= 0.8,0.202,0.802,0.323
+no_goggle,0.105,highest F1,0.655,0.509,0.573
+no_gloves,0.05,highest threshold with recall >= 0.8,0.198,0.8,0.318
+no_boots,0.05,highest F1 (recall target not reachable),0.006,0.007,0.007
+no_vest,0.163,highest threshold with recall >= 0.8,0.26,0.801,0.393

@@ -1,0 +1,5 @@
+image_type,train,val,test,total
+fire only,437,83,193,713
+smoke only,2426,406,1083,3915
+fire and smoke,2597,460,852,3909
+background,3257,589,1813,5659

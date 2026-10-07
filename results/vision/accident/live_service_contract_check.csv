@@ -1,0 +1,7 @@
+key,value,read by
+model_id,yolov8s_fall_sams,"load_spec, model_id, detect_falls"
+fall_classes,['laying'],"load_spec, detect_falls"
+conf,0.8,"load_spec, detect_falls (predict conf)"
+imgsz,640,"load_spec, detect_falls (predict imgsz)"
+fall class names found in the weights,['laying'],detect_falls
+weights file,/content/drive/MyDrive/SAMS/models/vision/accident/best.pt,"weights_path, get_model"

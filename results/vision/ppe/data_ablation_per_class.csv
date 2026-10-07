@@ -1,0 +1,9 @@
+class,ppe_e1_full,ppe_e2_curated,ppe_e3_balanced
+helmet,0.4,0.198,0.254
+no_helmet,0.271,0.122,0.129
+vest,0.499,0.27,0.264
+no_vest,0.25,0.097,0.131
+gloves,0.446,0.312,0.284
+no_gloves,0.288,0.105,0.089
+boots,0.201,0.135,0.17
+no_boots,0.0,0.0,0.0

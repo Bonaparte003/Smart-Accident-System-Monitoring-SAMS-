@@ -1,0 +1,2 @@
+yaml,train images,val images,test images
+/content/SAMS/datasets/vision/accident/fall_main.yaml,80,17,17

@@ -1,0 +1,4 @@
+source,images,median_width,median_height,min_width,max_width,mean_brightness,std_brightness
+cpex,1401,640.0,640.0,408,1024,127.6,38.3
+mend,2259,640.0,640.0,128,5712,120.8,36.8
+wppe,6677,1280.0,720.0,200,2688,115.2,15.8

@@ -1,0 +1,7 @@
+folder,file type,files
+.,,1
+.,.md,1
+laying_dataset,.png,1
+laying_dataset,.yaml,1
+laying_dataset/images,.png,111
+laying_dataset/labels,.txt,111

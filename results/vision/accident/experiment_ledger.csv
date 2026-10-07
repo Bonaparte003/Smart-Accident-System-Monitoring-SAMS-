@@ -1,0 +1,6 @@
+experiment_id,group,change,weights_in,train images,imgsz,two_stage,optimizer,epochs_run,best_epoch,stopped_early,precision,recall,map50,map50_95,fall_map50,fall_map50_95,fall_recall,minutes
+fall_e1_baseline,main,"Baseline YOLOv8n, 640 pixels, single-stage SGD",yolov8n.pt,80,640,False,SGD,6,3,True,0.0028,0.5,0.4892,0.4619,0.9784,0.9238,1.0,0.4
+fall_e2_imgsz960,main,YOLOv8n at 960 pixels,yolov8n.pt,80,960,False,SGD,12,9,True,1.0,0.3789,0.5009,0.4465,0.9922,0.8883,0.7578,0.6
+fall_e3_two_stage,main,"Freeze 10 layers for 10 epochs, then unfreeze at lr0/10",yolov8n.pt,80,640,True,SGD,11,8,True,1.0,0.3312,0.4975,0.4791,0.995,0.9581,0.6624,0.7
+fall_e4_adamw,main,AdamW lr0=0.001 with the recipe so far,yolov8n.pt,80,640,True,AdamW,7,4,True,1.0,0.4978,0.4975,0.4615,0.995,0.9231,0.9956,0.8
+fall_e5_yolov8s,main,"YOLOv8s with best image size, fine-tuning, and optimizer so far",yolov8s.pt,80,640,True,SGD,23,20,True,0.9985,0.5,0.498,0.4954,0.995,0.99,1.0,1.2

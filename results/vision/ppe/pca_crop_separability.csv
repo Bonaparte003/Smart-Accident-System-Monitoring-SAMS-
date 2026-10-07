@@ -1,0 +1,5 @@
+pair,worn crops,missing crops,balanced accuracy mean,balanced accuracy std
+helmet vs no_helmet,150,150,0.907,0.034
+vest vs no_vest,150,150,0.887,0.032
+gloves vs no_gloves,150,150,0.907,0.033
+boots vs no_boots,150,88,0.849,0.077

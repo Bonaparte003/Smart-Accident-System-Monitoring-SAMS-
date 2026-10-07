@@ -1,0 +1,6 @@
+experiment_id,val map50_95,gap to winner,seed standard deviation,gap larger than seed noise
+fall_e1_baseline,0.4619,0.0335,0.0102,True
+fall_e2_imgsz960,0.4465,0.0489,0.0102,True
+fall_e3_two_stage,0.4791,0.0164,0.0102,True
+fall_e4_adamw,0.4615,0.0339,0.0102,True
+fall_e5_yolov8s,0.4954,0.0,0.0102,False

@@ -1,0 +1,21 @@
+hyperparameter,value,meaning
+optimizer,SGD,Update rule. SGD with momentum is the YOLOv8 reference setting
+lr0,0.01,Starting learning rate
+lrf,0.01,Final learning rate as a fraction of lr0
+momentum,0.937,How much of the last update carries into the next one
+weight_decay,0.0005,"Penalty on large weights, reduces overfitting"
+warmup_epochs,3.0,Epochs where the learning rate ramps up from a small value
+cos_lr,False,Cosine learning-rate decay instead of linear
+box,7.5,Weight of the box position loss
+cls,0.5,Weight of the class loss
+dfl,1.5,Weight of the distribution focal loss for box edges
+hsv_h,0.015,Random hue change during training
+hsv_s,0.7,Random saturation change during training
+hsv_v,0.4,Random brightness change during training
+degrees,0.0,"Random rotation during training. Kept at 0, the stored copies already rotate"
+translate,0.1,Random shift during training
+scale,0.5,Random zoom during training
+fliplr,0.5,Chance of a left-right flip during training
+flipud,0.0,"Chance of an upside-down flip. 0, since gear is never upside down on a worker"
+mosaic,1.0,Chance of combining four images into one
+close_mosaic,5,Turn mosaic off for the last N epochs so the model sees whole images

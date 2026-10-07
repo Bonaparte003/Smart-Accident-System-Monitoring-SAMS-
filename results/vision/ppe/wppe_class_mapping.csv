@@ -1,0 +1,11 @@
+source id,source name,shared name
+0,glove,gloves
+1,goggles,goggles
+2,helmet,helmet
+3,mask,dropped
+4,no_glove,no_gloves
+5,no_goggles,no_goggle
+6,no_helmet,no_helmet
+7,no_mask,dropped
+8,no_shoes,no_boots
+9,shoes,boots

@@ -1,0 +1,9 @@
+class,train pool,val,test,val has enough,test has enough
+helmet,3265,704,1432,True,True
+no_helmet,1351,293,1107,True,True
+vest,2330,460,178,True,True
+no_vest,830,221,0,True,False
+gloves,4730,470,163,True,True
+no_gloves,4493,535,58,True,True
+boots,1217,316,313,True,True
+no_boots,88,137,84,True,True

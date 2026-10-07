@@ -1,0 +1,2 @@
+training set,train images,val images,test images,yaml
+train,11026,1538,3941,/content/SAMS/datasets/vision/hazard/hazard_train.yaml

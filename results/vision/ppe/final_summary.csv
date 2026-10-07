@@ -1,0 +1,14 @@
+item,value
+chosen experiment,ppe_e1_full
+base model,yolov8n.pt
+image size,640
+two-stage fine-tuning,False
+training images,6676
+val mAP50-95,0.3326
+val missing-gear recall,0.4542
+test mAP50-95 (all sources),0.2353
+test missing-gear recall (all sources),0.0473
+weights,/content/drive/MyDrive/SAMS/models/vision/ppe/best.pt
+metadata,/content/drive/MyDrive/SAMS/models/vision/ppe/metadata.json
+model card,/content/drive/MyDrive/SAMS/models/vision/ppe/model_card.md
+tables and charts,/content/drive/MyDrive/SAMS/results/vision/ppe

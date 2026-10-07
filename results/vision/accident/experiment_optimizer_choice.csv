@@ -1,0 +1,3 @@
+optimizer,experiment,map50_95
+SGD,fall_e3_two_stage,0.4791
+AdamW,fall_e4_adamw,0.4615

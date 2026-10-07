@@ -1,0 +1,4 @@
+training set,train images,val images,test images,yaml
+full,6676,1599,2062,/content/SAMS/datasets/vision/ppe/ppe_full.yaml
+curated,3921,1599,2062,/content/SAMS/datasets/vision/ppe/ppe_curated.yaml
+balanced,6295,1599,2062,/content/SAMS/datasets/vision/ppe/ppe_balanced.yaml

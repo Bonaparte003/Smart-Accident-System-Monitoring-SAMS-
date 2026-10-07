@@ -1,0 +1,5 @@
+image_type,train,val,test
+fire only,5.0,5.4,4.9
+smoke only,27.8,26.4,27.5
+fire and smoke,29.8,29.9,21.6
+background,37.4,38.3,46.0

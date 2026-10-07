@@ -1,0 +1,3 @@
+class,threshold,frames with the class,frame recall,frames without the class,false alarm rate,background frames,false alarm rate on background
+fire,0.05,543,0.989,995,0.078,589,0.053
+smoke,0.374,866,0.872,672,0.055,589,0.015

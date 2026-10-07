@@ -1,0 +1,13 @@
+class,small,medium,large
+helmet,18.4,62.0,19.6
+gloves,2.7,96.1,1.2
+vest,3.0,28.8,68.1
+boots,6.0,59.2,34.8
+goggles,70.7,28.9,0.3
+none,5.7,29.3,65.0
+Person,0.9,20.4,78.7
+no_helmet,19.3,60.5,20.2
+no_goggle,85.5,14.5,0.1
+no_gloves,6.8,92.0,1.2
+no_boots,12.5,87.5,0.0
+no_vest,4.1,50.2,45.7

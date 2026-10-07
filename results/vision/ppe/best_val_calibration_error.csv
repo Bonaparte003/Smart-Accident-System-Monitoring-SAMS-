@@ -1,0 +1,10 @@
+class,predictions,ECE
+all classes,15969,0.047
+helmet,1930,0.043
+no_helmet,1293,0.159
+vest,883,0.041
+no_vest,1075,0.108
+gloves,811,0.125
+no_gloves,1065,0.076
+boots,394,0.085
+no_boots,2,0.061

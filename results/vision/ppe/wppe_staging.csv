@@ -1,0 +1,4 @@
+published split,staged as,images,staged,"skipped, no shared class",boxes dropped
+train,pool,6473,6227,246,0
+valid,valcand,3570,3498,72,893
+test,test,1935,1921,14,37

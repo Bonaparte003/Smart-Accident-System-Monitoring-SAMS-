@@ -1,0 +1,2 @@
+majority train boxes,minority train boxes,ratio,will augment train (ratio > threshold)
+8360,5776,1.447,True

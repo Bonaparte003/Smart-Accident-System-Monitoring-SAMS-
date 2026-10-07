@@ -1,0 +1,5 @@
+folder,reason,images removed
+pool,near-duplicate of a test image,4371
+pool,repeat inside the training pool,185
+pool,same as a test image,2410
+test,repeat inside test,365

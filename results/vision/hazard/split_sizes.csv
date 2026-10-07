@@ -1,0 +1,4 @@
+split,images,file
+train,8717,written in section 8
+val,1538,/content/SAMS/datasets/vision/hazard/merged/lists/val.txt
+test,3941,/content/SAMS/datasets/vision/hazard/merged/lists/test.txt

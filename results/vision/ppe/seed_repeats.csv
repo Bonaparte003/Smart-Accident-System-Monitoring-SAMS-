@@ -1,0 +1,4 @@
+experiment_id,seed,precision,recall,map50,map50_95,missing_recall
+ppe_e1_full,42,0.709,0.5763,0.5674,0.3326,0.4542
+ppe_e1_full_seed1,1,0.6835,0.5655,0.5666,0.3215,0.4191
+ppe_e1_full_seed2,2,0.6859,0.5624,0.5695,0.3355,0.4184

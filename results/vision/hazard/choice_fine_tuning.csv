@@ -1,0 +1,3 @@
+fine-tuning,experiment,val mAP50-95
+single stage,hazard_e2_imgsz_960,0.4035
+two stage,hazard_e3_two_stage,0.3724

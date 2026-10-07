@@ -1,0 +1,4 @@
+set,images,background images,background %
+train,11026,3257,29.5
+val,1538,589,38.3
+test,3941,1813,46.0

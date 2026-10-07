@@ -1,0 +1,9 @@
+class,train pool boxes,images containing it,sources,target,gap to target
+helmet,3265,1926,"cpex, mend",3000,0
+no_helmet,1351,731,"cpex, mend",3000,1649
+vest,2330,1437,"cpex, mend",3000,670
+no_vest,830,516,mend,3000,2170
+gloves,4730,2164,"cpex, wppe",3000,0
+no_gloves,4493,1964,"cpex, wppe",3000,0
+boots,1217,522,cpex,3000,1783
+no_boots,88,28,cpex,3000,2912

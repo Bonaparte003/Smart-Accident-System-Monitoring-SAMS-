@@ -1,0 +1,13 @@
+class,test,train pool,val
+helmet,1432,3265,704
+gloves,163,4730,470
+vest,178,2330,460
+boots,313,1217,316
+goggles,352,1489,379
+none,65,651,81
+Person,3943,21241,4347
+no_helmet,1107,1351,293
+no_goggle,110,1802,521
+no_gloves,58,4493,535
+no_boots,84,88,137
+no_vest,0,830,221

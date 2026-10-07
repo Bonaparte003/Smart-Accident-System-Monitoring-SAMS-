@@ -1,0 +1,4 @@
+held-out source,in-domain val mAP50-95,held-out mAP50-95,in-domain val mAP50,held-out mAP50,held-out recall,mAP50-95 gap
+cpex,0.293,0.056,0.518,0.151,0.166,0.237
+mend,0.189,0.108,0.378,0.258,0.312,0.081
+wppe,0.153,0.135,0.284,0.285,0.171,0.018

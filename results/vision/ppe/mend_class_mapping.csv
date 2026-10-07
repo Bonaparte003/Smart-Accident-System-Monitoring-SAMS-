@@ -1,0 +1,5 @@
+source id,source name,shared name
+0,Helmet,helmet
+1,NoHelmet,no_helmet
+2,NoVest,no_vest
+3,Vest,vest

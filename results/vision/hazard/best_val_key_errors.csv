@@ -1,0 +1,3 @@
+class,true boxes,read as the other hazard,not found,predicted boxes with no label
+fire,1507,0.109,0.03,27960
+smoke,1006,0.324,0.036,12980

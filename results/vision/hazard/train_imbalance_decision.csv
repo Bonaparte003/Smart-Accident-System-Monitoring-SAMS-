@@ -1,0 +1,2 @@
+minority class,majority boxes,minority boxes,ratio,augment train
+smoke,8360,5776,1.447,True

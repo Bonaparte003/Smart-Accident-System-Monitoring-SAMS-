@@ -1,0 +1,11 @@
+field,value
+model_id,yolov8s_dfire
+best_experiment_id,hazard_e5_yolov8s
+classes,"{""fire"": [""fire""], ""smoke"": [""smoke""]}"
+conf,0.05
+class_conf,"{""fire"": 0.05, ""smoke"": 0.374}"
+imgsz,960
+score_window,1
+val mAP50-95,0.413
+test mAP50-95,0.3937
+weights,/content/drive/MyDrive/SAMS/models/vision/hazard/best.pt

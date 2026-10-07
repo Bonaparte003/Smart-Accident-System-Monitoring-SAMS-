@@ -1,0 +1,3 @@
+published split,folder,images,label files
+train,/content/SAMS/datasets/vision/hazard/dfire/train,34442,34442
+test,/content/SAMS/datasets/vision/hazard/dfire/test,8612,8612

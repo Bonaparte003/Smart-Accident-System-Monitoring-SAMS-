@@ -1,0 +1,3 @@
+published split,staged as,images found,staged,background images,boxes kept,"skipped, no label file","skipped, unreadable image","skipped, no usable box in a non-empty file",bad lines,unknown class id,tiny boxes dropped,boxes clipped to the image,repeated boxes removed
+train,pool,34442,17221,7833,21349,0,17221,0,0,0,15,317,0
+test,test,8612,4306,2005,5189,0,4306,0,0,0,4,62,0

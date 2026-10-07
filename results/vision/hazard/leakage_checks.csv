@@ -1,0 +1,4 @@
+splits,identical files,identical hashes,near-duplicates,shared groups,passed
+train vs val,0,0,0,0,True
+train vs test,0,0,0,0,True
+val vs test,0,0,0,0,True

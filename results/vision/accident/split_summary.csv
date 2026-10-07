@@ -1,0 +1,4 @@
+split,images,share of images,images with laying,laying boxes,standing boxes
+train,77,0.694,77,77,9
+val,17,0.153,17,17,1
+test,17,0.153,17,17,0

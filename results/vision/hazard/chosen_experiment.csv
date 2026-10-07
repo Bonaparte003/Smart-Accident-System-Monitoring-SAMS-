@@ -1,0 +1,2 @@
+chosen experiment,val mAP50-95,val mAP50,val fire recall,val smoke recall,training set,image size,two stage,optimizer,weights
+hazard_e5_yolov8s,0.413,0.7214,0.6072,0.7455,train,960,False,AdamW,/content/drive/MyDrive/SAMS/models/vision/hazard/hazard_e5_yolov8s/weights/best.pt

@@ -1,0 +1,4 @@
+experiment_id,seed,precision,recall,map50,map50_95,fall_map50_95,fall_recall
+fall_e5_yolov8s,42,0.9985,0.5,0.498,0.4954,0.99,1.0
+fall_e5_yolov8s_seed1,1,0.9964,0.5,0.4978,0.4909,0.9817,1.0
+fall_e5_yolov8s_seed2,2,0.9983,0.5,0.5201,0.5103,0.9889,1.0

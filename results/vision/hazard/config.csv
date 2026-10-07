@@ -1,0 +1,30 @@
+setting,value,meaning
+SEED,42,"Random seed for sampling, splitting, augmentation, and training"
+YOLO_DEVICE,0,"0 is the first GPU, cpu means no GPU"
+NEAR_DUP_BITS,4,Largest number of differing bits (out of 64) for two image hashes to count as near-duplicates
+VAL_FRACTION,0.15,Share of the published train images moved into the fixed val split
+MIN_EVAL_BOXES,300,Fewest real boxes each class should have in val and in test
+EXTRA_BACKGROUND_DIR,/content/drive/MyDrive/SAMS/datasets/vision/hazard/background,Folder for your own SAMS frames with no fire or smoke. Leave it empty if you have none
+MIN_CROP_PIXELS,16,Boxes narrower or shorter than this are skipped in the crop example grid
+IMBALANCE_RATIO_THRESHOLD,1.25,Augment the minority class when majority/minority train box counts exceed this ratio
+MAX_AUG_COPIES_PER_IMAGE,3,Most augmented copies made from one real training photo
+MAX_EPOCHS,25,Upper limit on epochs. Early stopping usually ends sooner
+PATIENCE,3,Epochs without a val improvement before training stops
+STAGE_A_EPOCHS,10,Epochs with the backbone frozen in two-stage fine-tuning
+FREEZE_LAYERS,10,Layers frozen in stage A. 10 is the whole YOLOv8 backbone
+BATCH,-1,-1 lets Ultralytics pick the largest batch that fits the GPU
+IMGSZ_BASE,640,Default training image size
+IMGSZ_LARGE,960,"Larger size tested for small, distant flames"
+CLOSE_SCORE_GAP,0.005,Val mAP50-95 gap treated as a tie when choosing the winner
+REPEAT_SEEDS,"[1, 2]",Extra seeds used to retrain the chosen recipe
+SAFETY_CLASS,fire,Class whose threshold is chosen for recall instead of F1
+MIN_RECALL_SAFETY,0.85,Recall wanted on the safety class when picking its threshold
+THRESHOLD_MIN,0.05,Lowest confidence threshold allowed for any class
+THRESHOLD_MAX,0.8,Highest confidence threshold allowed for any class
+ANALYSIS_CONF,0.05,Confidence used when collecting predictions for the box-by-box analysis
+MATCH_IOU,0.5,Overlap needed for a prediction to count as finding a label
+ROBUST_SAMPLE,600,Val images used in the bad-conditions test
+BOOTSTRAP_ROUNDS,1000,Resampling rounds for the confidence intervals
+CALIBRATION_BINS,10,Confidence bins in the reliability diagram
+FPS_IMAGES,100,Val images timed in the export check
+SCORE_WINDOW,1,Frames the live service averages fire and smoke scores over. 1 means the current frame only
