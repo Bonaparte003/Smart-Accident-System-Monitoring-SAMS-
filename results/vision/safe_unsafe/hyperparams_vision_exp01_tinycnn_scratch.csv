@@ -1,0 +1,4 @@
+parameter,value,meaning
+epochs,EPOCHS_BASELINE,Training epochs
+lr,1e-3,AdamW learning rate
+architecture,TinyCNN,From-scratch CNN

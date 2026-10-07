@@ -1,0 +1,4 @@
+,split,pctid_list,n_windows
+0,train,"[np.int64(20), np.int64(25), np.int64(30), np.int64(35), np.int64(40), np.int64(45), np.int64(55), np.int64(60), np.int64(85), np.int64(90), np.int64(95)]",1947
+1,val,"[np.int64(50), np.int64(65), np.int64(70)]",531
+2,test,"[np.int64(75), np.int64(80), np.int64(100)]",531

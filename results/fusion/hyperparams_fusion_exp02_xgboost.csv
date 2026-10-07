@@ -1,0 +1,4 @@
+parameter,value,meaning
+n_estimators,250.0,Rounds
+max_depth,5.0,Depth
+learning_rate,0.1,Shrinkage

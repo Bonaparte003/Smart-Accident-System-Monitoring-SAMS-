@@ -1,0 +1,8 @@
+setting,value,meaning
+SEED,42.0,Random seed
+CAUTION_ZONE_M,2.0,Distance threshold for caution zone (m)
+DANGER_ZONE_M,0.8,Distance threshold for danger zone (m)
+N_TRIALS,60.0,Synthetic experimental trials
+SAMPLES_PER_TRIAL,40.0,Fusion rows per trial
+MLP_MAX_ITER,300.0,Max MLP epochs (sklearn early stopping)
+MLP_PATIENCE,15.0,MLP validation patience

@@ -1,0 +1,7 @@
+,experiment_id,approach,mae,medae,rmse,mean_rel_err,weights
+5,dist_exp06_residual_log_huber,Residual MLP - Huber loss on log(Z),0.22127512888646916,0.14919495582580566,0.3121001845451219,0.044960231566134136,/content/drive/MyDrive/SAMS/models/vision/distance/dist_exp06_residual_log_huber/model.pt
+4,dist_exp05_residual_pose_only,Residual MLP - pose_available==1 subset,0.23208976765989742,0.1724759340286255,0.3106687093527097,0.0486050062241796,/content/drive/MyDrive/SAMS/models/vision/distance/dist_exp05_residual_pose_only/model.pt
+2,dist_exp03_residual_mlp,Residual MLP - SAMS Z=Z0*exp(delta),0.2357960780074586,0.16891813278198242,0.3198263224917325,0.04916272194227722,/content/drive/MyDrive/SAMS/models/vision/distance/dist_exp03_residual_mlp/model.pt
+1,dist_exp02_ridge,Ridge,0.3647247161958125,0.32026147842407227,0.45882038058554814,0.0866391574090093,
+0,dist_exp01_pinhole_z0,Pinhole Z0,0.793180385279277,0.6249005794525146,0.9692256877463069,0.16645311323986828,
+3,dist_exp04_absolute_mlp,Absolute MLP - direct Z regression,2.874271429075307,2.220701575279236,3.636563432178763,0.5005927565104165,/content/drive/MyDrive/SAMS/models/vision/distance/dist_exp04_absolute_mlp/model.pt

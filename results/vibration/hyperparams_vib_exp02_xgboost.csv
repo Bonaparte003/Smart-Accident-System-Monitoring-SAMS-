@@ -1,0 +1,6 @@
+parameter,value,meaning
+n_estimators,300.0,Boosting rounds
+max_depth,6.0,Tree depth
+learning_rate,0.08,Shrinkage
+subsample,0.9,Row subsample
+scale_pos_weight,0.5,Balance ABNORMAL vs NORMAL

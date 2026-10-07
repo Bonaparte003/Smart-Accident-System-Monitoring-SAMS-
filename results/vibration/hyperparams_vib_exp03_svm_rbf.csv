@@ -1,0 +1,5 @@
+parameter,value,meaning
+kernel,rbf,Non-linear decision boundary
+C,10.0,Regularisation strength
+gamma,scale,RBF width
+class_weight,balanced,Upweight minority class

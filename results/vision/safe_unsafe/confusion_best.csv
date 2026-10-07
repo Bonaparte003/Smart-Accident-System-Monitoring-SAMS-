@@ -1,0 +1,9 @@
+,Authorized Intervention,Carrying Overload with Forklift,Closed Panel Cover,Opened Panel Cover,Safe Carrying,Safe Walkway,Safe Walkway Violation,Unauthorized Intervention
+Authorized Intervention,8,0,0,22,0,10,2,3
+Carrying Overload with Forklift,0,24,0,0,0,0,0,0
+Closed Panel Cover,0,0,21,0,0,14,1,2
+Opened Panel Cover,1,0,1,27,0,3,2,5
+Safe Carrying,0,0,0,0,24,0,0,0
+Safe Walkway,0,0,6,9,0,46,4,8
+Safe Walkway Violation,0,0,0,1,0,32,48,12
+Unauthorized Intervention,0,0,0,2,0,1,8,22

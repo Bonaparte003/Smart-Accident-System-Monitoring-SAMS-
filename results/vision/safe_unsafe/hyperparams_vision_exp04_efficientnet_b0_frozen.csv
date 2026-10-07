@@ -1,0 +1,4 @@
+parameter,value,meaning
+epochs,EPOCHS_TRANSFER,Training epochs
+lr,1e-3,Head LR
+architecture,efficientnet_b0,Frozen backbone

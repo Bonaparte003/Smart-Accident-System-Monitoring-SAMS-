@@ -1,0 +1,4 @@
+,experiment_id,approach,val_f1_macro,accuracy,f1_macro,recall_macro,precision_macro
+2,vib_exp03_svm_rbf,Margin classifier - SVM RBF on scaled window features,0.8627884102427315,0.8305084745762712,0.7994376363941582,0.786723163841808,0.8209844559585493
+1,vib_exp02_xgboost,Boosted trees - XGBoost on window features,0.8188087227018791,0.8625235404896422,0.8498983523398324,0.8615819209039548,0.8422356495468277
+0,vib_exp01_random_forest,Classical baseline - Random Forest on window features,0.7831908313625614,0.7871939736346516,0.715901612177742,0.6977401129943502,0.817822696490868

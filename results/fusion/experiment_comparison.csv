@@ -1,0 +1,5 @@
+,experiment_id,approach,val_danger_recall,danger_recall,f1_macro,accuracy,missed_dangers
+0,fusion_exp01_random_forest,Classical baseline - Random Forest on fusion features,1.0,1.0,1.0,1.0,0
+1,fusion_exp02_xgboost,Boosted trees - XGBoost on fusion features,1.0,1.0,1.0,1.0,0
+2,fusion_exp03_svm_rbf,Margin classifier - SVM RBF on scaled fusion features,1.0,1.0,1.0,1.0,0
+3,fusion_exp04_mlp,Neural net - MLP on scaled fusion features,0.92,1.0,1.0,1.0,0

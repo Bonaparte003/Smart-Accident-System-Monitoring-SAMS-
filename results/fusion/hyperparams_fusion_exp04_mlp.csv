@@ -1,0 +1,6 @@
+parameter,value,meaning
+hidden_layer_sizes,"(64, 32)",Layer widths
+early_stopping,True,Stop on val score plateau
+validation_fraction,0.15,Internal val fraction
+n_iter_no_change,15,Patience epochs
+max_iter,300,Epoch cap

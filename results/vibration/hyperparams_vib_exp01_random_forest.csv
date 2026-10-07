@@ -1,0 +1,5 @@
+parameter,value,meaning
+n_estimators,400,Number of trees
+max_depth,None,Unlimited depth
+class_weight,balanced,Upweight minority class
+random_state,42,Reproducibility

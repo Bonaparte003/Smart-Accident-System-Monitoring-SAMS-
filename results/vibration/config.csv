@@ -1,0 +1,10 @@
+setting,value,meaning
+SEED,42.0,Random seed for splits and training
+SAMPLE_RATE_HZ,50.0,Assumed sampling rate (matches live service)
+WINDOW_SIZE,100.0,Samples per window (2.0 s at 50 Hz)
+WINDOW_STRIDE,50.0,Stride between windows (50 percent overlap)
+UCI_DATASET_ID,846.0,UCI ML repository Accelerometer dataset id
+MAX_EPOCHS_CNN,40.0,Upper epoch limit for the 1D CNN
+CNN_PATIENCE,8.0,Early stopping patience on validation macro-F1 for CNN
+CNN_BATCH,64.0,Batch size for CNN training
+CNN_LR,0.001,Adam learning rate for CNN

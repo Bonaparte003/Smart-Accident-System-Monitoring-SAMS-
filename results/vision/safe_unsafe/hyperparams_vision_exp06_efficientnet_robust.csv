@@ -1,0 +1,4 @@
+parameter,value,meaning
+epochs,EPOCHS_FINETUNE,Training epochs
+class_weights,balanced,Weighted CE loss
+augmentation,strong,Extra Albumentations

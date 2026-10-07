@@ -1,0 +1,6 @@
+parameter,value,meaning
+architecture,Conv1D x2 + linear,Lightweight temporal CNN
+optimizer,Adam,First-order solver
+lr,0.001,Learning rate
+max_epochs,40,Upper epoch cap
+patience,8,Early stopping on val macro-F1

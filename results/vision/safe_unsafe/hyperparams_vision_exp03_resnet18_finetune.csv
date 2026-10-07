@@ -1,0 +1,4 @@
+parameter,value,meaning
+epochs,EPOCHS_FINETUNE,Fine-tune epochs
+lr,3e-5,Lower LR for full network
+freeze_backbone,False,All layers trainable

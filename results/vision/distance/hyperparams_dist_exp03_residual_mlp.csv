@@ -1,0 +1,4 @@
+parameter,value,meaning
+hidden,"(64, 32)",MLP shape
+loss,smooth_l1_log,Log-space robust loss
+patience,10,Early stopping

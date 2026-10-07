@@ -1,0 +1,4 @@
+parameter,value,meaning
+C,5.0,Regularisation
+kernel,rbf,Kernel
+class_weight,balanced,Class balance
