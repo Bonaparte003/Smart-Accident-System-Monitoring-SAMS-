@@ -52,22 +52,22 @@ SAMS warns workers **before** they get hurt near industrial machines. A phone ca
 
 ```mermaid
 flowchart LR
-    subgraph Edge devices
-        PHONE[Android phone camera]
-        ARD[Arduino: MPU6050, VL53L0X ToF, buzzer, LEDs]
+    subgraph EDGE["Edge devices"]
+        PHONE["Android phone camera"]
+        ARD["Arduino: MPU6050, VL53L0X ToF, buzzer, LEDs"]
     end
-    subgraph SAMS server - Django on uvicorn, HTTPS
-        VIS[vision_inference: YOLOv8 person + pose]
+    subgraph SERVER["SAMS server: Django on uvicorn, HTTPS"]
+        VIS["vision_inference: YOLOv8 person + pose"]
         PPE[ppe_inference]
         HAZ[hazard_inference]
         ACC[accident_inference]
         DIST[distance_estimation]
         VIB[vibration_inference]
-        CC[control_center + fusion_inference]
-        REC[recordings + video_jobs]
+        CC["control_center + fusion_inference"]
+        REC["recordings + video_jobs"]
         DB[(SQLite)]
     end
-    UI[Web UI: Control Center and review dashboard]
+    UI["Web UI: Control Center and review dashboard"]
 
     PHONE -- frames over Wi-Fi --> VIS
     ARD -- serial 115200 baud --> VIB
