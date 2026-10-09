@@ -570,20 +570,47 @@ Supporting figures and CSVs are in `results/`.
 
 ## Designs and screenshots
 
-_Add the images below to `docs/screenshots/`._
+All screens are in [`Design/`](Design/).
 
-| Screen | File |
-|---|---|
-| Sign in | `docs/screenshots/login.png` |
-| Home overview | `docs/screenshots/home.png` |
-| Control Center (live decision) | `docs/screenshots/control.png` |
-| Vision lab | `docs/screenshots/vision.png` |
-| Vibration | `docs/screenshots/vibration.png` |
-| Alerts | `docs/screenshots/alerts.png` |
-| Archive and recording detail | `docs/screenshots/archive.png`, `docs/screenshots/detail.png` |
-| MLOps | `docs/screenshots/mlops.png` |
-| Phone camera page | `docs/screenshots/phone.png` |
-| Circuit | `docs/circuit.png` |
+### Sign in
+
+![Sign in](Design/login.png)
+
+### Safety overview
+
+Headline counts, safety events per hour, and the **Go Live** button.
+
+![Safety overview](Design/Homepage.png)
+
+Alert distribution, top alert causes, the latest alerts and system health.
+
+![Safety overview, lower half](Design/Home2.png)
+
+### Go Live (phone QR)
+
+Scan the QR code with the phone to stream its camera to SAMS over HTTPS.
+
+![Go Live QR code](Design/qrcode-phone.png)
+
+### Alerts
+
+![Alerts](Design/Alerts.png)
+
+### Archive
+
+![Archive](Design/ArchiveSection.png)
+
+### Recording view
+
+The framed clip with person, PPE and pose overlays, and one log card per sampled second showing which safety gear was seen.
+
+![Recording view](Design/VideoView.png)
+
+### MLOps and data retraining
+
+Models in service, and a review queue where flagged frames are kept or excluded before downloading the training set.
+
+![MLOps](Design/MLOPS-DaatRetraining.png)
 
 **Design choices:**
 - **Two areas for two users.** The operations console is for whoever stands at the machine. The review dashboard is for the safety officer after the fact.
