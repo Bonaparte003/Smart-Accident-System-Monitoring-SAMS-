@@ -15,6 +15,24 @@ import sys
 import time
 
 
+def _buzzer_off(ser, attempts: int = 5) -> bool:
+    """Send B0 until the board ACKs it. Returns True once confirmed."""
+    print("TX B0 (off)")
+    for _ in range(attempts):
+        ser.write(b"B0\n")
+        ser.flush()
+        deadline = time.time() + 0.4
+        while time.time() < deadline:
+            line = ser.readline().decode("utf-8", errors="ignore").strip()
+            if not line:
+                continue
+            if line.startswith("#"):
+                print(f"  RX {line}")
+            if "ACK B0" in line:
+                return True
+    return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Send B1/B0 to SAMS Arduino buzzer")
     parser.add_argument(
@@ -59,33 +77,33 @@ def main() -> int:
         if line:
             print(f"  RX {line}")
 
-    print(f"\nTX B1 (on for {args.seconds}s)")
-    for _ in range(5):
-        ser.write(b"B1\n")
-        ser.flush()
-        time.sleep(0.05)
-
-    t0 = time.time()
     got_ack = False
-    while time.time() - t0 < args.seconds:
-        line = ser.readline().decode("utf-8", errors="ignore").strip()
-        if line:
-            print(f"  RX {line}")
-            if "ACK" in line and "B1" in line:
-                got_ack = True
+    off_acked = False
+    try:
+        print(f"\nTX B1 (on for {args.seconds}s)")
+        for _ in range(5):
+            ser.write(b"B1\n")
+            ser.flush()
+            time.sleep(0.05)
 
-    print("TX B0 (off)")
-    ser.write(b"B0\n")
-    ser.flush()
-    time.sleep(0.5)
-    while ser.in_waiting:
-        line = ser.readline().decode("utf-8", errors="ignore").strip()
-        if line:
-            print(f"  RX {line}")
-
-    ser.close()
+        t0 = time.time()
+        while time.time() - t0 < args.seconds:
+            line = ser.readline().decode("utf-8", errors="ignore").strip()
+            if line:
+                print(f"  RX {line}")
+                if "ACK" in line and "B1" in line:
+                    got_ack = True
+    except KeyboardInterrupt:
+        print("\nInterrupted.")
+    finally:
+        off_acked = _buzzer_off(ser)
+        ser.close()
 
     print()
+    if off_acked:
+        print("Buzzer OFF confirmed (ACK B0).")
+    else:
+        print("WARNING: board did not confirm B0 — buzzer may still be on. Unplug USB to silence it.")
     if got_ack:
         print("RESULT: Board ACK'd B1 — firmware received the command.")
         print("  If still silent: D8 cannot power this buzzer → use transistor/5V rail.")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cycle the status LEDs on the flashed MPU6050 sketch.
 
-Green D5, yellow D6, red D7. Stop Django first — only one process can open the port.
+Green D2, yellow D3, red D5. Stop Django first — only one process can open the port.
 
   python hardware/tools/led_test.py --port /dev/cu.usbserial-1430
 """
@@ -15,9 +15,9 @@ import time
 
 
 _STEPS = (
-    ("LG", "green", "D5"),
-    ("LY", "yellow", "D6"),
-    ("LR", "red", "D7"),
+    ("LG", "green", "D2"),
+    ("LY", "yellow", "D3"),
+    ("LR", "red", "D5"),
     ("L0", "off", "all"),
 )
 
@@ -58,7 +58,7 @@ def main() -> int:
     finally:
         ser.close()
 
-    print("Done. If none of them lit, check long leg → resistor → D5/D6/D7 and short leg → GND.")
+    print("Done. If none of them lit, check long leg → resistor → D2/D3/D5 and short leg → GND.")
     return 0
 
 

@@ -181,15 +181,53 @@ def _live_decision(
     detected = bool(vision.get("worker_detected"))
     distance_m = measured_distance(vision) if detected else None
     speed, approaching = observe_motion(distance_m, detected)
+    stream = get_stream()
     if machine_on is None:
-        machine_on = get_stream().machine_on
-    return classify(
+        machine_on = stream.machine_on
+    decision = classify(
         vision,
         vibration,
         machine_on=machine_on,
         speed=speed,
         approaching=approaching,
     )
+    if stream.is_live:
+        apply_proximity(decision, _tof_reading())
+    return decision
+
+
+def _tof_reading() -> float | None:
+    try:
+        from hardware.tof import get_tof
+
+        return get_tof().read_metres()
+    except Exception:
+        return None
+
+
+def proximity_limit_m() -> float:
+    from .distance_estimation import load_calib
+
+    try:
+        return float(load_calib()["tof_near_m"])
+    except (OSError, ValueError, KeyError):
+        return 1.5
+
+
+def apply_proximity(decision: dict[str, Any], tof_m: float | None) -> dict[str, Any]:
+    """Raise the decision to CAUTION when the ToF sees something inside its range.
+
+    The sensor cannot tell a person from an object, so a close reading never
+    lowers a level and never reaches DANGER on its own.
+    """
+    if tof_m is None or not 0.05 < tof_m <= proximity_limit_m():
+        return decision
+    finding = f"Object {tof_m:.2f} m from the sensor"
+    level, reason = apply_scene_events(str(decision["label"]), decision.get("reason") or "", [("CAUTION", finding)])
+    decision["label"] = level
+    decision["reason"] = reason
+    decision["proximity_m"] = round(float(tof_m), 3)
+    return decision
 
 
 def assemble(

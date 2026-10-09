@@ -17,9 +17,9 @@ const int MPU_ADDR = 0x68;
 const int TOF_SDA = A0;
 const int TOF_SCL = A1;
 const int BUZZER_PIN = 8;
-const int STATUS_LED_G = 5;
-const int STATUS_LED_Y = 6;
-const int STATUS_LED_R = 7;
+const int STATUS_LED_G = 2;
+const int STATUS_LED_Y = 3;
+const int STATUS_LED_R = 5;
 const unsigned long SAMPLE_US = 20000;
 
 SoftI2C tofBus(TOF_SDA, TOF_SCL);
@@ -154,6 +154,8 @@ void setup() {
   while (!Serial && millis() < 2000) {}
 
   Wire.begin();
+  // A miswired or unpowered MPU6050 can hold the bus; without a timeout setup() never returns.
+  Wire.setWireTimeout(25000, true);
   Wire.beginTransmission(MPU_ADDR);
   Wire.write(0x6B);
   Wire.write(0);

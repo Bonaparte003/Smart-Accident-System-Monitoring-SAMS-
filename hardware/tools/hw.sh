@@ -28,7 +28,7 @@ case "$cmd" in
     python hardware/tools/buzzer_test.py --port "$PORT"
     ;;
   test-leds)
-    echo ">>> LED cycle on $PORT (green D5, yellow D6, red D7)"
+    echo ">>> LED cycle on $PORT (green D2, yellow D3, red D5)"
     # shellcheck disable=SC1091
     source "$ROOT/myenv/bin/activate"
     python hardware/tools/led_test.py --port "$PORT"

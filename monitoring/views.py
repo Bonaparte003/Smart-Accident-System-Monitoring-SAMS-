@@ -8,7 +8,7 @@ from django.templatetags.static import static
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
 
-from hardware import get_buzzer, get_camera, get_leds, get_stream
+from hardware import get_buzzer, get_camera, get_leds, get_stream, get_tof
 from hardware.stream import apply_risk_actuators
 from hardware.wifi_camera import guess_lan_ip
 
@@ -28,6 +28,7 @@ from .services.fusion_inference import (
     get_model,
     predict_fusion,
 )
+from .services import distance_estimation
 from .services import ppe_inference as ppe
 from .services import vibration_inference as vib
 from .services import vision_inference as vision
@@ -325,7 +326,10 @@ def _control_payload(vision: dict | None, *, actuate: bool) -> dict:
     vibration = _live_vibration_result() if stream.is_live else None
     payload = assemble_control(vision, vibration, actuate=actuate and stream.is_live)
     payload["hardware"] = stream.status()
-    if vibration is None:
+    payload["tof"] = _tof_status()
+    if vibration is not None:
+        payload["vibration"]["series"] = vibration.get("series")
+    else:
         payload["vibration"] = {
             "label": None,
             "ready": False,
@@ -446,10 +450,11 @@ def vibration_predict(request):
 
 @require_GET
 def vibration_live(request):
-    """Poll the latest live MPU6050 window prediction."""
+    """Poll the latest live MPU6050 window prediction, plus the ToF reading."""
     stream = get_stream()
+    tof = _tof_status()
     if not stream.is_live:
-        return JsonResponse({"error": "Not in live mode", "hardware": stream.status()}, status=400)
+        return JsonResponse({"error": "Not in live mode", "hardware": stream.status(), "tof": tof}, status=400)
     cached = stream.last_prediction()
     result = _live_vibration_result()
     if result is None:
@@ -458,9 +463,19 @@ def vibration_live(request):
                 "ready": False,
                 "hardware": stream.status(),
                 "last": cached,
+                "tof": tof,
             }
         )
-    return JsonResponse({"ready": True, **result})
+    return JsonResponse({"ready": True, **result, "tof": tof})
+
+
+def _tof_status() -> dict:
+    status = get_tof().status()
+    try:
+        status["near_m"] = float(distance_estimation.load_calib()["tof_near_m"])
+    except (OSError, ValueError, KeyError):
+        status["near_m"] = None
+    return status
 
 
 @require_GET

@@ -780,7 +780,10 @@ body {
   line-height: 1.45;
 }
 
-#vib-canvas {
+.tof-card { margin-top: 1rem; }
+
+#vib-canvas,
+#tof-canvas {
   width: 100%;
   height: auto;
   border-radius: 8px;

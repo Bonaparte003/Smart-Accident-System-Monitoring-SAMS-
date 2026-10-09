@@ -16,6 +16,24 @@
         <span class="pill" id="live-level" hidden></span>
       </div>
     </div>
+    <div class="sensor-strip">
+      <section class="sensor-panel">
+        <header>
+          <span class="sensor-name"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i> Vibration</span>
+          <strong id="vib-state">—</strong>
+          <em id="vib-score"></em>
+        </header>
+        <canvas id="vib-wave" width="640" height="90"></canvas>
+      </section>
+      <section class="sensor-panel">
+        <header>
+          <span class="sensor-name"><i class="fa-solid fa-ruler-horizontal" aria-hidden="true"></i> Distance · ToF</span>
+          <strong id="tof-value">—</strong>
+          <em id="tof-note"></em>
+        </header>
+        <canvas id="tof-wave" width="640" height="90"></canvas>
+      </section>
+    </div>
     <div class="controls">
       <button type="button" id="live-back" aria-label="Back to live" title="Back to live" hidden>
         <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
@@ -149,12 +167,108 @@
     poll();
   });
 
+  const TOF_HISTORY = 90;
+  const tofHistory = [];
+
+  function blankCanvas(id) {
+    const canvas = document.getElementById(id);
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fafaf8";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    return { ctx, w: canvas.width, h: canvas.height };
+  }
+
+  function drawVibration(series) {
+    const { ctx, w, h } = blankCanvas("vib-wave");
+    if (!series) return;
+    const lanes = [
+      { key: "x", color: "#1f6feb", y0: h * 0.2 },
+      { key: "y", color: "#1a7f4b", y0: h * 0.5 },
+      { key: "z", color: "#c9372c", y0: h * 0.8 },
+    ];
+    for (const { key, color, y0 } of lanes) {
+      const arr = series[key] || [];
+      if (arr.length < 2) continue;
+      const min = Math.min(...arr);
+      const span = Math.max(Math.max(...arr) - min, 1e-6);
+      ctx.beginPath();
+      arr.forEach((v, i) => {
+        const x = (i / (arr.length - 1)) * (w - 16) + 8;
+        const y = y0 - ((v - min) / span - 0.5) * (h * 0.24);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+
+  function drawTof(nearM) {
+    const { ctx, w, h } = blankCanvas("tof-wave");
+    const pad = 8;
+    const values = tofHistory.filter((v) => v != null);
+    const top = Math.max(2, nearM || 0, ...values) * 1.1;
+    const yOf = (v) => h - pad - (v / top) * (h - pad * 2);
+    const xOf = (i) => (i / (TOF_HISTORY - 1)) * (w - pad * 2) + pad;
+    if (nearM) {
+      ctx.strokeStyle = "#e6a100";
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(pad, yOf(nearM));
+      ctx.lineTo(w - pad, yOf(nearM));
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    const offset = TOF_HISTORY - tofHistory.length;
+    ctx.strokeStyle = "#1f6feb";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    let drawing = false;
+    tofHistory.forEach((v, i) => {
+      if (v == null) {
+        drawing = false;
+        return;
+      }
+      if (drawing) ctx.lineTo(xOf(offset + i), yOf(v));
+      else ctx.moveTo(xOf(offset + i), yOf(v));
+      drawing = true;
+    });
+    ctx.stroke();
+  }
+
+  function paintSensors(data) {
+    const vib = data.vibration || {};
+    const vibState = document.getElementById("vib-state");
+    vibState.textContent = vib.label || "Not streaming";
+    vibState.className = vib.abnormal ? "is-bad" : "";
+    document.getElementById("vib-score").textContent =
+      vib.anomaly_score != null ? `anomaly ${Number(vib.anomaly_score).toFixed(2)}` : "";
+    drawVibration(vib.series);
+
+    const tof = data.tof || {};
+    const metres = tof.available ? tof.distance_m : null;
+    tofHistory.push(metres);
+    if (tofHistory.length > TOF_HISTORY) tofHistory.shift();
+    document.getElementById("tof-value").textContent = metres != null ? `${metres.toFixed(2)} m` : "No signal";
+    const usedSource = (data.vision || {}).distance_source;
+    const note = document.getElementById("tof-note");
+    if (metres == null) note.textContent = tof.enabled === false ? "disabled" : "";
+    else if ((data.fusion || {}).proximity_m != null) note.textContent = "too close · caution";
+    else if (usedSource === "tof") note.textContent = "used in decision";
+    else if (tof.near_m != null && metres > tof.near_m) note.textContent = `beyond ${tof.near_m.toFixed(1)} m`;
+    else note.textContent = "clear";
+    drawTof(tof.near_m);
+  }
+
   async function poll() {
     if (busy) return;
     busy = true;
     try {
       const res = await fetch("/api/control/live/");
       const data = await res.json();
+      if (data.tof || data.vibration) paintSensors(data);
       const camera = data.camera || {};
       if (!camera.live) {
         noCamera("No live camera. Start Go Live on Home and scan the code with the phone.", true);

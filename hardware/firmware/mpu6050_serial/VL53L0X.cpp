@@ -368,7 +368,7 @@ void VL53L0X::writeMulti(uint8_t reg, uint8_t const * src, uint8_t count)
   bus->beginTransmission(address);
   bus->write(reg);
 
-  while (count > 0)
+  while (count-- > 0)
   {
     bus->write(*(src++));
   }
@@ -386,7 +386,7 @@ void VL53L0X::readMulti(uint8_t reg, uint8_t * dst, uint8_t count)
 
   bus->requestFrom(address, count);
 
-  while (count > 0)
+  while (count-- > 0)
   {
     *(dst++) = bus->read();
   }

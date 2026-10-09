@@ -157,6 +157,7 @@ async function pollLive() {
     const res = await fetch("/api/vibration/live/");
     const data = await res.json();
     if (data.hardware) updateHwPill(data.hardware);
+    if (data.tof) applyTof(data.tof);
     if (!data.ready) return;
     applyResult(data);
   } catch (err) {
@@ -180,6 +181,82 @@ function applyResult(data) {
   const led =
     data.label === "DANGER" ? "red" : data.label === "ABNORMAL" || data.label === "CAUTION" ? "yellow" : "green";
   updateLedUi(led);
+}
+
+const TOF_HISTORY = 150;
+const tofHistory = [];
+
+function applyTof(tof) {
+  const metres = tof.available ? tof.distance_m : null;
+  tofHistory.push(metres);
+  if (tofHistory.length > TOF_HISTORY) tofHistory.shift();
+  drawTof(tof.near_m);
+
+  document.getElementById("tof-distance").textContent = metres != null ? `${metres.toFixed(2)} m` : "—";
+  document.getElementById("tof-state").textContent = !tof.enabled
+    ? "Disabled"
+    : tof.override_env
+      ? "Override"
+      : tof.available
+        ? "Reading"
+        : "No signal";
+  document.getElementById("tof-age").textContent = tof.age_s != null ? `${tof.age_s.toFixed(1)} s` : "—";
+  document.getElementById("tof-near").textContent = tof.near_m != null ? `${tof.near_m.toFixed(1)} m` : "—";
+}
+
+function drawTof(nearM) {
+  const canvas = document.getElementById("tof-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+  const pad = 24;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = "#fafbfc";
+  ctx.fillRect(0, 0, w, h);
+
+  const values = tofHistory.filter((v) => v != null);
+  const top = Math.max(2, nearM || 0, ...values) * 1.1;
+  const yOf = (v) => h - pad - (v / top) * (h - pad * 2);
+  const xOf = (i) => (i / (TOF_HISTORY - 1)) * (w - pad * 2) + pad;
+
+  ctx.font = "12px JetBrains Mono, monospace";
+  if (nearM) {
+    const y = yOf(nearM);
+    ctx.strokeStyle = "#e6a100";
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - pad, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#e6a100";
+    ctx.fillText(`used up to ${nearM.toFixed(1)} m`, pad, y - 6);
+  }
+
+  const offset = TOF_HISTORY - tofHistory.length;
+  ctx.strokeStyle = "#1f6feb";
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  let drawing = false;
+  tofHistory.forEach((v, i) => {
+    if (v == null) {
+      drawing = false;
+      return;
+    }
+    const x = xOf(offset + i);
+    const y = yOf(v);
+    if (!drawing) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+    drawing = true;
+  });
+  ctx.stroke();
+
+  ctx.fillStyle = "#1f6feb";
+  ctx.fillText("DISTANCE (m)", pad, pad - 6);
+  ctx.fillStyle = "#5c5c5c";
+  ctx.fillText(`${top.toFixed(1)} m`, w - pad - 48, pad - 6);
+  ctx.fillText("0 m", w - pad - 24, h - 6);
 }
 
 function drawWave(series) {

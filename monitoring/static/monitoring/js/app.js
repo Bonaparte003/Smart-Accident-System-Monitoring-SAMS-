@@ -1,6 +1,6 @@
 import { initControlCenter } from "./control.js?v=live2";
 import { initVisionLab } from "./vision.js?v=alert1";
-import { initVibrationLab } from "./vibration.js?v=uploadlive1";
+import { initVibrationLab } from "./vibration.js?v=tof1";
 import { setSoundEnabled } from "./sounds.js?v=control1";
 
 const pages = ["control", "vision", "vibration", "logs"];

@@ -277,7 +277,7 @@ Full details are in [`hardware/README.md`](hardware/README.md).
 | MPU6050 accelerometer | Yes | SDA A4, SCL A5 | Machine vibration |
 | Buzzer | Yes, for alerts | D8 and GND | Audible caution / danger patterns |
 | VL53L0X time-of-flight | Optional | SDA A0, SCL A1 (software I2C), 5V, GND | Accurate close-range distance |
-| LEDs green / yellow / red | Optional | D5 / D6 / D7 | Visual risk level |
+| LEDs green / yellow / red | Optional | D2 / D3 / D5 | Visual risk level |
 | Android phone | Yes, for live vision | Same Wi-Fi, HTTPS | Camera |
 
 ```mermaid
@@ -321,7 +321,7 @@ erDiagram
     }
     LED {
         string colour "green / yellow / red (optional)"
-        string pin "D5 / D6 / D7"
+        string pin "D2 / D3 / D5"
         string meaning "normal / caution / danger"
     }
     ANDROID_PHONE {
@@ -365,9 +365,9 @@ erDiagram
     ARDUINO_UNO ||--|| BUZZER : "D8 to plus"
     RAIL_GND ||--|| BUZZER : "to minus"
 
-    ARDUINO_UNO ||--o| LED_GREEN : "D5 to anode"
-    ARDUINO_UNO ||--o| LED_YELLOW : "D6 to anode"
-    ARDUINO_UNO ||--o| LED_RED : "D7 to anode"
+    ARDUINO_UNO ||--o| LED_GREEN : "D2 to anode"
+    ARDUINO_UNO ||--o| LED_YELLOW : "D3 to anode"
+    ARDUINO_UNO ||--o| LED_RED : "D5 to anode"
     RAIL_GND ||--o| LED_GREEN : "to cathode"
     RAIL_GND ||--o| LED_YELLOW : "to cathode"
     RAIL_GND ||--o| LED_RED : "to cathode"
@@ -382,9 +382,9 @@ erDiagram
         pin A5 "SCL hardware I2C"
         pin A0 "SDA software I2C"
         pin A1 "SCL software I2C"
-        pin D5 "green LED"
-        pin D6 "yellow LED"
-        pin D7 "red LED"
+        pin D2 "green LED"
+        pin D3 "yellow LED"
+        pin D5 "red LED"
         pin D8 "buzzer"
         pin D13 "onboard status LED"
     }
@@ -415,17 +415,17 @@ erDiagram
         string note "use a transistor if D8 cannot drive it"
     }
     LED_GREEN {
-        pin anode "D5 via 220 ohm resistor"
+        pin anode "D2 via 220 ohm resistor"
         pin cathode "GND"
         string meaning "normal"
     }
     LED_YELLOW {
-        pin anode "D6 via 220 ohm resistor"
+        pin anode "D3 via 220 ohm resistor"
         pin cathode "GND"
         string meaning "caution"
     }
     LED_RED {
-        pin anode "D7 via 220 ohm resistor"
+        pin anode "D5 via 220 ohm resistor"
         pin cathode "GND"
         string meaning "danger"
     }
@@ -438,7 +438,7 @@ erDiagram
 | A4 / A5 | MPU6050 SDA / SCL | Hardware I2C, address `0x68` |
 | A0 / A1 | VL53L0X SDA / SCL | Software I2C; leave XSHUT open |
 | D8 | Buzzer + | Active buzzer; add a transistor if it is too quiet |
-| D5 / D6 / D7 | Green / yellow / red LED anodes | Each through a ~220 Ω resistor |
+| D2 / D3 / D5 | Green / yellow / red LED anodes | Each through a ~220 Ω resistor |
 
 ---
 

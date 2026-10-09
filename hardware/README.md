@@ -29,9 +29,9 @@ See [`firmware/mpu6050_serial.ino`](firmware/mpu6050_serial.ino).
 
 | LED | Pin |
 | --- | --- |
-| Green | D5 |
-| Yellow | D6 |
-| Red | D7 |
+| Green | D2 |
+| Yellow | D3 |
+| Red | D5 |
 
 Re-flash after updates. On upload/reset you should hear a **double chirp** and
 see the onboard LED (D13) follow the buzzer when commands arrive.

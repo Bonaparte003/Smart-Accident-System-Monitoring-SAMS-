@@ -1100,6 +1100,35 @@ body.has-chapters .live-frame { position: absolute; inset: 0; }
   font: 600 12px var(--font);
 }
 .controls .live-stop i { font-size: 11px; }
+.sensor-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-top: 1px solid var(--line);
+  background: #ffffff;
+}
+.sensor-panel header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+.sensor-name { color: #5c5c5c; display: inline-flex; align-items: center; gap: 6px; }
+.sensor-panel strong { font-variant-numeric: tabular-nums; }
+.sensor-panel strong.is-bad { color: var(--danger); }
+.sensor-panel em { color: #8c8c8c; font-style: normal; font-size: 0.75rem; margin-left: auto; }
+.sensor-panel canvas {
+  display: block;
+  width: 100%;
+  height: 54px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+@media (max-width: 720px) {
+  .sensor-strip { grid-template-columns: minmax(0, 1fr); }
+}
 .ov-status {
   background: #ffffff;
   border: 1px solid var(--line);
