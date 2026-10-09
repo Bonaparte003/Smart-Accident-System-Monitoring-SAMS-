@@ -196,11 +196,25 @@
         });
         continue;
       }
+      if (box.kind === "hazard") {
+        if (follow) continue;
+        drawn.push({
+          xyxy: box.xyxy,
+          color: box.label === "fire" ? "#ff4500" : "#8c8c8c",
+          label: box.label + " " + Math.round(Number(box.confidence || 0) * 100) + "%",
+        });
+        continue;
+      }
+      if (box.kind === "fall") {
+        if (follow) continue;
+        drawn.push({ xyxy: box.xyxy, color: "#c2332a", label: "FALLEN" });
+        continue;
+      }
       const metres = box.distance_m != null ? " " + Number(box.distance_m).toFixed(1) + "m" : "";
       drawn.push({
         xyxy: box.xyxy,
-        color: "#e6a100",
-        label: "person " + id + metres,
+        color: box.fallen ? "#c2332a" : "#e6a100",
+        label: "person " + id + metres + (box.fallen ? " FALLEN" : ""),
       });
     }
     return drawn;

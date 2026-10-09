@@ -561,14 +561,22 @@ def reset_tracker() -> None:
             reset()
 
 
+def load_private_model():
+    """A separate copy of the PPE checkpoint whose tracker belongs to one video job."""
+    from ultralytics import YOLO
+
+    return YOLO(str(weights_path()))
+
+
 def detect_scene(
-    image, *, conf: float | None = None, track: bool = False
+    image, *, conf: float | None = None, track: bool = False, model=None
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any] | None]:
     """One pass of the PPE checkpoint. Returns worker boxes, gear boxes, and an error payload.
 
     Track ids, when requested, come from that checkpoint's tracker (ByteTrack
     by default, named in the metadata). Class names are the checkpoint's names
-    matched to the exported item map. A person box is not gear.
+    matched to the exported item map. A person box is not gear. A video job
+    passes its own ``model`` so its track ids never mix with the live camera.
     """
     if not ppe_enabled():
         return [], [], _unavailable("PPE disabled", "disabled")
@@ -578,7 +586,7 @@ def detect_scene(
         return [], [], _unavailable("PPE metadata not exported yet", "unavailable")
     try:
         spec = load_spec()
-        model = get_model()
+        model = model if model is not None else get_model()
     except Exception as exc:  # noqa: BLE001
         return [], [], _unavailable(str(exc), "error")
 
@@ -673,6 +681,13 @@ def reset_live_votes() -> None:
     """Drop the live-frame vote history (camera session start or stop)."""
     with _vote_lock:
         _votes.clear()
+
+
+def drop_votes(prefix: str) -> None:
+    """Forget every track a video job stored under its own prefix."""
+    with _vote_lock:
+        for track_id in [key for key in _votes if key.startswith(prefix)]:
+            del _votes[track_id]
 
 
 def prune_live_votes(active_ids: set[str]) -> None:

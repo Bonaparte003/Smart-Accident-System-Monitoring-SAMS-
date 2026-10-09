@@ -386,6 +386,52 @@ class LogLineTests(SimpleTestCase):
         self.assertEqual(times, [0.0, 2.0, 4.0, 6.0, 8.0])
 
 
+class FallAndSceneTests(SimpleTestCase):
+    def _standing(self):
+        return _pose({5: (100, 100, 1), 6: (140, 100, 1), 11: (105, 200, 1), 12: (135, 200, 1), 15: (105, 340, 1), 16: (135, 340, 1)})
+
+    def _sitting_on_ground(self):
+        return _pose({5: (160, 518, 1), 6: (165, 520, 1), 11: (210, 560, 1), 12: (216, 560, 1), 15: (280, 569, 1), 16: (286, 569, 1)})
+
+    def test_a_standing_worker_is_not_down(self):
+        from monitoring.services.accident_inference import body_lying
+
+        self.assertFalse(body_lying(self._standing(), [90, 80, 150, 350]))
+
+    def test_hips_at_ankle_height_is_down(self):
+        from monitoring.services.accident_inference import body_lying
+
+        self.assertTrue(body_lying(self._sitting_on_ground(), [110, 478, 302, 591]))
+
+    def test_a_fall_box_on_a_standing_worker_is_not_a_fall(self):
+        from monitoring.services.accident_inference import fall_for_box
+
+        falls = {"available": True, "detections": [{"xyxy": [90, 80, 150, 350], "confidence": 0.9}]}
+        self.assertFalse(fall_for_box([90, 80, 150, 350], falls, self._standing())["fallen"])
+        self.assertTrue(fall_for_box([110, 478, 302, 591], {"available": True, "detections": [{"xyxy": [110, 478, 302, 591], "confidence": 0.9}]}, self._sitting_on_ground())["fallen"])
+
+    def test_a_person_keeps_their_id_between_sparse_frames(self):
+        from monitoring.services.person_tracker import IdKeeper
+
+        keeper = IdKeeper()
+        first = keeper.assign([[0, 0, 50, 100], [300, 0, 350, 100]], 0.0)
+        moved = keeper.assign([[310, 5, 360, 105], [20, 0, 70, 100]], 0.25)
+        self.assertEqual(moved, [first[1], first[0]])
+        later = keeper.assign([[600, 0, 650, 100]], 3.0)
+        self.assertNotIn(later[0], first)
+
+    def test_scene_findings_raise_the_fusion_level(self):
+        from monitoring.services.control_center import apply_scene_events, scene_events
+
+        events = scene_events(fallen_ids=[3], smoke=True, behaviour={"unsafe": False, "label": "Safe Walkway"})
+        level, reason = apply_scene_events("NORMAL", "", events)
+        self.assertEqual(level, "DANGER")
+        self.assertEqual(reason, "Fall: person 3 down · Smoke detected")
+        unsafe = scene_events(behaviour={"unsafe": True, "label": "Opened Panel Cover"})
+        self.assertEqual(apply_scene_events("DEGRADED", "Person seen, distance unavailable.", unsafe)[0], "CAUTION")
+        self.assertEqual(apply_scene_events("DANGER", "", unsafe)[0], "DANGER")
+
+
 class DistanceHonestyTests(SimpleTestCase):
     def _full_body(self):
         return _pose({0: (150, 40, 1), 15: (130, 340, 1), 16: (170, 340, 1)})

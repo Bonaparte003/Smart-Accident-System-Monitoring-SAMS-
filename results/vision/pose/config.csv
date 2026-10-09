@@ -1,0 +1,28 @@
+setting,value,meaning
+SEED,42,"Random seed for splitting, augmentation, and training"
+YOLO_DEVICE,0,"0 is the first GPU, cpu means no GPU"
+COCO_LABELS_URL,https://github.com/ultralytics/assets/releases/download/v0.0.0/coco2017labels-pose.zip,Ultralytics pose labels for COCO 2017 (17 keypoints per person)
+COCO_IMAGES_URL,http://images.cocodataset.org/zips/val2017.zip,COCO 2017 val images. The stock model never trained on them
+MAX_SOURCE_IMAGES,None,Cap on source photos for a quick run. None uses all
+VAL_FRACTION,0.15,Share of source photos held out for val
+TEST_FRACTION,0.15,Share of source photos held out for test
+MIN_PERSON_HEIGHT_PX,64,"Smallest person box height, in source pixels, that becomes a crop"
+MIN_LABELLED_KPTS,5,Fewest labelled joints a person needs to become a crop
+OTHER_PERSON_MIN_INSIDE,0.5,A neighbour is labelled in a crop when at least this share of its box is inside
+SITE_POSE_DIR,/content/drive/MyDrive/SAMS/datasets/vision/pose/site,Optional own labelled SAMS crops (images/ and labels/). Added to train only
+CROP_PAD,0.12,"Padding around a worker box, same as _crop_worker"
+KP_MIN_CONF,0.3,"Joints below this confidence are missing, same as _KP_MIN"
+LIVE_CONF,0.229,Person confidence the service passes to pose. Source: /content/drive/MyDrive/SAMS/models/vision/ppe/metadata.json
+MAX_EPOCHS,30,Upper limit on epochs. Early stopping usually ends sooner
+PATIENCE,5,Epochs without a val improvement before training stops
+STAGE_A_EPOCHS,10,Epochs with the backbone frozen in two-stage fine-tuning
+FREEZE_LAYERS,10,Layers frozen in stage A. 10 is the whole YOLOv8 backbone
+BATCH,32,Images per training step
+IMGSZ,640,Training and live image size. The service predicts at this size
+CAMERA_COPIES_PER_CROP,1,Camera-damage copies made per training crop for E4
+SELECTION_METRIC,service_pck,Val score used to choose: joints placed correctly the way the service reads them
+WINNER_TOLERANCE,0.005,Runs this close to the best score count as tied. Ties go to higher pose mAP50-95
+PCK_ALPHA,0.1,A joint is correct within this share of the person box's longer side
+BOOTSTRAP_ROUNDS,1000,Resampling rounds for the confidence intervals
+REPEAT_SEEDS,"[1, 2]",Extra seeds used to retrain the chosen recipe
+TIMING_IMAGES,100,Single-image predictions timed in the export check

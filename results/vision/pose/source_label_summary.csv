@@ -1,0 +1,8 @@
+item,value
+source photos,5000
+photos with labelled people,2346
+labelled people,6352
+values per label line,{56: 6352}
+joints not labelled (v=0),39769
+"joints labelled, hidden (v=1)",8365
+"joints labelled, visible (v=2)",59850

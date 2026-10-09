@@ -204,6 +204,9 @@
   </div>
   <div id="live-qr" class="live-qr" aria-label="Scan this code with the phone"></div>
   <p class="live-status" id="live-status">Scan with the phone.</p>
+  <a class="live-view" id="live-view" href="{% url 'review_live' %}" hidden>
+    <i class="fa-solid fa-video" aria-hidden="true"></i> View video
+  </a>
 </dialog>
 {{ overview.chart|json_script:"events-data" }}
 {{ overview.distribution|json_script:"dist-data" }}
@@ -288,12 +291,19 @@
   const causesChart = document.getElementById("causes-chart");
   const liveDialog = document.getElementById("live-dialog");
   const goLive = document.getElementById("go-live");
+  const liveView = document.getElementById("live-view");
   let liveTimer = null;
+  let keepSession = false;
 
   function setLiveState(text, verified) {
     document.getElementById("live-status").textContent = text;
     liveDialog.classList.toggle("is-verified", !!verified);
+    liveView.hidden = !verified;
   }
+
+  liveView.addEventListener("click", () => {
+    keepSession = true;
+  });
 
   async function openLive() {
     if (typeof liveDialog.showModal === "function") liveDialog.showModal();
@@ -340,6 +350,7 @@
   liveDialog.addEventListener("close", () => {
     clearInterval(liveTimer);
     liveTimer = null;
+    if (keepSession) return;
     fetch("/api/hardware/camera/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -89,9 +89,10 @@ export function initControlCenter() {
   document.getElementById("cc-mode-live").addEventListener("click", () => setMode("live"));
   document.getElementById("cc-show-qr").addEventListener("click", () => showQrSession());
   document.getElementById("cc-stop").addEventListener("click", () => stopLive());
+  if (new URLSearchParams(location.search).get("live") === "1") setMode("live", { attach: true });
 }
 
-function setMode(mode) {
+function setMode(mode, { attach = false } = {}) {
   const leavingLive = mode !== "live" && state.liveActive;
   state.mode = mode;
   if (leavingLive) stopLive();
@@ -112,9 +113,33 @@ function setMode(mode) {
     }
     stopAlerts();
     document.getElementById("cc-qr-panel")?.classList.remove("linked");
+  } else if (attach) {
+    attachLive();
   } else {
     showQrSession();
   }
+}
+
+async function attachLive() {
+  try {
+    const res = await fetch("/api/hardware/camera/");
+    const data = await res.json();
+    if (!data.camera?.live) {
+      showQrSession();
+      return;
+    }
+  } catch {
+    showQrSession();
+    return;
+  }
+  state.liveActive = true;
+  document.getElementById("cc-show-qr").disabled = true;
+  document.getElementById("cc-stop").disabled = false;
+  document.getElementById("cc-qr-panel")?.classList.add("linked");
+  showLiveMsg("Phone linked — waiting for frames…");
+  clearInterval(livePoll);
+  livePoll = setInterval(pollLive, 1500);
+  pollLive();
 }
 
 function showLiveMsg(msg, ok = true) {

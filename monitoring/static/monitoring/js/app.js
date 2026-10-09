@@ -1,4 +1,4 @@
-import { initControlCenter } from "./control.js?v=track1";
+import { initControlCenter } from "./control.js?v=live2";
 import { initVisionLab } from "./vision.js?v=alert1";
 import { initVibrationLab } from "./vibration.js?v=uploadlive1";
 import { setSoundEnabled } from "./sounds.js?v=control1";

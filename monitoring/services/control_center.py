@@ -112,6 +112,43 @@ def classify(
     }
 
 
+LEVEL_RANK = {"NORMAL": 0, "DEGRADED": 1, "CAUTION": 2, "DANGER": 3}
+
+
+def scene_events(
+    *,
+    fallen_ids: list[Any] | None = None,
+    fire: bool = False,
+    smoke: bool = False,
+    behaviour: dict[str, Any] | None = None,
+) -> list[tuple[str, str]]:
+    """Scene findings the fusion model has no input for, each with the level it demands."""
+    events: list[tuple[str, str]] = []
+    fallen_ids = list(fallen_ids or [])
+    if fallen_ids:
+        named = [f"person {pid}" for pid in fallen_ids if pid is not None]
+        who = ", ".join(named) if named else "a person"
+        events.append(("DANGER", f"Fall: {who} down"))
+    if fire:
+        events.append(("DANGER", "Fire detected"))
+    if smoke:
+        events.append(("CAUTION", "Smoke detected"))
+    if behaviour and behaviour.get("unsafe"):
+        events.append(("CAUTION", f"Unsafe behaviour: {behaviour['label']}"))
+    return events
+
+
+def apply_scene_events(level: str, reason: str, events: list[tuple[str, str]]) -> tuple[str, str]:
+    """Raise the fusion level to the worst scene finding. Findings lead the reason."""
+    if not events:
+        return level, reason
+    worst = max(events, key=lambda event: LEVEL_RANK.get(event[0], 0))[0]
+    if LEVEL_RANK.get(worst, 0) > LEVEL_RANK.get(level, 0):
+        level = worst
+    found = " · ".join(text for _level, text in events)
+    return level, f"{found} · {reason}" if reason else found
+
+
 def decide_alert(
     vision: dict[str, Any] | None,
     vibration: dict[str, Any] | None,

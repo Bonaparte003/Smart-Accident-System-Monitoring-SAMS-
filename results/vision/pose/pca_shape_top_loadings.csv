@@ -1,0 +1,13 @@
+component,feature,loading
+PC1,right_shoulder y,0.306
+PC1,left_shoulder y,0.292
+PC1,right_hip y,0.275
+PC1,left_hip y,0.269
+PC1,right_elbow y,0.267
+PC1,left_elbow y,0.256
+PC2,nose x,0.378
+PC2,left_eye x,0.36
+PC2,right_eye x,0.343
+PC2,left_shoulder x,0.334
+PC2,left_ear x,0.301
+PC2,right_ear x,0.283

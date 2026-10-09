@@ -1,0 +1,4 @@
+format,file,test service PCK,crops per second
+PyTorch (.pt),best.pt,0.854,44.351
+ONNX,best.onnx,0.854,8.205
+stock yolov8n-pose (.pt),yolov8n-pose.pt,0.767,59.773

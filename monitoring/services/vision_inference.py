@@ -31,7 +31,7 @@ from PIL import Image, ImageDraw, ImageFont
 from . import distance_estimation as distance
 from . import hazard_inference as hazard
 from . import ppe_inference as ppe
-from .person_tracker import MotionLog
+from .person_tracker import IdKeeper, MotionLog
 
 _lock = threading.Lock()
 _pose_model = None
@@ -312,12 +312,157 @@ def _image_to_data_url(image: Image.Image, quality: int = 85) -> str:
     return f"data:image/jpeg;base64,{b64}"
 
 
-def predict_image(image: Image.Image, conf: float | None = None, *, live: bool = False, track: bool = False) -> dict[str, Any]:
+def _lone_falls(image: Image.Image, falls: dict[str, Any], observed: list[dict[str, Any]], conf: float | None) -> list[dict[str, Any]]:
+    """Fall boxes on nobody the PPE model saw, kept when pose in that box is lying."""
+    lone: list[dict[str, Any]] = []
+    for det in falls.get("detections") or []:
+        box = [float(v) for v in det["xyxy"]]
+        if any(_overlap_of_smaller(box, person["box"]) > 0.3 for person in observed):
+            continue
+        keep, keypoints = _joints_inside(image, box, conf)
+        if not keep:
+            continue
+        verdict = hazard.fall_for_person(box, {"available": True, "detections": [det]}, keypoints)
+        if verdict["fallen"]:
+            lone.append(
+                {
+                    "xyxy": box,
+                    "confidence": float(det["confidence"]),
+                    "keypoints": keypoints,
+                    "torso_deg": verdict["torso_deg"],
+                }
+            )
+    return lone
+
+
+ZOOM_MAX_HEIGHT_FRAC = 0.5
+ZOOM_WINDOW_SCALE = 2.0
+_zoom_model = None
+
+
+def _zoom_window(image: Image.Image, box: list[float]):
+    """A square around the worker, twice its longest side.
+
+    A tight crop blown up to model size finds no gear; the PPE model was
+    trained on scenes, so it needs some surroundings around the worker.
+    """
+    width, height = image.size
+    cx = (float(box[0]) + float(box[2])) * 0.5
+    cy = (float(box[1]) + float(box[3])) * 0.5
+    half = max(float(box[2]) - float(box[0]), float(box[3]) - float(box[1])) * ZOOM_WINDOW_SCALE * 0.5
+    left, top = max(0, int(cx - half)), max(0, int(cy - half))
+    right, bottom = min(width, int(cx + half)), min(height, int(cy + half))
+    if right - left < 8 or bottom - top < 8:
+        return None
+    return image.crop((left, top, right, bottom)), (left, top)
+
+
+def _needs_zoom(wearing: dict[str, Any], box: list[float], frame_h: int) -> bool:
+    """Pose placed a head, torso, hand, or foot, yet no gear decision landed there."""
+    if not wearing.get("available"):
+        return False
+    if (float(box[3]) - float(box[1])) > ZOOM_MAX_HEIGHT_FRAC * frame_h:
+        return False
+    return any((item or {}).get("evidence") == "uncertain" for item in (wearing.get("items") or {}).values())
+
+
+def _zoom_gear(
+    image: Image.Image,
+    box: list[float],
+    gear: list[dict[str, Any]],
+    conf: float | None,
+    model=None,
+) -> list[dict[str, Any]]:
+    """Run the PPE model again on this worker's padded crop, at full model resolution.
+
+    New gear boxes come back in frame pixels. A box that repeats one already
+    found on the full frame is dropped.
+    """
+    global _zoom_model
+    cropped = _zoom_window(image, box)
+    if cropped is None:
+        return []
+    crop, (ox, oy) = cropped
+    if model is None:
+        if _zoom_model is None:
+            with _lock:
+                if _zoom_model is None and ppe.weights_available():
+                    _zoom_model = ppe.load_private_model()
+        model = _zoom_model
+    if model is None:
+        return []
+    _workers, found, blocked = ppe.detect_scene(crop, conf=conf, model=model)
+    if blocked is not None:
+        return []
+    extra: list[dict[str, Any]] = []
+    for det in found:
+        x1, y1, x2, y2 = det["xyxy"]
+        shifted = {**det, "xyxy": [x1 + ox, y1 + oy, x2 + ox, y2 + oy], "zoomed": True}
+        repeat = any(
+            old.get("item") == det.get("item")
+            and bool(old.get("missing")) == bool(det.get("missing"))
+            and _overlap_of_smaller(old["xyxy"], shifted["xyxy"]) > 0.5
+            for old in gear
+        )
+        if not repeat:
+            extra.append(shifted)
+    return extra
+
+
+def _fall_for(image: Image.Image, person: dict[str, Any], falls: dict[str, Any], conf: float | None) -> dict[str, Any]:
+    """Fall verdict for one worker. A worker box can cover only part of a body
+    on the ground, so when it disagrees the pose is read again in the fall box."""
+    fall = hazard.fall_for_person(person["box"], falls, person["keypoints"])
+    if fall["fallen"] or fall["lying_score"] <= 0:
+        return fall
+    for det in falls.get("detections") or []:
+        box = [float(v) for v in det["xyxy"]]
+        if _overlap_of_smaller(box, person["box"]) <= 0.3:
+            continue
+        keep, keypoints = _joints_inside(image, box, conf)
+        if not keep:
+            continue
+        again = hazard.fall_for_person(box, {"available": True, "detections": [det]}, keypoints)
+        if again["fallen"]:
+            return {**again, "keypoints": keypoints}
+    return fall
+
+
+def _overlap_of_smaller(a: list[float], b: list[float]) -> float:
+    ix = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
+    iy = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    smaller = min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1]))
+    return (ix * iy) / smaller if smaller > 0 else 0.0
+
+
+def predict_image(
+    image: Image.Image,
+    conf: float | None = None,
+    *,
+    live: bool = False,
+    track: bool = False,
+    ppe_model=None,
+    motion: MotionLog | None = None,
+    now: float | None = None,
+    vote_scope: str = "",
+    annotate: bool = True,
+    run_hazards: bool = True,
+    run_falls: bool = True,
+    id_keeper: IdKeeper | None = None,
+) -> dict[str, Any]:
+    """One frame through every vision model.
+
+    A video job passes its own PPE model, motion log, and the frame's time in
+    the clip, so tracks, gear votes, and approach speed follow the video's own
+    clock and never mix with the live camera.
+    """
     rgb = image.convert("RGB")
     width, height = rgb.size
-    keep_identity = live or track
+    keep_identity = live or track or id_keeper is not None
     tof_m = _read_tof_m() if live else None
-    workers, gear, blocked = ppe.detect_scene(rgb, conf=conf, track=keep_identity)
+    motion_log = motion if motion is not None else _motion
+    use_bytetrack = keep_identity and id_keeper is None
+    workers, gear, blocked = ppe.detect_scene(rgb, conf=conf, track=use_bytetrack, model=ppe_model)
     observed: list[dict[str, Any]] = []
     if blocked is None:
         for worker in workers:
@@ -335,6 +480,10 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
     else:
         gear = []
 
+    if id_keeper is not None:
+        kept = id_keeper.assign([person["box"] for person in observed], 0.0 if now is None else float(now))
+        for person, kept_id in zip(observed, kept):
+            person["track_id"] = kept_id
     track_ids: list[int] = []
     stable_ids: list[bool] = []
     for index, person in enumerate(observed):
@@ -345,10 +494,14 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
         else:
             track_ids.append(index + 1)
             stable_ids.append(False)
-    hazards = hazard.detect_hazards(rgb)
-    if keep_identity:
+    if run_hazards:
+        hazards = hazard.detect_hazards(rgb)
+    else:
+        hazards = {"available": False, "model_id": None, "fire_score": 0.0, "smoke_score": 0.0, "detections": []}
+    if live:
         hazards = hazard.smooth_scores(hazards)
-    falls = hazard.detect_falls(rgb)
+    falls = hazard.detect_falls(rgb) if run_falls else {"available": False, "detections": []}
+    lone_falls = _lone_falls(rgb, falls, observed, conf) if falls.get("detections") else []
 
     aimed_index = None
     best_aim = -1.0
@@ -368,6 +521,12 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
             wearing = blocked
         else:
             wearing = ppe.assess_person(person["keypoints"], person["box"], gear, regions=regions)
+            if _needs_zoom(wearing, person["box"], height):
+                closer = _zoom_gear(rgb, person["box"], gear, conf, ppe_model)
+                if closer:
+                    gear = gear + closer
+                    wearing = ppe.assess_person(person["keypoints"], person["box"], gear, regions=regions)
+                    wearing["zoomed"] = True
         estimate = distance.measure_person(
             person["keypoints"],
             (width, height),
@@ -379,10 +538,10 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
         distance_m = estimate.distance_m if estimate else None
         source = estimate.source if estimate else None
         track_id = int(track_ids[index])
-        fall = hazard.fall_for_person(person["box"], falls)
+        fall = _fall_for(rgb, person, falls, conf)
         if stable_ids[index]:
-            _motion.record_distance(track_id, distance_m)
-            motion = _motion.motion(track_id)
+            motion_log.record_distance(track_id, distance_m, now=now)
+            motion = motion_log.motion(track_id)
         else:
             motion = {"speed_mps": 0.0, "approach_mps": 0.0, "approaching": False, "samples": 0}
         record = {
@@ -420,6 +579,8 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
                 "approach_mps": motion["approach_mps"],
                 "fallen": fall["fallen"],
                 "lying_score": fall["lying_score"],
+                "torso_deg": fall["torso_deg"],
+                "keypoints": fall.get("keypoints") or person["keypoints"],
             }
         )
         for gear_box in wearing.get("detections") or []:
@@ -429,13 +590,14 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
     worker_detected = person_count > 0
     if keep_identity and worker_detected:
         for person in people:
-            person["ppe"] = ppe.stabilize_live_ppe(person["ppe"], track_id=str(person["id"]))
+            person["ppe"] = ppe.stabilize_live_ppe(person["ppe"], track_id=f"{vote_scope}{person['id']}")
             person["summary"] = person["ppe"].get("summary")
-        ppe.prune_live_votes({str(person["id"]) for person in people})
-        _motion.prune({int(person["id"]) for person in people})
-    elif keep_identity:
+        if not vote_scope:
+            ppe.prune_live_votes({str(person["id"]) for person in people})
+            motion_log.prune({int(person["id"]) for person in people})
+    elif keep_identity and not vote_scope:
         ppe.prune_live_votes(set())
-        _motion.prune(set())
+        motion_log.prune(set())
     selected = _select_person(people)
     if selected is not None:
         selected["selected"] = True
@@ -456,9 +618,9 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
         ppe_result = ppe.blank_wearing()
     ppe_result = dict(ppe_result)
     ppe_result["detections"] = drawn_gear
-    annotated = _draw_detections(rgb, detections, drawn_gear + hazards["detections"])
+    annotated = _draw_detections(rgb, detections, drawn_gear + hazards["detections"]) if annotate else None
     motion = selected["motion"] if selected else {"speed_mps": 0.0, "approach_mps": 0.0, "approaching": False}
-    fall_detected = any(person["fallen"] for person in people)
+    fall_detected = any(person["fallen"] for person in people) or bool(lone_falls)
     distance_m = selected.get("distance_m") if selected else None
     source = selected.get("distance_source") if selected else None
     body_m = None
@@ -484,7 +646,10 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
                 "distance_m": person["distance_m"],
                 "distance_source": person["distance_source"],
                 "approach_mps": person["motion"]["approach_mps"],
+                "approaching": bool(person["motion"]["approaching"]),
                 "fallen": person["fallen"],
+                "confidence": person["confidence"],
+                "ppe": person["ppe"],
             }
             for person in people
         ],
@@ -494,6 +659,11 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
         "approach_velocity": motion["approach_mps"],
         "approaching": bool(motion["approaching"]),
         "fall_detected": fall_detected,
+        "lone_falls": lone_falls,
+        "hazards_ran": run_hazards,
+        "falls_ran": run_falls,
+        "frame_w": width,
+        "frame_h": height,
         "hazards": {
             "available": hazards["available"],
             "model_id": hazards["model_id"],
@@ -519,7 +689,7 @@ def predict_image(image: Image.Image, conf: float | None = None, *, live: bool =
         "ppe_complete": ppe_result.get("ppe_complete"),
         "ppe_summary": ppe_result.get("summary"),
         "unsafe": bool(ppe_result.get("ppe_complete") is False),
-        "annotated_thumbnail": _image_to_data_url(annotated),
+        "annotated_thumbnail": _image_to_data_url(annotated) if annotated is not None else None,
         "model_id": _model_id(),
         "backend": "ultralytics",
         "probabilities": {

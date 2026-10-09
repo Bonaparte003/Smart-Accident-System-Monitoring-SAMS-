@@ -1,0 +1,3 @@
+yaml,train images,val images,test images
+pose_main.yaml,3719,820,754
+pose_camera.yaml,7438,820,754

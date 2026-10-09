@@ -5,6 +5,7 @@ from . import review_views, views
 urlpatterns = [
     path("", review_views.entrance, name="review_entrance"),
     path("archive/", review_views.archive, name="review_archive"),
+    path("live/", review_views.live, name="review_live"),
     path("alerts/", review_views.alerts, name="review_alerts"),
     path("mlops/", review_views.mlops, name="review_mlops"),
     path("mlops/label/", review_views.label_minute, name="review_label"),

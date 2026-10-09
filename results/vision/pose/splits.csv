@@ -1,0 +1,5 @@
+split,source photos,crops,labelled joints,share of crops
+train,1517,3719,43478.0,0.703
+val,325,820,9668.0,0.155
+test,325,754,8859.0,0.142
+site (train only),0,0,,

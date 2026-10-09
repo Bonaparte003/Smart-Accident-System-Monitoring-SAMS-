@@ -1,0 +1,18 @@
+joint,visible (v=2),hidden (v=1),not labelled (v=0)
+nose,68.3,5.0,26.7
+left_eye,61.5,2.0,36.5
+right_eye,60.9,2.1,37.0
+left_ear,51.0,3.0,46.0
+right_ear,49.8,5.3,44.9
+left_shoulder,85.9,7.0,7.1
+right_shoulder,85.1,7.9,7.0
+left_elbow,66.4,8.3,25.3
+right_elbow,65.5,10.0,24.5
+left_wrist,60.3,7.2,32.5
+right_wrist,61.6,7.7,30.7
+left_hip,68.1,13.5,18.3
+right_hip,67.3,15.0,17.7
+left_knee,54.5,7.3,38.3
+right_knee,54.2,7.4,38.4
+left_ankle,44.0,7.4,48.6
+right_ankle,43.6,7.4,49.0

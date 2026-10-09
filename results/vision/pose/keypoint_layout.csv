@@ -1,0 +1,18 @@
+index,joint,group,mirror partner,used by the service for
+0,nose,head,nose,"head region, stature (nose)"
+1,left_eye,head,right_eye,"head region, stature (eyes)"
+2,right_eye,head,left_eye,"head region, stature (eyes)"
+3,left_ear,head,right_ear,head region
+4,right_ear,head,left_ear,head region
+5,left_shoulder,shoulders,right_shoulder,"torso region, head-or-shoulders rule"
+6,right_shoulder,shoulders,left_shoulder,"torso region, head-or-shoulders rule"
+7,left_elbow,elbows,right_elbow,hand region direction
+8,right_elbow,elbows,left_elbow,hand region direction
+9,left_wrist,wrists,right_wrist,hand region
+10,right_wrist,wrists,left_wrist,hand region
+11,left_hip,hips,right_hip,torso region
+12,right_hip,hips,left_hip,torso region
+13,left_knee,knees,right_knee,not used directly
+14,right_knee,knees,left_knee,not used directly
+15,left_ankle,ankles,right_ankle,"feet region, stature"
+16,right_ankle,ankles,left_ankle,"feet region, stature"

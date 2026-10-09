@@ -1,0 +1,23 @@
+hyperparameter,value,meaning
+optimizer,SGD,Update rule. SGD with momentum is the YOLOv8 reference setting
+lr0,0.002,"Starting learning rate, low because the weights are already trained for pose"
+lrf,0.1,Final learning rate as a fraction of lr0
+momentum,0.937,How much of the last update carries into the next one
+weight_decay,0.0005,"Penalty on large weights, reduces overfitting"
+warmup_epochs,1.0,Epochs where the learning rate ramps up from a small value
+cos_lr,False,Cosine learning-rate decay instead of linear
+box,7.5,Weight of the box position loss
+cls,0.5,"Weight of the class loss (one class, person)"
+dfl,1.5,Weight of the distribution focal loss for box edges
+pose,12.0,Weight of the joint position loss
+kobj,1.0,"Weight of the joint visibility loss, which drives joint confidence"
+hsv_h,0.015,Random hue change during training
+hsv_s,0.7,Random saturation change during training
+hsv_v,0.4,Random brightness change during training
+degrees,0.0,"Random rotation during training. 0, cameras are mounted level"
+translate,0.1,Random shift during training
+scale,0.3,"Random zoom during training. Mild, the service crop size is fixed by the person box"
+fliplr,0.5,Chance of a left-right flip. Joints are swapped with flip_idx
+flipud,0.0,"Chance of an upside-down flip. 0, a camera never sees people upside down"
+mosaic,0.0,"Chance of combining four images into one. 0, the service sends one worker per crop"
+close_mosaic,0,Epochs at the end without mosaic. Unused when mosaic is 0

@@ -1,0 +1,6 @@
+check,result
+"kpt_shape is [17, 3]",ok
+joint order matches the service indices,ok
+imgsz,640
+model_id,yolov8s-pose_sams
+weights file,/content/drive/MyDrive/SAMS/models/vision/pose/best.pt (23.5 MB)

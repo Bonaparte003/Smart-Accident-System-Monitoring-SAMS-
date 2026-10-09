@@ -503,6 +503,15 @@ def export_training(request: HttpRequest) -> HttpResponse:
 
 
 @login_required(login_url="review_entrance")
+def live(request: HttpRequest) -> HttpResponse:
+    return render(
+        request,
+        "monitoring/review/live.html",
+        {"nav": "home", "ppe_icons": PPE_ICONS, **_desk()},
+    )
+
+
+@login_required(login_url="review_entrance")
 def recording_status(request: HttpRequest, pk: int) -> JsonResponse:
     recording = get_object_or_404(Recording, pk=pk)
     return JsonResponse(

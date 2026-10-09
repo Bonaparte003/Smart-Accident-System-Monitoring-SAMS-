@@ -1,0 +1,200 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}Live — SAMS{% endblock %}
+{% block body_class %}app has-chapters{% endblock %}
+{% block main %}
+<section class="watch">
+  <div class="player">
+    <div class="frame live-stage">
+      <img id="live-frame" class="live-frame" alt="Live camera" hidden />
+      <div class="live-empty" id="live-empty">
+        <i class="fa-solid fa-video-slash" aria-hidden="true"></i>
+        <p id="live-empty-text">Connecting to the live camera…</p>
+        <a class="live-view" id="live-home" href="{% url 'review_entrance' %}" hidden>Go Live from Home</a>
+      </div>
+      <div class="player-top">
+        <span class="pill live-pill" id="live-pill"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span>
+        <span class="pill" id="live-level" hidden></span>
+      </div>
+    </div>
+    <div class="controls">
+      <button type="button" id="live-back" aria-label="Back to live" title="Back to live" hidden>
+        <i class="fa-solid fa-forward-step" aria-hidden="true"></i>
+      </button>
+      <span class="live-reason" id="live-reason">Waiting for frames…</span>
+      <button type="button" class="live-stop" id="live-stop">
+        <i class="fa-solid fa-power-off" aria-hidden="true"></i> Disconnect
+      </button>
+    </div>
+  </div>
+</section>
+
+<aside class="chapters" aria-label="Logs">
+  <h2>Logs</h2>
+  <div class="log-list" id="live-logs" role="listbox">
+    <p class="empty" id="live-logs-empty">Changes in the scene appear here.</p>
+  </div>
+</aside>
+
+{{ ppe_icons|json_script:"ppe-icons" }}
+<script>
+  const icons = JSON.parse(document.getElementById("ppe-icons").textContent);
+  const frame = document.getElementById("live-frame");
+  const empty = document.getElementById("live-empty");
+  const emptyText = document.getElementById("live-empty-text");
+  const levelPill = document.getElementById("live-level");
+  const livePill = document.getElementById("live-pill");
+  const reasonEl = document.getElementById("live-reason");
+  const backBtn = document.getElementById("live-back");
+  const list = document.getElementById("live-logs");
+  const MAX_ROWS = 120;
+  let busy = false;
+  let timer = null;
+  let lastLine = "";
+  let pinned = null;
+
+  function clock() {
+    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+
+  function stateIcon(level) {
+    if (level === "DANGER") return "fa-circle-exclamation";
+    if (level === "CAUTION" || level === "DEGRADED") return "fa-triangle-exclamation";
+    return "fa-circle-check";
+  }
+
+  function showFrame(src) {
+    if (!src) return;
+    frame.src = src;
+    frame.hidden = false;
+    empty.hidden = true;
+  }
+
+  function noCamera(text, offerHome) {
+    frame.hidden = true;
+    empty.hidden = false;
+    emptyText.textContent = text;
+    document.getElementById("live-home").hidden = !offerHome;
+    levelPill.hidden = true;
+    livePill.classList.remove("is-on");
+  }
+
+  function ppeMarks(ppe) {
+    const items = (ppe && ppe.items) || {};
+    const keys = Object.keys(items);
+    if (!keys.length) return null;
+    const box = document.createElement("span");
+    box.className = "ppe-marks";
+    for (const key of keys) {
+      const item = items[key] || {};
+      const mark = document.createElement("span");
+      mark.className = "ppe-mark" + (item.worn === true ? " is-on" : item.worn === false ? " is-off" : "");
+      mark.title = (item.label || key) + " · " + (item.status || "—");
+      const ico = document.createElement("i");
+      ico.className = "fa-solid " + (icons[key] || "fa-user");
+      ico.setAttribute("aria-hidden", "true");
+      const name = document.createElement("span");
+      name.textContent = item.label || key;
+      mark.append(ico, name);
+      box.appendChild(mark);
+    }
+    return box;
+  }
+
+  function addLog(level, line, ppe, thumb) {
+    document.getElementById("live-logs-empty")?.remove();
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "log-row" + (level && level !== "NORMAL" ? " problem " + level : "");
+    row.setAttribute("role", "option");
+    const marks = ppeMarks(ppe);
+    if (marks) row.appendChild(marks);
+    const text = document.createElement("span");
+    text.className = "log-line";
+    const ico = document.createElement("span");
+    ico.className = "state-ico " + (level || "NORMAL");
+    ico.innerHTML = '<i class="fa-solid ' + stateIcon(level) + '"></i>';
+    const ts = document.createElement("span");
+    ts.className = "ts";
+    ts.textContent = clock();
+    const msg = document.createElement("span");
+    msg.className = "msg";
+    msg.textContent = line;
+    text.append(ico, ts, msg);
+    row.appendChild(text);
+    row.addEventListener("click", () => pin(row, thumb, level, line));
+    list.prepend(row);
+    while (list.children.length > MAX_ROWS) list.lastElementChild.remove();
+  }
+
+  function paintLevel(level, line) {
+    levelPill.hidden = !level;
+    levelPill.className = "pill " + (level || "");
+    levelPill.textContent = level || "";
+    reasonEl.textContent = line || "";
+  }
+
+  function pin(row, thumb, level, line) {
+    pinned = row;
+    list.querySelectorAll(".log-row").forEach((node) => node.classList.toggle("is-on", node === row));
+    showFrame(thumb);
+    paintLevel(level, line);
+    livePill.classList.remove("is-on");
+    backBtn.hidden = false;
+  }
+
+  backBtn.addEventListener("click", () => {
+    pinned = null;
+    list.querySelectorAll(".log-row.is-on").forEach((node) => node.classList.remove("is-on"));
+    backBtn.hidden = true;
+    poll();
+  });
+
+  async function poll() {
+    if (busy) return;
+    busy = true;
+    try {
+      const res = await fetch("/api/control/live/");
+      const data = await res.json();
+      const camera = data.camera || {};
+      if (!camera.live) {
+        noCamera("No live camera. Start Go Live on Home and scan the code with the phone.", true);
+        return;
+      }
+      if (data.ready === false || !data.fusion) {
+        if (!pinned) noCamera(data.error || "Phone linked. Waiting for frames…", false);
+        return;
+      }
+      const vision = data.vision || {};
+      const level = data.fusion.label || "NORMAL";
+      const line = data.fusion.reason || vision.ppe_summary || vision.label || "";
+      if (level + line !== lastLine) {
+        lastLine = level + line;
+        addLog(level, line || level, vision.ppe, vision.thumbnail);
+      }
+      if (pinned) return;
+      showFrame(vision.thumbnail);
+      livePill.classList.add("is-on");
+      paintLevel(level, line);
+    } catch (err) {
+      if (!pinned) reasonEl.textContent = String(err.message || err);
+    } finally {
+      busy = false;
+    }
+  }
+
+  document.getElementById("live-stop").addEventListener("click", async () => {
+    clearInterval(timer);
+    try {
+      await fetch("/api/hardware/camera/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "stop" }),
+      });
+    } catch (err) {}
+    location.href = "{% url 'review_entrance' %}";
+  });
+
+  timer = setInterval(poll, 1000);
+  poll();
+</script>
+{% endblock %}

@@ -1,0 +1,3 @@
+item,path,files
+label folder,/content/SAMS/datasets/vision/pose/coco_raw/labels_unzipped/coco-pose/labels/val2017,2346
+image folder,/content/SAMS/datasets/vision/pose/coco_raw/images_unzipped/val2017,5000

@@ -138,7 +138,10 @@ def detect_hazards(image, *, conf: float | None = None) -> dict[str, Any]:
         return result
     result["available"] = True
     result["model_id"] = spec["model_id"]
+    class_conf = {} if conf is not None else dict(spec.get("class_conf") or {})
     cutoff = float(spec["conf"] if conf is None else conf)
+    if class_conf:
+        cutoff = min([cutoff, *(float(v) for v in class_conf.values())])
     try:
         outputs = model.predict(image, conf=cutoff, imgsz=int(spec["imgsz"]), verbose=False)
     except Exception as exc:  # noqa: BLE001
@@ -161,6 +164,8 @@ def detect_hazards(image, *, conf: float | None = None) -> dict[str, Any]:
         if kind is None:
             continue
         score = float(scores[index])
+        if score < float(class_conf.get(kind, cutoff)):
+            continue
         result[f"{kind}_score"] = max(result[f"{kind}_score"], score)
         result["detections"].append(
             {
@@ -195,8 +200,8 @@ def detect_falls(image) -> dict[str, Any]:
     return accident.detect_falls(image)
 
 
-def fall_for_person(box: list[float] | None, falls: dict[str, Any]) -> dict[str, Any]:
-    return accident.fall_for_box(box, falls)
+def fall_for_person(box: list[float] | None, falls: dict[str, Any], keypoints=None) -> dict[str, Any]:
+    return accident.fall_for_box(box, falls, keypoints)
 
 
 def reset() -> None:

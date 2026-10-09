@@ -7,3 +7,5 @@ hardware/certs
 yolov8n-pose.pt__pycache__/
 *.pyc
 .DS_Store
+mygithub
+mygithub.*

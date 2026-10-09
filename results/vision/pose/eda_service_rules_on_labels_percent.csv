@@ -1,0 +1,4 @@
+split,labels pass head-or-shoulders,labels allow stature
+train,97.8,31.6
+val,97.0,34.3
+test,97.3,30.4
