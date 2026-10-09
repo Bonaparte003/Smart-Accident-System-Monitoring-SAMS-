@@ -280,6 +280,61 @@ Full details are in [`hardware/README.md`](hardware/README.md).
 | LEDs green / yellow / red | Optional | D5 / D6 / D7 | Visual risk level |
 | Android phone | Yes, for live vision | Same Wi-Fi, HTTPS | Camera |
 
+```mermaid
+erDiagram
+    SAMS_SERVER ||--o| ARDUINO_UNO : "USB serial 115200"
+    SAMS_SERVER ||--o{ ANDROID_PHONE : "HTTPS over Wi-Fi (QR join)"
+    ARDUINO_UNO ||--|| MPU6050 : "hardware I2C"
+    ARDUINO_UNO ||--o| VL53L0X : "software I2C"
+    ARDUINO_UNO ||--|| BUZZER : "digital out"
+    ARDUINO_UNO ||--o{ LED : "digital out"
+
+    SAMS_SERVER {
+        string host "Mac, Django on uvicorn"
+        string url "https://0.0.0.0:8000"
+        string serial_port "SAMS_HW_SERIAL_PORT"
+        int baud "115200"
+    }
+    ARDUINO_UNO {
+        string board "Uno / AVR + CH340"
+        string firmware "mpu6050_serial.ino"
+        string sends "ax,ay,az at 50 Hz and TOF:m"
+        string receives "B0/B1/B2 and L0/LG/LY/LR"
+        int status_led "D13"
+    }
+    MPU6050 {
+        string role "machine vibration"
+        string sda "A4"
+        string scl "A5"
+        string power "5V / GND"
+    }
+    VL53L0X {
+        string role "close-range distance (optional)"
+        string sda "A0"
+        string scl "A1"
+        string power "5V / GND, XSHUT open"
+    }
+    BUZZER {
+        string role "caution / danger alerts"
+        string signal "D8"
+        string ground "GND"
+    }
+    LED {
+        string colour "green / yellow / red (optional)"
+        string pin "D5 / D6 / D7"
+        string meaning "normal / caution / danger"
+    }
+    ANDROID_PHONE {
+        string role "live camera"
+        string join_page "/cam/token/"
+        string upload "POST /cam/token/frame/ (JPEG)"
+    }
+```
+
+- **SAMS server and Arduino**: the board streams accelerometer lines (`ax,ay,az`) and distance lines (`TOF:1.23`), and the server sends buzzer (`B0`/`B1`/`B2`) and LED (`L0`/`LG`/`LY`/`LR`) commands back. The board is optional; without it, vibration and the buzzer show as offline.
+- **SAMS server and phones**: each phone scans the QR code from **Vision lab → Live phone** and uploads camera frames over HTTPS.
+- **Arduino and parts**: the MPU6050 and buzzer are required for live sensing; the VL53L0X and LEDs are optional.
+
 ```bash
 ./hardware/tools/hw.sh ports       # list connected boards
 ./hardware/tools/hw.sh flash       # compile and upload hardware/firmware/mpu6050_serial
@@ -289,7 +344,101 @@ Full details are in [`hardware/README.md`](hardware/README.md).
 ./hardware/tools/hw.sh run         # start SAMS with hardware
 ```
 
-_Circuit diagram: add `docs/circuit.png`._
+### Circuit diagram
+
+Pin-level wiring, taken from `hardware/firmware/mpu6050_serial/mpu6050_serial.ino`. Every part shares the Arduino's 5V and GND rails; the board itself is powered over the USB cable to the Mac.
+
+```mermaid
+erDiagram
+    MAC_HOST ||--|| ARDUINO_UNO : "USB cable: power + serial 115200"
+    ARDUINO_UNO ||--|| RAIL_5V : "5V pin"
+    ARDUINO_UNO ||--|| RAIL_GND : "GND pin"
+
+    ARDUINO_UNO ||--|| MPU6050 : "A4 to SDA, A5 to SCL"
+    RAIL_5V ||--|| MPU6050 : "to VCC"
+    RAIL_GND ||--|| MPU6050 : "to GND"
+
+    ARDUINO_UNO ||--o| VL53L0X : "A0 to SDA, A1 to SCL"
+    RAIL_5V ||--o| VL53L0X : "to VIN"
+    RAIL_GND ||--o| VL53L0X : "to GND"
+
+    ARDUINO_UNO ||--|| BUZZER : "D8 to plus"
+    RAIL_GND ||--|| BUZZER : "to minus"
+
+    ARDUINO_UNO ||--o| LED_GREEN : "D5 to anode"
+    ARDUINO_UNO ||--o| LED_YELLOW : "D6 to anode"
+    ARDUINO_UNO ||--o| LED_RED : "D7 to anode"
+    RAIL_GND ||--o| LED_GREEN : "to cathode"
+    RAIL_GND ||--o| LED_YELLOW : "to cathode"
+    RAIL_GND ||--o| LED_RED : "to cathode"
+
+    MAC_HOST {
+        string role "runs SAMS (uvicorn HTTPS)"
+        string port "/dev/cu.usbserial-*"
+    }
+    ARDUINO_UNO {
+        string board "Uno / Nano AVR + CH340"
+        pin A4 "SDA hardware I2C"
+        pin A5 "SCL hardware I2C"
+        pin A0 "SDA software I2C"
+        pin A1 "SCL software I2C"
+        pin D5 "green LED"
+        pin D6 "yellow LED"
+        pin D7 "red LED"
+        pin D8 "buzzer"
+        pin D13 "onboard status LED"
+    }
+    RAIL_5V {
+        string source "Arduino 5V pin"
+    }
+    RAIL_GND {
+        string source "Arduino GND pin (common ground)"
+    }
+    MPU6050 {
+        pin VCC "5V"
+        pin GND "GND"
+        pin SDA "A4"
+        pin SCL "A5"
+        string i2c_address "0x68"
+    }
+    VL53L0X {
+        pin VIN "5V"
+        pin GND "GND"
+        pin SDA "A0"
+        pin SCL "A1"
+        pin XSHUT "leave unconnected"
+    }
+    BUZZER {
+        string type "active buzzer"
+        pin plus "D8"
+        pin minus "GND"
+        string note "use a transistor if D8 cannot drive it"
+    }
+    LED_GREEN {
+        pin anode "D5 via 220 ohm resistor"
+        pin cathode "GND"
+        string meaning "normal"
+    }
+    LED_YELLOW {
+        pin anode "D6 via 220 ohm resistor"
+        pin cathode "GND"
+        string meaning "caution"
+    }
+    LED_RED {
+        pin anode "D7 via 220 ohm resistor"
+        pin cathode "GND"
+        string meaning "danger"
+    }
+```
+
+| Arduino pin | Connects to | Notes |
+|---|---|---|
+| 5V | MPU6050 VCC, VL53L0X VIN | Shared 5V rail |
+| GND | MPU6050 GND, VL53L0X GND, buzzer −, LED cathodes | Common ground |
+| A4 / A5 | MPU6050 SDA / SCL | Hardware I2C, address `0x68` |
+| A0 / A1 | VL53L0X SDA / SCL | Software I2C; leave XSHUT open |
+| D8 | Buzzer + | Active buzzer; add a transistor if it is too quiet |
+| D5 / D6 / D7 | Green / yellow / red LED anodes | Each through a ~220 Ω resistor |
 
 ---
 
