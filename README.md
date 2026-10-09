@@ -3,7 +3,7 @@
 SAMS warns workers **before** they get hurt near industrial machines. A phone camera and an accelerometer watch the machine area. Machine-learning models detect the worker, estimate how far they are from the machine, check their protective gear, and read the machine's vibration. A fusion model then turns all of that into one risk level, **NORMAL**, **CAUTION** or **DANGER**, and drives a buzzer and warning LEDs in real time. Every analysed clip is archived so a safety officer can review incidents and label data for retraining.
 
 - **Repository:** <https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS->
-- **Video demo:** _add link here_
+- **Video demo:** <https://www.youtube.com/watch?v=tkwJFKNSVD8>
 - **Track:** ML Track (models, notebooks, metrics) with a full-stack web MVP and hardware integration
 - **ML report:** [`notebooks/README.md`](notebooks/README.md) covers data visualisation, EDA, model architectures, experiments and metrics for all eight models
 
