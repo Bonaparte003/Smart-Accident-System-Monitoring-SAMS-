@@ -660,13 +660,3 @@ flowchart LR
 | **3. Scale** | One edge box per machine, plus a shared dashboard | Each box keeps its video locally and shares only its alerts, so a safety officer sees every machine on one screen. |
 
 **Updating models is painless.** Each model ships with a `metadata.json` that holds its classes, thresholds and image size, and the app reads it at start-up. A better model from the notebooks or the MLOps export is a drop-in replacement: copy the new folder into `models/`, restart, done.
-
----
-
-## Known limitations and next steps
-
-- The fusion model is trained on synthetic, rule-labelled data. Real labelled sessions (the `Trial` model and the MLOps export exist for this) are needed before trusting it on site.
-- PPE missing-gear recall drops sharply from validation to test (0.45 to 0.047), so PPE results are recorded but do not change the risk decision.
-- The fall detector was trained on 111 synthetic images.
-- The pose notebook has not been run yet; the app uses the stock YOLOv8n-pose weights.
-- Security for production: move `SECRET_KEY` to an environment variable, set `DEBUG = False`, restrict `ALLOWED_HOSTS` and CORS, and add authentication to the device API.
