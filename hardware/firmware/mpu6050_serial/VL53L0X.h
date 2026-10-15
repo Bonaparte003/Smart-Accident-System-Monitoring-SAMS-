@@ -7,7 +7,6 @@
 class VL53L0X
 {
   public:
-    // register addresses from API vl53l0x_device.h (ordered as listed there)
     enum regAddr
     {
       SYSRANGE_START                              = 0x00,
@@ -136,9 +135,7 @@ class VL53L0X
     bool timeoutOccurred();
 
   private:
-    // TCC: Target CentreCheck
-    // MSRC: Minimum Signal Rate Check
-    // DSS: Dynamic Spad Selection
+
 
     struct SequenceStepEnables
     {
@@ -159,7 +156,7 @@ class VL53L0X
     bool did_timeout;
     uint16_t timeout_start_ms;
 
-    uint8_t stop_variable; // read by init and used when starting measurement; is StopVariable field of VL53L0X_DevData_t structure in API
+    uint8_t stop_variable;
     uint32_t measurement_timing_budget_us;
 
     bool getSpadInfo(uint8_t * count, bool * type_is_aperture);

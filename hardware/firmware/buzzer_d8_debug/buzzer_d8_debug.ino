@@ -1,7 +1,6 @@
 /*
-  SAMS buzzer debug — D8 solid beep (no melody)
-
-  ./hardware/tools/hw.sh flash-buzzer
+  SAMS buzzer debug — D8 solid beep
+  ./hardware/tools/hw.sh flash-buzzer (The debuging command)
 */
 
 const int BUZZER_PIN = 8;
@@ -22,14 +21,14 @@ void setup() {
   buzzerOff();
   Serial.begin(115200);
   delay(400);
-  Serial.println("# buzzer debug ready (D8)");
+  Serial.println("- buzzer debug ready (D8)");
   for (int i = 0; i < 3; i++) {
     buzzerOn();
     delay(300);
     buzzerOff();
     delay(150);
   }
-  Serial.println("# B1=on  B0=off");
+  Serial.println("- B1=on  B0=off");
 }
 
 void loop() {
@@ -38,10 +37,10 @@ void loop() {
     line.trim();
     if (line == "B1" || line == "B2" || line == "1") {
       buzzerOn();
-      Serial.println("# ACK B1");
+      Serial.println("- ACK B1");
     } else if (line == "B0" || line == "0") {
       buzzerOff();
-      Serial.println("# ACK B0");
+      Serial.println("- ACK B0");
     }
   }
 }

@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-// Bit-banged I2C so the ToF can use A0/A1 while the MPU6050 keeps hardware I2C.
+
 class SoftI2C {
  public:
   SoftI2C(uint8_t sda, uint8_t scl) : _sda(sda), _scl(scl) {}
@@ -24,22 +24,18 @@ class SoftI2C {
   }
 
   uint8_t endTransmission() {
-    noInterrupts();
     startCond();
     if (!writeByte((_addr << 1) | 0)) {
       stopCond();
-      interrupts();
       return 2;
     }
     for (uint8_t i = 0; i < _txLen; i++) {
       if (!writeByte(_tx[i])) {
         stopCond();
-        interrupts();
-        return 3;
+          return 3;
       }
     }
     stopCond();
-    interrupts();
     return 0;
   }
 
@@ -47,18 +43,15 @@ class SoftI2C {
     if (qty > sizeof(_rx)) qty = sizeof(_rx);
     _rxLen = 0;
     _rxPos = 0;
-    noInterrupts();
     startCond();
     if (!writeByte((addr << 1) | 1)) {
       stopCond();
-      interrupts();
       return 0;
     }
     for (uint8_t i = 0; i < qty; i++) {
       _rx[_rxLen++] = readByte(i + 1 < qty);
     }
     stopCond();
-    interrupts();
     return _rxLen;
   }
 
@@ -70,7 +63,6 @@ class SoftI2C {
  private:
   void dly() { delayMicroseconds(8); }
 
-  // Latch low before driving, so the pin does not spike high.
   void sdaLow() {
     digitalWrite(_sda, LOW);
     pinMode(_sda, OUTPUT);
