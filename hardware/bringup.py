@@ -19,14 +19,17 @@ def find_serial_port() -> str:
     chosen = os.environ.get("SAMS_HW_SERIAL_PORT", "").strip()
     if chosen:
         return chosen
-    found = sorted(
-        glob.glob("/dev/cu.usbserial-*")
-        + glob.glob("/dev/cu.usbmodem*")
-        + glob.glob("/dev/cu.wchusbserial*")
-        + glob.glob("/dev/ttyUSB*")
-        + glob.glob("/dev/ttyACM*")
-    )
-    return found[0] if found else ""
+    for pattern in (
+        "/dev/cu.usbserial-*",
+        "/dev/cu.wchusbserial*",
+        "/dev/ttyUSB*",
+        "/dev/cu.usbmodem*",
+        "/dev/ttyACM*",
+    ):
+        found = sorted(glob.glob(pattern))
+        if found:
+            return found[0]
+    return ""
 
 
 def ensure_certs() -> tuple[Path, Path]:
@@ -62,7 +65,7 @@ def start_hardware() -> None:
         return
     stream.config = replace(load_config(), serial_port=port)
     try:
-        stream.set_mode("live")
+        stream.start()
     except Exception as exc:  # noqa: BLE001
         get_presence().reset()
         logger.warning("Hardware serial did not open: %s", exc)

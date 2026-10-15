@@ -1,4 +1,4 @@
-"""Environment-driven hardware settings (real serial MPU6050 only)."""
+"""Environment-driven hardware settings"""
 
 from __future__ import annotations
 
@@ -21,10 +21,8 @@ class HardwareConfig:
     window_size: int = 100
     buzzer_auto: bool = True
     buzzer_enabled: bool = True
-    # Green is the idle state. Caution and danger replace it.
     leds_auto: bool = True
     leds_enabled: bool = True
-    # Android phone over Wi‑Fi (IP Webcam base URL, e.g. http://192.168.1.20:8080)
     camera_url: str = ""
     camera_user: str = ""
     camera_password: str = ""

@@ -14,9 +14,7 @@ BuzzerState = Literal["off", "caution", "danger"]
 _LABEL_TO_STATE: dict[str, BuzzerState] = {
     "NORMAL": "off",
     "CAUTION": "caution",
-    "ABNORMAL": "caution",
     "DANGER": "danger",
-    "DEGRADED": "caution",
 }
 
 _CMD: dict[BuzzerState, str] = {
@@ -60,7 +58,7 @@ class Buzzer:
                 self._apply("off")
 
     def apply_label(self, label: str | None) -> BuzzerState:
-        state = _LABEL_TO_STATE.get((label or "NORMAL").upper(), "off")
+        state = _LABEL_TO_STATE.get(str(label).upper(), "off") if label else "off"
         self.set_state(state)
         return state
 

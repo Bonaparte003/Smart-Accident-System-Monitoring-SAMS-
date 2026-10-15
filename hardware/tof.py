@@ -1,11 +1,5 @@
-"""Time-of-flight ranging for near-field worker distance.
-
-Vision covers range beyond 5 m. A ToF reading at or under 5 m replaces that estimate.
-
-Reading order:
-1. Explicit override via ``SAMS_HW_TOF_M`` (lab injection / tests)
-2. Latest sample from the shared MCU serial stream (``TOF:<metres>`` lines)
-3. Unavailable → ``None`` (caller falls back to vision)
+"""
+Time-of-flight ranging for near-field worker distance
 """
 
 from __future__ import annotations
@@ -20,6 +14,7 @@ from typing import Any
 logger = logging.getLogger("hardware.tof")
 
 _TOF_LINE = re.compile(r"^TOF:([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s*$")
+OFFLINE_AFTER_S = 5.0
 
 
 class ToFSensor:
@@ -31,19 +26,16 @@ class ToFSensor:
         self._latest_ts: float = 0.0
         self._log_ts: float = 0.0
         self._stale_s = float(os.environ.get("SAMS_HW_TOF_STALE_S", "2.0"))
-        self._enabled = os.environ.get("SAMS_HW_TOF_ENABLED", "true").strip().lower() in {
-            "1",
-            "true",
-            "yes",
-            "on",
-        }
 
-    @property
-    def enabled(self) -> bool:
-        return self._enabled
+    def online(self) -> bool:
+        """The board reported the sensor recently, or a lab override is set."""
+        if os.environ.get("SAMS_HW_TOF_M", "").strip():
+            return True
+        from .presence import get_presence
 
-    def set_enabled(self, on: bool) -> None:
-        self._enabled = bool(on)
+        board = get_presence().snapshot()
+        age = board.get("tof_age_s")
+        return board.get("tof_present") is True and age is not None and age <= OFFLINE_AFTER_S
 
     def ingest_line(self, line: str) -> bool:
         """Parse a firmware line like ``TOF:1.23``. Returns True if consumed."""
@@ -77,8 +69,6 @@ class ToFSensor:
             self._latest_ts = time.monotonic()
 
     def read_metres(self) -> float | None:
-        if not self._enabled:
-            return None
         override = os.environ.get("SAMS_HW_TOF_M", "").strip()
         if override:
             try:
@@ -101,7 +91,7 @@ class ToFSensor:
         with self._lock:
             age = (time.monotonic() - self._latest_ts) if self._latest_ts else None
         return {
-            "enabled": self._enabled,
+            "online": self.online(),
             "available": metres is not None,
             "distance_m": round(metres, 3) if metres is not None else None,
             "age_s": round(age, 3) if age is not None else None,

@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Cycle the status LEDs on the flashed MPU6050 sketch.
-
-Green D2, yellow D3, red D5. Stop Django first — only one process can open the port.
-
-  python hardware/tools/led_test.py --port /dev/cu.usbserial-1430
+"""
+Cycle the status LEDs on the flashed MPU6050 sketch
+Green D2, yellow D3, red D5.
+python hardware/tools/led_test.py --port /dev/cu.usbserial-1430
 """
 
 from __future__ import annotations

@@ -6,19 +6,18 @@ import logging
 import threading
 import time
 from collections import deque
-from typing import Any, Literal
+from typing import Any
 
 import numpy as np
 
 from .buzzer import get_buzzer
 from .config import HardwareConfig, load_config
 from .leds import get_leds
+from .motor import get_motor
 from .mpu6050 import AccelSource, SerialMPU6050
 from .presence import get_presence
 
 logger = logging.getLogger("hardware.stream")
-
-Mode = Literal["simulate", "live"]
 
 
 def apply_risk_actuators(label: str | None, *, buzzer: bool = True, leds: bool = True) -> None:
@@ -34,7 +33,7 @@ class AccelStream:
 
     def __init__(self, config: HardwareConfig | None = None):
         self.config = config or load_config()
-        self.mode: Mode = "simulate"
+        self._live = False
         self._source: AccelSource | None = None
         self._buf: deque[tuple[float, float, float]] = deque(maxlen=self.config.window_size)
         self._lock = threading.Lock()
@@ -45,15 +44,12 @@ class AccelStream:
         self._started_at: float | None = None
         self._last_sample_at: float | None = None
         self._last_prediction: dict[str, Any] | None = None
-        self._buzzer_auto = self.config.buzzer_auto
-        self._leds_auto = self.config.leds_auto
-        self._machine_on = False
 
     def status(self) -> dict[str, Any]:
         with self._lock:
             filled = len(self._buf)
             return {
-                "mode": self.mode,
+                "live": self._live,
                 "source": "serial",
                 "connected": bool(self._source and self._source.connected),
                 "running": self._thread is not None and self._thread.is_alive(),
@@ -65,51 +61,22 @@ class AccelStream:
                 "last_error": self._last_error,
                 "started_at": self._started_at,
                 "last_sample_at": self._last_sample_at,
-                "buzzer_auto": self._buzzer_auto,
-                "leds_auto": self._leds_auto,
-                "machine_on": self._machine_on,
+                "buzzer_auto": self.buzzer_auto,
+                "leds_auto": self.leds_auto,
                 "last_label": (self._last_prediction or {}).get("label"),
                 "serial_port": self.config.serial_port or None,
             }
 
-    def set_mode(self, mode: Mode, *, source: str | None = None) -> dict[str, Any]:
-        if mode not in ("simulate", "live"):
-            raise ValueError("mode must be 'simulate' or 'live'")
-        if source and source.strip().lower() not in ("", "serial"):
-            raise ValueError("Only serial MPU6050 is supported (no mock source)")
-        if mode == "live":
-            self.start()
-        else:
-            self.stop()
-            get_buzzer().set_state("off")
-            get_leds().set_color("off")
-        self.mode = mode
-        logger.info("Hardware mode → %s", self.mode)
-        return self.status()
-
-    def set_buzzer_auto(self, on: bool) -> None:
-        self._buzzer_auto = bool(on)
-
-    def set_leds_auto(self, on: bool) -> None:
-        self._leds_auto = bool(on)
-
-    def set_machine_on(self, on: bool) -> None:
-        """Explicit run switch. A vibration sample does not turn the machine on."""
-        self._machine_on = bool(on)
-
-    @property
-    def machine_on(self) -> bool:
-        return self._machine_on
-
     @property
     def buzzer_auto(self) -> bool:
-        return self._buzzer_auto
+        return self.config.buzzer_auto
 
     @property
     def leds_auto(self) -> bool:
-        return self._leds_auto
+        return self.config.leds_auto
 
     def start(self) -> None:
+        """Open the serial board and stream samples. Raises if the port does not open."""
         if self._thread and self._thread.is_alive():
             return
         self.stop()
@@ -127,39 +94,34 @@ class AccelStream:
             self._source = None
             get_buzzer().attach_writer(None)
             get_leds().attach_writer(None)
+            get_motor().detach()
             logger.warning("Failed to open MPU6050 serial: %s", exc)
             raise
         get_buzzer().attach_writer(self._source.write_line)
         get_leds().attach_writer(self._source.write_line)
-        if get_leds().enabled:
-            get_leds().set_color("green")
+        get_motor().attach_writer(self._source.write_line)
         self._started_at = time.time()
         self._thread = threading.Thread(target=self._run, name="sams-mpu6050", daemon=True)
         self._thread.start()
-        # Raw serial chirp — proves D8 wiring without waiting for a risk label.
-        source = self._source
-
-        def _chirp_off() -> None:
-            try:
-                if source is not None and source.connected:
-                    source.write_line("B0")
-            except Exception:  # noqa: BLE001
-                pass
-
+        self._live = True
+        logger.info("Hardware live on %s", self.config.serial_port)
+        # Startup sequence — buzzer, LEDs one by one, motor — proves every actuator
+        # without waiting for a risk label. The board skips it if it just booted.
         try:
-            source.write_line("B1")
-            threading.Timer(0.45, _chirp_off).start()
-            logger.info("Buzzer link chirp sent (B1)")
+            self._source.write_line("ST")
+            logger.info("Startup sequence sent (ST)")
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Buzzer link chirp failed: %s", exc)
+            logger.warning("Startup sequence failed: %s", exc)
 
     def stop(self) -> None:
+        self._live = False
         self._stop.set()
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=2.0)
         self._thread = None
         get_buzzer().attach_writer(None)
         get_leds().attach_writer(None)
+        get_motor().detach()
         if self._source is not None:
             try:
                 self._source.close()
@@ -186,11 +148,18 @@ class AccelStream:
                 logger.warning("MPU6050 read error: %s", exc)
                 time.sleep(0.2)
 
-    def latest_window(self) -> np.ndarray | None:
+    def latest_window(self, size: int | None = None) -> np.ndarray | None:
+        """The newest ``size`` samples (the buffer length when omitted), or None until that many arrived.
+
+        A model that needs a longer window than the buffer holds grows the buffer.
+        """
+        size = int(size or self.config.window_size)
         with self._lock:
-            if len(self._buf) < self.config.window_size:
+            if size > (self._buf.maxlen or 0):
+                self._buf = deque(self._buf, maxlen=size)
+            if len(self._buf) < size:
                 return None
-            arr = np.array(self._buf, dtype=np.float32)
+            arr = np.array(list(self._buf)[-size:], dtype=np.float32)
         return arr
 
     def record_prediction(self, result: dict[str, Any]) -> None:
@@ -203,7 +172,7 @@ class AccelStream:
 
     @property
     def is_live(self) -> bool:
-        return self.mode == "live"
+        return self._live
 
 
 _stream: AccelStream | None = None

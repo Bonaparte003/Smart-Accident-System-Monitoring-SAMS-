@@ -52,7 +52,7 @@ class PhoneCamera:
         self._last_jpeg: bytes | None = None
         self._last_prediction: dict[str, Any] | None = None
         self._grab_count = 0
-        self._join_base: str = ""  # e.g. http://192.168.1.10:8000
+        self._join_base: str = ""
 
     @property
     def token(self) -> str | None:
@@ -132,7 +132,8 @@ class PhoneCamera:
             self._last_error = None
         return self.status()
 
-    def grab_image(self) -> Image.Image:
+    def grab_jpeg(self) -> bytes:
+        """The phone's latest JPEG, exactly as it was uploaded."""
         with self._lock:
             raw = self._last_jpeg
             age = None if self._last_grab_at is None else time.time() - self._last_grab_at
@@ -140,7 +141,10 @@ class PhoneCamera:
             raise RuntimeError("Waiting for phone — scan the QR and allow camera access")
         if age is not None and age > 8.0:
             raise RuntimeError("Phone feed stalled — keep the join page open on the phone")
-        return Image.open(io.BytesIO(raw)).convert("RGB")
+        return raw
+
+    def grab_image(self) -> Image.Image:
+        return Image.open(io.BytesIO(self.grab_jpeg())).convert("RGB")
 
     def record_prediction(self, prediction: dict[str, Any] | None) -> None:
         with self._lock:

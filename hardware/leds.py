@@ -13,9 +13,7 @@ LedColor = Literal["off", "green", "yellow", "red"]
 _LABEL_TO_LED: dict[str, LedColor] = {
     "NORMAL": "green",
     "CAUTION": "yellow",
-    "ABNORMAL": "yellow",
     "DANGER": "red",
-    "DEGRADED": "yellow",
 }
 
 _CMD: dict[LedColor, str] = {
@@ -54,7 +52,7 @@ class Leds:
                 self._apply("off")
 
     def apply_label(self, label: str | None) -> LedColor:
-        color = _LABEL_TO_LED.get((label or "NORMAL").upper(), "off")
+        color = _LABEL_TO_LED.get(str(label).upper(), "off") if label else "off"
         self.set_color(color)
         return color
 

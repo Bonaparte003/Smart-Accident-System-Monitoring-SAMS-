@@ -1,5 +1,5 @@
-"""MPU6050 accelerometer over USB serial (CSV lines).
-
+"""
+MPU6050 accelerometer over USB serial
 All serial I/O is serialized on one lock so actuator commands (buzzer/LEDs)
 are not dropped while the reader thread is mid-readline.
 """
@@ -127,16 +127,16 @@ class SerialMPU6050(AccelSource):
                 from .presence import get_presence
 
                 get_presence().note_line(line)
+                if line.startswith("# ACK "):
+                    from .motor import get_motor
+
+                    get_motor().note_ack(line)
                 logger.info("MCU RX %s", line)
                 continue
-            # Optional ToF firmware lines: TOF:1.23
             if line.upper().startswith("TOF:"):
-                try:
-                    from .tof import get_tof
+                from .tof import get_tof
 
-                    get_tof().ingest_line(line)
-                except Exception:  # noqa: BLE001
-                    pass
+                get_tof().ingest_line(line)
                 continue
             parts = [p.strip() for p in line.replace(";", ",").split(",")]
             if len(parts) < 3:
