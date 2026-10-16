@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import InteractionEvent, Recording, RecordingMinute
+from .models import InteractionEvent, Recording, RecordingMinute, Trial, TrainingSample
 
 
 class RecordingMinuteInline(admin.TabularInline):
@@ -20,3 +20,14 @@ class InteractionEventAdmin(admin.ModelAdmin):
 class RecordingAdmin(admin.ModelAdmin):
     list_display = ("title", "created_at", "duration_s", "problem_count", "render_status")
     inlines = [RecordingMinuteInline]
+
+
+@admin.register(Trial)
+class TrialAdmin(admin.ModelAdmin):
+    list_display = ("code", "started_at", "ended_at", "risk_label", "scenario", "participant")
+
+
+@admin.register(TrainingSample)
+class TrainingSampleAdmin(admin.ModelAdmin):
+    list_display = ("kind", "trial", "timestamp_ms", "target", "target_value", "predicted")
+    list_filter = ("kind",)

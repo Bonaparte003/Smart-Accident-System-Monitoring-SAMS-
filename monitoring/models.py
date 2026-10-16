@@ -1,11 +1,26 @@
 from django.db import models
 
+RISK_LABELS = [("NORMAL", "Normal"), ("CAUTION", "Caution"), ("DANGER", "Danger")]
+VIBRATION_LABELS = [("NORMAL", "Normal"), ("ABNORMAL", "Abnormal")]
+MACHINE_STATES = [("RUNNING", "Running"), ("STOPPED", "Stopped")]
+
 
 class Recording(models.Model):
-    """A workplace video kept so a problem minute can be opened later."""
+    """A workplace video kept so a problem minute can be opened later.
+
+    ``live`` clips are recorded from a Go Live session; ``upload`` clips come
+    from a file, with ``declared`` holding what the operator stated for the
+    sensors a file cannot carry (machine state, vibration).
+    """
 
     created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=200)
+    source = models.CharField(
+        max_length=16,
+        default="upload",
+        choices=[("upload", "Uploaded video"), ("live", "Live session")],
+    )
+    declared = models.JSONField(default=dict, blank=True)
     video = models.FileField(upload_to="recordings/%Y/%m/")
     framed = models.FileField(upload_to="recordings/framed/%Y/%m/", blank=True)
     render_status = models.CharField(
@@ -53,6 +68,7 @@ class RecordingMinute(models.Model):
             ("excluded", "Excluded"),
         ],
     )
+    true_label = models.CharField(max_length=16, choices=RISK_LABELS, blank=True)
 
     class Meta:
         ordering = ["minute"]
@@ -90,10 +106,6 @@ class InteractionEvent(models.Model):
 
     def __str__(self) -> str:
         return f"{self.level} {self.reason}".strip()
-
-
-RISK_LABELS = [("NORMAL", "Normal"), ("CAUTION", "Caution"), ("DANGER", "Danger")]
-VIBRATION_LABELS = [("NORMAL", "Normal"), ("ABNORMAL", "Abnormal")]
 
 
 class Trial(models.Model):
