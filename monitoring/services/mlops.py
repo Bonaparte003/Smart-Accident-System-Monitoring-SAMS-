@@ -10,19 +10,20 @@ from pathlib import Path
 from django.conf import settings
 
 from monitoring.models import RecordingMinute
+from monitoring.services.ppe_inference import ppe_items
 
 SERVING = (
     ("Person", "The PPE checkpoint's person class", "models/vision/ppe/best.pt"),
     ("PPE", "Hard hat, vest, gloves, and safety shoes on each person", "models/vision/ppe/best.pt"),
     ("Pose", "Body joints inside each worker crop", "models/vision/pose/best.pt"),
-    ("Distance", "Residual network on the pinhole prior, for a full body", "models/vision/distance/distance_nn.pt"),
+    ("Distance", "Residual network on the pinhole prior, from each person's box and pose", "models/vision/distance/distance_nn.pt"),
     ("Hazard", "Fire and smoke boxes", "models/vision/hazard/best.pt"),
     ("Accident", "A fallen worker", "models/vision/accident/best.pt"),
-    ("Vibration", "Reads the accelerometer window", "models/vibration/vib_exp02_xgboost/model.joblib"),
+    ("Vibration", "Labels each live accelerometer window NORMAL or ABNORMAL", "models/vibration/best/model.joblib"),
+    ("Machine state", "Labels each live accelerometer window STOPPED or RUNNING", "models/machine_state/model.joblib"),
     ("Fusion", "Turns vision, distance, and vibration into an alert", "models/fusion/best_fusion_model/model.joblib"),
 )
 
-PPE_KEYS = ("hard_hat", "vest", "gloves", "boots")
 
 
 def model_cards() -> list[dict]:
@@ -57,6 +58,7 @@ def export_zip(minutes) -> bytes:
     """
     buffer = io.BytesIO()
     minute_list = list(minutes)
+    ppe_keys = list(ppe_items())
     clean = _clean_frames(minute_list)
     written: set[int] = set()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -70,11 +72,13 @@ def export_zip(minutes) -> bytes:
                 "video",
                 "image",
                 "level",
+                "true_label",
                 "train_status",
+                "source",
                 "summary",
                 "worker_detected",
                 "distance_m",
-                *PPE_KEYS,
+                *ppe_keys,
             ]
         )
         for mark in minute_list:
@@ -114,14 +118,19 @@ def export_zip(minutes) -> bytes:
                     video_name,
                     image_name,
                     mark.level,
+                    mark.true_label,
                     mark.train_status,
+                    recording.source,
                     mark.summary,
                     detail.get("worker_detected"),
                     detail.get("distance_m"),
-                    *[worn.get(key) for key in PPE_KEYS],
+                    *[worn.get(key) for key in ppe_keys],
                 ]
             )
         archive.writestr("labels.csv", rows.getvalue())
+        from monitoring.services.trials import write_datasets
+
+        write_datasets(archive)
     return buffer.getvalue()
 
 

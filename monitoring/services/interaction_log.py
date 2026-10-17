@@ -18,15 +18,20 @@ def _selected_person(vision: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def record_interaction(payload: dict[str, Any]) -> InteractionEvent | None:
-    """Write one row when class, sentence, person, or machine switch changes."""
+    """Write one row when the fusion class, sentence, person, or machine state changes.
+
+    A frame where fusion gave no decision is not written.
+    """
     global _last_signature
     fusion = payload.get("fusion") or {}
+    if not fusion.get("label"):
+        return None
     vision = payload.get("vision") or {}
     features = payload.get("features") or {}
     vibration = payload.get("vibration") or {}
     person = _selected_person(vision)
     person_id = "" if person is None else str(person.get("id") or "")
-    level = str(fusion.get("label") or "NORMAL")
+    level = str(fusion["label"])
     reason = str(fusion.get("reason") or "")
     machine_on = bool(features.get("machine_active"))
     unusual = bool(vibration.get("abnormal"))
