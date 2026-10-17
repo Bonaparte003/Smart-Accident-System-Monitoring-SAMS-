@@ -1,18 +1,10 @@
 """PPE wearing detection — YOLOv8 fine-tuned on Construction-PPE.
 
-Gear is accepted only inside that person's body region:
-  head  - hard hat
-  torso - vest
-  hands - gloves (both wrists)
-  feet  - shoes (both ankles)
-
-Which class name means worn or missing is the checkpoint metadata, not a
-table in this file. A class the model does not have (there is no no-vest
-class) is never reported as missing.
-
-A hidden wrist or ankle stays "Not visible". It is not reported as missing.
-Across a person's track, a part that appears later can confirm the gear.
-A part that is still out of frame never becomes a missing flag.
+Each class keeps the boxes above its own threshold from the checkpoint
+metadata. A gear box belongs to the person box that holds its centre. For each item,
+the strongest worn-class or missing-class box on that person decides; with
+no box for an item, it is not detected. Which class name means worn or
+missing is the checkpoint metadata, not a table in this file.
 When weights are missing, returns ``available=False`` so the UI stays blank.
 """
 
@@ -32,14 +24,8 @@ logger = logging.getLogger("monitoring.ppe")
 # Item names, display labels, confidence, and image size come from
 # models/vision/ppe/metadata.json, written by
 # notebooks/05_vision_ppe_detection_training.ipynb from the checkpoint's classes.
-# COCO-17 indices used to place each region on the person.
-_HEAD_IDX = (0, 1, 2, 3, 4)
-_L_SHO, _R_SHO = 5, 6
-_L_ELB, _R_ELB = 7, 8
-_L_WRIST, _R_WRIST = 9, 10
-_L_HIP, _R_HIP = 11, 12
-_L_ANK, _R_ANK = 15, 16
-_KP_MIN = 0.3
+
+
 def _norm_label(label: str) -> str:
     return " ".join(str(label).strip().lower().replace("-", " ").replace("_", " ").split())
 
@@ -114,9 +100,6 @@ def is_worker_box(label: str, class_id: int = 0) -> bool:
 _lock = threading.Lock()
 _model = None
 _load_error: str | None = None
-_vote_lock = threading.Lock()
-# track id - item - recent worn votes
-_votes: dict[str, dict[str, list[bool | None]]] = {}
 
 
 def _project_root() -> Path:
@@ -187,6 +170,13 @@ def get_model():
     return _model
 
 
+def load_private_model():
+    """A separate copy of the PPE checkpoint, so a clip's tracker state stays its own."""
+    from ultralytics import YOLO
+
+    return YOLO(str(weights_path()))
+
+
 def reload_model() -> None:
     global _model, _load_error
     with _lock:
@@ -195,53 +185,23 @@ def reload_model() -> None:
 
 
 def _empty_item() -> dict[str, Any]:
-    return {"worn": None, "confidence": 0.0, "evidence": "none", "status": "—"}
+    return {"worn": None, "confidence": 0.0, "evidence": "none", "status": "Not detected"}
 
 
-def _decide_item(
-    scores_worn: list[float],
-    scores_missing: list[float],
-    *,
-    person_seen: bool,
-) -> dict[str, Any]:
-    """A wearing is whatever class the PPE model actually scored above its own confidence."""
-    cutoff = decision_conf()
+def _decide_item(scores_worn: list[float], scores_missing: list[float]) -> dict[str, Any]:
+    """The stronger of this person's worn and missing boxes for one item."""
     best_worn = max(scores_worn) if scores_worn else 0.0
     best_miss = max(scores_missing) if scores_missing else 0.0
-
-    if best_worn >= cutoff and best_worn >= best_miss:
-        return {
-            "worn": True,
-            "confidence": float(best_worn),
-            "evidence": "worn_class",
-            "status": "Worn",
-        }
-    if best_miss >= cutoff and best_miss > best_worn:
-        return {
-            "worn": False,
-            "confidence": float(best_miss),
-            "evidence": "missing_class",
-            "status": "Missing",
-        }
-    if not person_seen:
-        return _empty_item()
-    return {
-        "worn": None,
-        "confidence": 0.0,
-        "evidence": "uncertain",
-        "status": "—",
-    }
+    if best_worn > best_miss:
+        return {"worn": True, "confidence": float(best_worn), "evidence": "worn_class", "status": "Worn"}
+    if best_miss > best_worn:
+        return {"worn": False, "confidence": float(best_miss), "evidence": "missing_class", "status": "Missing"}
+    return _empty_item()
 
 
 def _summarize(items: dict[str, Any], person_seen: bool) -> tuple[str, bool | None, list[str]]:
-    """Complete only when every item is worn. A hidden part is not a miss."""
+    """Complete only when every item was detected worn."""
     missing = [_item_label(key, item) for key, item in items.items() if item["worn"] is False]
-    hidden = [key for key, item in items.items() if item.get("evidence") == "not_visible"]
-    undecided = [
-        key
-        for key, item in items.items()
-        if item["worn"] is None and item.get("evidence") != "not_visible"
-    ]
     if not person_seen:
         return "—", None, []
     if missing:
@@ -251,253 +211,30 @@ def _summarize(items: dict[str, Any], person_seen: bool) -> tuple[str, bool | No
             else f"{len(missing)} items missing"
         )
         return summary, False, missing
-    if undecided:
+    if any(item["worn"] is None for item in items.values()):
         return "Uncertain", None, []
-    if hidden:
-        return "Not fully visible", None, []
     return "Complete", True, []
 
 
-def worker_has_head_or_shoulders(keypoints) -> bool:
-    """A worker pose shows a head or a shoulder. Hips are not required.
-
-    A limb with neither is not a worker. An empty pose is not a decision;
-    the caller keeps the construction person box when pose found nothing.
-    """
-    if any(_kp(keypoints, index) for index in _HEAD_IDX):
-        return True
-    return _kp(keypoints, _L_SHO) is not None or _kp(keypoints, _R_SHO) is not None
-
-
-def _kp(keypoints, index: int) -> tuple[float, float, float] | None:
-    if not keypoints or index >= len(keypoints) or len(keypoints[index]) < 3:
-        return None
-    x, y, conf = (float(keypoints[index][0]), float(keypoints[index][1]), float(keypoints[index][2]))
-    if conf < _KP_MIN:
-        return None
-    return x, y, conf
-
-
-def _box_around(points: list[tuple[float, float, float]], pad_x: float, pad_top: float, pad_bottom: float) -> list[float]:
-    xs = [p[0] for p in points]
-    ys = [p[1] for p in points]
-    return [min(xs) - pad_x, min(ys) - pad_top, max(xs) + pad_x, max(ys) + pad_bottom]
-
-
-def body_regions(
-    keypoints,
-    person_box: list[float] | None,
-) -> dict[str, Any]:
-    """Rectangles for head, torso, each wrist, and each ankle.
-
-    A side is None when that keypoint was not confident enough to place it.
-    """
-    regions: dict[str, Any] = {"head": None, "torso": None, "hands": [None, None], "feet": [None, None]}
-    head_pts = [p for i in _HEAD_IDX if (p := _kp(keypoints, i))]
-    if head_pts:
-        face_w = max(12.0, max(p[0] for p in head_pts) - min(p[0] for p in head_pts))
-        face_h = max(12.0, max(p[1] for p in head_pts) - min(p[1] for p in head_pts))
-        regions["head"] = _box_around(head_pts, face_w * 0.8, face_h * 1.6, face_h * 0.35)
-
-    shoulders = [p for i in (_L_SHO, _R_SHO) if (p := _kp(keypoints, i))]
-    hips = [p for i in (_L_HIP, _R_HIP) if (p := _kp(keypoints, i))]
-    if shoulders and hips:
-        torso_pts = shoulders + hips
-        span_x = max(8.0, max(p[0] for p in torso_pts) - min(p[0] for p in torso_pts))
-        span_y = max(8.0, max(p[1] for p in torso_pts) - min(p[1] for p in torso_pts))
-        regions["torso"] = _box_around(torso_pts, span_x * 0.25, span_y * 0.15, span_y * 0.15)
-
-    height = 80.0
-    if person_box and len(person_box) >= 4:
-        height = max(32.0, float(person_box[3]) - float(person_box[1]))
-    foot_pad = max(14.0, height * 0.09)
-    for slot, (wrist_i, elbow_i) in enumerate(((_L_WRIST, _L_ELB), (_R_WRIST, _R_ELB))):
-        point = _kp(keypoints, wrist_i)
-        if point:
-            regions["hands"][slot] = _hand_region(point, _kp(keypoints, elbow_i), height)
-    for slot, index in enumerate((_L_ANK, _R_ANK)):
-        point = _kp(keypoints, index)
-        if point:
-            regions["feet"][slot] = [
-                point[0] - foot_pad,
-                point[1] - foot_pad * 0.4,
-                point[0] + foot_pad,
-                point[1] + foot_pad * 1.3,
-            ]
-    return regions
-
-
-def _center_inside(box: list[float], region: list[float] | None) -> bool:
-    if not region:
-        return False
-    cx = (float(box[0]) + float(box[2])) * 0.5
-    cy = (float(box[1]) + float(box[3])) * 0.5
-    return region[0] <= cx <= region[2] and region[1] <= cy <= region[3]
-
-
-def _overlaps_region(box: list[float], region: list[float] | None) -> bool:
-    """A glove box counts when its center is on the hand, or a fair part of the box is."""
-    if not region:
-        return False
-    if _center_inside(box, region):
-        return True
-    ix1, iy1 = max(float(box[0]), float(region[0])), max(float(box[1]), float(region[1]))
-    ix2, iy2 = min(float(box[2]), float(region[2])), min(float(box[3]), float(region[3]))
-    inter = max(0.0, ix2 - ix1) * max(0.0, iy2 - iy1)
-    area = max(1.0, (float(box[2]) - float(box[0])) * (float(box[3]) - float(box[1])))
-    return inter / area >= 0.2
-
-
-def _hand_region(wrist: tuple[float, float, float], elbow: tuple[float, float, float] | None, height: float) -> list[float]:
-    """Cover the hand beyond the wrist. Glove boxes rarely sit on the joint itself."""
-    pad = max(22.0, height * 0.12)
-    if elbow is None:
-        return [wrist[0] - pad, wrist[1] - pad * 0.7, wrist[0] + pad, wrist[1] + pad * 1.3]
-    dx = wrist[0] - elbow[0]
-    dy = wrist[1] - elbow[1]
-    length = max((dx * dx + dy * dy) ** 0.5, 1.0)
-    tip_x = wrist[0] + dx * 0.85
-    tip_y = wrist[1] + dy * 0.85
-    side = max(pad, length * 0.45)
-    xs = (wrist[0], tip_x)
-    ys = (wrist[1], tip_y)
-    return [min(xs) - side, min(ys) - side * 0.7, max(xs) + side, max(ys) + side * 0.7]
-
-
-def _not_visible() -> dict[str, Any]:
-    return {"worn": None, "confidence": 0.0, "evidence": "not_visible", "status": "Not visible"}
-
-
-def _pair_decision(sides: list[dict[str, Any] | None]) -> dict[str, Any]:
-    """Both sides must be visible and worn. One explicit miss is missing."""
-    visible = [side for side in sides if side is not None]
-    if not visible:
-        return _not_visible()
-    misses = [side for side in visible if side["worn"] is False]
-    if misses:
-        best = max(misses, key=lambda side: side["confidence"])
-        return {
-            "worn": False,
-            "confidence": best["confidence"],
-            "evidence": best["evidence"],
-            "status": "Missing",
-        }
-    if any(side is None for side in sides) or any(side["worn"] is None for side in visible):
-        if any(side is None for side in sides) and all(side is None or side["worn"] is not None for side in sides):
-            return _not_visible()
-        return {"worn": None, "confidence": 0.0, "evidence": "uncertain", "status": "—"}
-    best = max(visible, key=lambda side: side["confidence"])
-    return {
-        "worn": True,
-        "confidence": best["confidence"],
-        "evidence": "worn_class",
-        "status": "Worn",
-    }
-
-
-def _intersection(box: list[float], region: list[float]) -> float:
-    ix1, iy1 = max(float(box[0]), float(region[0])), max(float(box[1]), float(region[1]))
-    ix2, iy2 = min(float(box[2]), float(region[2])), min(float(box[3]), float(region[3]))
-    return max(0.0, ix2 - ix1) * max(0.0, iy2 - iy1)
-
-
-def _claim_pair(item: str, regions: list, gear: list[dict[str, Any]], used: list[dict[str, Any]]) -> list[dict[str, Any] | None]:
-    """Give each glove box to the one hand it overlaps most."""
-    claimed: list[list[dict[str, Any]]] = [[] for _ in regions]
-    for det in gear:
-        if det.get("item") != item:
-            continue
-        best_i = None
-        best_area = 0.0
-        for index, region in enumerate(regions):
-            if region is None or not _overlaps_region(det["xyxy"], region):
-                continue
-            area = _intersection(det["xyxy"], region)
-            if area > best_area:
-                best_area = area
-                best_i = index
-        if best_i is None:
-            continue
-        claimed[best_i].append(det)
-        used.append(det)
-    sides: list[dict[str, Any] | None] = []
-    for index, region in enumerate(regions):
-        if region is None:
-            sides.append(None)
-            continue
-        hits = claimed[index]
-        worn = [float(hit["confidence"]) for hit in hits if not hit.get("missing")]
-        missing = [float(hit["confidence"]) for hit in hits if hit.get("missing")]
-        sides.append(_decide_item(worn, missing, person_seen=True))
-    return sides
-
-
-def _scores_in(region: list[float] | None, gear: list[dict[str, Any]], item: str) -> tuple[list[float], list[float], list[dict[str, Any]]]:
-    worn: list[float] = []
-    missing: list[float] = []
-    used: list[dict[str, Any]] = []
-    if not region:
-        return worn, missing, used
-    for det in gear:
-        if det.get("item") != item:
-            continue
-        if not _overlaps_region(det["xyxy"], region):
-            continue
-        used.append(det)
-        if det.get("missing"):
-            missing.append(float(det["confidence"]))
-        else:
-            worn.append(float(det["confidence"]))
-    return worn, missing, used
-
-
-def assess_person(
-    keypoints,
-    person_box: list[float] | None,
-    gear: list[dict[str, Any]],
-    *,
-    regions: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    """Score one person's four regions. Gear outside those regions is ignored."""
-    regions = regions if regions is not None else body_regions(keypoints, person_box)
-    used: list[dict[str, Any]] = []
-
-    def one_region(item: str, region: list[float] | None) -> dict[str, Any]:
-        if region is None:
-            return _not_visible()
-        worn, missing, hits = _scores_in(region, gear, item)
-        used.extend(hits)
-        return _decide_item(worn, missing, person_seen=True)
-
-    hands = _claim_pair("gloves", regions["hands"], gear, used)
-    feet = [one_region("boots", region) if region is not None else None for region in regions["feet"]]
-    gloves = _pair_decision(hands)
-    boots = _pair_decision(feet)
-    gloves["sides"] = hands
-    boots["sides"] = feet
-    items = {
-        "hard_hat": one_region("hard_hat", regions["head"]),
-        "vest": one_region("vest", regions["torso"]),
-        "gloves": gloves,
-        "boots": boots,
-    }
+def assess_person(gear: list[dict[str, Any]]) -> dict[str, Any]:
+    """Wearings from the gear boxes the PPE model placed on one person."""
+    items = {}
     for key in ppe_items():
-        items[key]["label"] = _item_label(key, items[key])
-    summary, complete, missing = _summarize(items, True)
+        worn = [float(det["confidence"]) for det in gear if det.get("item") == key and not det.get("missing")]
+        missing = [float(det["confidence"]) for det in gear if det.get("item") == key and det.get("missing")]
+        items[key] = {**_decide_item(worn, missing), "label": _item_label(key)}
+    summary, complete, missing_labels = _summarize(items, True)
     return {
         "available": True,
         "model_id": model_id(),
         "items": items,
-        "detections": used,
+        "detections": list(gear),
         "ppe_complete": complete,
-        "missing": missing,
+        "missing": missing_labels,
         "summary": summary,
         "person_seen": True,
         "source": "vision_ppe",
-        "hard_hat": items["hard_hat"]["worn"],
-        "vest": items["vest"]["worn"],
-        "gloves": items["gloves"]["worn"],
-        "boots": items["boots"]["worn"],
+        **_item_payload(items),
     }
 
 
@@ -561,13 +298,6 @@ def reset_tracker() -> None:
             reset()
 
 
-def load_private_model():
-    """A separate copy of the PPE checkpoint whose tracker belongs to one video job."""
-    from ultralytics import YOLO
-
-    return YOLO(str(weights_path()))
-
-
 def detect_scene(
     image, *, conf: float | None = None, track: bool = False, model=None
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any] | None]:
@@ -575,8 +305,7 @@ def detect_scene(
 
     Track ids, when requested, come from that checkpoint's tracker (ByteTrack
     by default, named in the metadata). Class names are the checkpoint's names
-    matched to the exported item map. A person box is not gear. A video job
-    passes its own ``model`` so its track ids never mix with the live camera.
+    matched to the exported item map. A person box is not gear.
     """
     if not ppe_enabled():
         return [], [], _unavailable("PPE disabled", "disabled")
@@ -590,7 +319,11 @@ def detect_scene(
     except Exception as exc:  # noqa: BLE001
         return [], [], _unavailable(str(exc), "error")
 
-    cutoff = float(spec["conf"] if conf is None else conf)
+    # Each class keeps boxes from its own tuned threshold (metadata ``class_conf``);
+    # a class without one, or an explicit ``conf``, uses the single ``conf``.
+    default_cutoff = float(spec["conf"] if conf is None else conf)
+    class_conf = {} if conf is not None else {_norm_label(k): float(v) for k, v in (spec.get("class_conf") or {}).items()}
+    cutoff = min([default_cutoff, *class_conf.values()])
     kwargs: dict[str, Any] = {"conf": cutoff, "imgsz": int(spec["imgsz"]), "verbose": False}
     if track:
         kwargs["persist"] = True
@@ -616,6 +349,8 @@ def detect_scene(
         cid = int(clss[i])
         score = float(scores[i])
         label = str(names.get(cid, cid))
+        if score < class_conf.get(_norm_label(label), default_cutoff):
+            continue
         box = [float(v) for v in xyxy[i]]
         if is_worker_box(label, cid):
             workers.append(
@@ -642,143 +377,3 @@ def detect_scene(
             }
         )
     return workers, detections, None
-
-
-def detect_gear(image, *, conf: float | None = None) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
-    """One full-frame pass. Returns gear boxes, or an unavailable payload."""
-    _workers, gear, blocked = detect_scene(image, conf=conf)
-    return gear, blocked
-
-
-def predict_ppe(
-    image,
-    *,
-    conf: float | None = None,
-    person_hint: bool | None = None,
-    person_box: list[float] | None = None,
-    keypoints=None,
-) -> dict[str, Any]:
-    """Detect gear on the full frame and score it only with a pose.
-
-    Without keypoints the items stay unknown. A gear box is not a wearing
-    until it sits on that person's head, torso, hand, or foot.
-    """
-    gear, blocked = detect_gear(image, conf=conf)
-    if blocked is not None:
-        return blocked
-    if keypoints is not None:
-        return assess_person(keypoints, person_box, gear)
-    blank = blank_wearing()
-    summary, complete, missing = _summarize(blank["items"], bool(person_hint))
-    blank["summary"] = summary
-    blank["ppe_complete"] = complete
-    blank["missing"] = missing
-    blank["person_seen"] = bool(person_hint)
-    return blank
-
-
-def reset_live_votes() -> None:
-    """Drop the live-frame vote history (camera session start or stop)."""
-    with _vote_lock:
-        _votes.clear()
-
-
-def drop_votes(prefix: str) -> None:
-    """Forget every track a video job stored under its own prefix."""
-    with _vote_lock:
-        for track_id in [key for key in _votes if key.startswith(prefix)]:
-            del _votes[track_id]
-
-
-def prune_live_votes(active_ids: set[str]) -> None:
-    """Forget workers who have left the frame."""
-    with _vote_lock:
-        for track_id in [key for key in _votes if key not in active_ids]:
-            del _votes[track_id]
-
-
-def _remember_value(previous: bool | None, item: dict[str, Any] | None) -> bool | None:
-    """Keep a confirmed wearing. A hidden or uncertain part does not erase it."""
-    if item is None or item.get("evidence") in {"not_visible", "uncertain"} or item.get("worn") is None:
-        return previous
-    if item.get("worn") is True:
-        return True
-    if item.get("worn") is False:
-        return False
-    return previous
-
-
-def _remember_item(previous: Any, item: dict[str, Any]) -> Any:
-    sides = item.get("sides")
-    if isinstance(sides, list):
-        remembered = list(previous) if isinstance(previous, list) else [None, None]
-        while len(remembered) < len(sides):
-            remembered.append(None)
-        for index, side in enumerate(sides):
-            remembered[index] = _remember_value(remembered[index], side)
-        return remembered[: len(sides)]
-    return _remember_value(previous if isinstance(previous, bool) or previous is None else None, item)
-
-
-def _status_from_memory(memory: Any) -> dict[str, Any]:
-    if isinstance(memory, list):
-        if any(value is False for value in memory):
-            return {"worn": False, "confidence": 0.0, "evidence": "missing_class", "status": "Missing"}
-        if memory and all(value is True for value in memory):
-            return {"worn": True, "confidence": 0.0, "evidence": "worn_class", "status": "Worn"}
-        return _not_visible()
-    if memory is True:
-        return {"worn": True, "confidence": 0.0, "evidence": "worn_class", "status": "Worn"}
-    if memory is False:
-        return {"worn": False, "confidence": 0.0, "evidence": "missing_class", "status": "Missing"}
-    return _not_visible()
-
-
-def stabilize_live_ppe(ppe: dict[str, Any], track_id: str = "primary") -> dict[str, Any]:
-    """Remember gear for one tracked person.
-
-    A worn or missing call sticks until a later visible frame contradicts it.
-    A part that is out of frame leaves the memory unchanged and is not a miss.
-    Gloves and shoes are complete only after each visible side has been seen worn.
-    """
-    if not ppe or not ppe.get("available"):
-        return ppe
-    if not ppe.get("person_seen"):
-        return ppe
-
-    items_in = ppe.get("items") or {}
-    keys = tuple(items_in) or ppe_items()
-    with _vote_lock:
-        memory = _votes.setdefault(str(track_id), {})
-        for key in keys:
-            current = dict(items_in.get(key) or _empty_item())
-            memory[key] = _remember_item(memory.get(key), current)
-
-        items = {}
-        for key in keys:
-            item = _status_from_memory(memory.get(key))
-            item["label"] = _item_label(key, items_in.get(key))
-            items[key] = item
-
-    summary, complete, missing = _summarize(items, True)
-    stable = dict(ppe)
-    stable["items"] = items
-    stable["summary"] = summary
-    stable["ppe_complete"] = complete
-    stable["missing"] = missing
-    for key in keys:
-        stable[key] = items[key]["worn"]
-    return stable
-
-
-def wearings_for_fusion(ppe: dict[str, Any]) -> dict[str, bool] | None:
-    """Return hard_hat/vest/… bools if the model made a decision; else None."""
-    if not ppe.get("available") or ppe.get("source") not in {"vision_ppe"}:
-        return None
-    out: dict[str, bool] = {}
-    for key in ppe.get("items") or ppe_items():
-        worn = ppe.get(key)
-        if worn is None:
-            return None
-        out[key] = bool(worn)
-    return out

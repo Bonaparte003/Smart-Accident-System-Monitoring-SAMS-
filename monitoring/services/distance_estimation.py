@@ -1,13 +1,13 @@
-"""Person distance from a measured body or the time-of-flight sensor.
+"""Person distance from the time-of-flight sensor or the trained distance network.
 
-Live range is published only in two cases:
-- the sensor beam hits that person's torso, or
-- the head and both ankles are visible, so the trained distance network
-  (residual on the pinhole prior, Z = Z0 * exp(delta)) has a full body to read.
+The sensor reading is used for the person its beam (the image centre) falls
+on, within the near range stored in the distance calibration. Every other
+person gets the trained network (residual on the pinhole prior,
+Z = Z0 * exp(delta)) from that person's box and pose.
 
 The served network is the one with the lowest test MAE in its metadata. A
 network fine-tuned on this site's own sensor/body pairs (``site/``) wins over
-the public-dataset experiments. A partial body publishes no distance.
+the public-dataset experiments.
 """
 
 from __future__ import annotations
@@ -77,7 +77,7 @@ class DistanceEstimate:
     z0_m: float
     vision_m: float
     source: str
-    confidence: float
+    confidence: float | None
     method: str
     features: dict[str, float] | None = None
     body_m: float | None = None
@@ -88,7 +88,7 @@ class DistanceEstimate:
             "z0_m": round(self.z0_m, 3),
             "vision_m": round(self.vision_m, 3),
             "source": self.source,
-            "confidence": round(self.confidence, 3),
+            "confidence": None if self.confidence is None else round(self.confidence, 3),
             "method": self.method,
         }
         if self.features is not None:
@@ -218,120 +218,71 @@ def pinhole_z0_m(
     return float((fy * h_person) / h)
 
 
-def _confident_point(keypoints, index: int, min_conf: float = 0.3) -> tuple[float, float] | None:
-    if not keypoints or index >= len(keypoints) or len(keypoints[index]) < 3:
-        return None
-    x, y, conf = float(keypoints[index][0]), float(keypoints[index][1]), float(keypoints[index][2])
-    if conf < min_conf:
-        return None
-    return x, y
-
-
-def stature_px(keypoints) -> float | None:
-    """Pixel height from the head to both ankles. None unless all three are visible."""
-    nose = _confident_point(keypoints, _NOSE)
-    left_eye = _confident_point(keypoints, 1)
-    right_eye = _confident_point(keypoints, 2)
-    if nose is not None:
-        head_y = nose[1]
-    elif left_eye is not None and right_eye is not None:
-        head_y = (left_eye[1] + right_eye[1]) * 0.5
-    else:
-        return None
-    left_ankle = _confident_point(keypoints, _L_ANK)
-    right_ankle = _confident_point(keypoints, _R_ANK)
-    if left_ankle is None or right_ankle is None:
-        return None
-    foot_y = (left_ankle[1] + right_ankle[1]) * 0.5
-    height = foot_y - head_y
-    if height < 10.0:
-        return None
-    return float(height)
-
-
-def aim_hits(region: Sequence[float] | None, image_wh: tuple[int, int], aim: tuple[float, float] = (0.5, 0.5)) -> bool:
-    """True when the sensor aim point (image center) lies inside the torso."""
-    if not region or len(region) < 4:
+def aim_hits(box: Sequence[float] | None, image_wh: tuple[int, int], aim: tuple[float, float] = (0.5, 0.5)) -> bool:
+    """True when the sensor aim point (image centre) lies inside this person's box."""
+    if not box or len(box) < 4:
         return False
     width, height = image_wh
     ax = float(aim[0]) * max(1, width)
     ay = float(aim[1]) * max(1, height)
-    return float(region[0]) <= ax <= float(region[2]) and float(region[1]) <= ay <= float(region[3])
-
-
-def _keypoint_box(keypoints) -> list[float] | None:
-    points = [(float(p[0]), float(p[1])) for p in keypoints or [] if len(p) >= 3 and float(p[2]) >= 0.3]
-    if len(points) < 2:
-        return None
-    xs, ys = [p[0] for p in points], [p[1] for p in points]
-    return [min(xs), min(ys), max(xs), max(ys)]
-
-
-def _body_estimate(keypoints, image_wh, box, det_conf) -> tuple[float, float, dict[str, float], float, str] | None:
-    """Network range from a full body: (vision_m, z0_m, features, confidence, method)."""
-    if stature_px(keypoints) is None:
-        return None
-    box = box or _keypoint_box(keypoints)
-    if box is None:
-        return None
-    try:
-        vision_m, z0_m, named, conf = predict_vision_distance(box, image_wh, det_conf=det_conf, keypoints=keypoints)
-        return vision_m, z0_m, named, conf, f"residual_mlp:{served_model()['experiment_id']}"
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("distance network unavailable: %s", exc)
-        return None
+    return float(box[0]) <= ax <= float(box[2]) and float(box[1]) <= ay <= float(box[3])
 
 
 def measure_person(
     keypoints,
     image_wh: tuple[int, int],
     *,
+    box: Sequence[float],
     tof_m: float | None = None,
     sensor_aimed: bool = False,
-    box: Sequence[float] | None = None,
     det_conf: float = 1.0,
+    kpt_conf: float | None = None,
 ) -> DistanceEstimate | None:
-    """Return a sensor range, or the network range from a full body. Nothing else."""
-    body = _body_estimate(keypoints, image_wh, list(box) if box is not None else None, det_conf)
-    calib = load_calib()
-    sensor_max = float(calib["tof_near_m"])
+    """The sensor range when its beam is on this person, otherwise the distance network.
+
+    ``kpt_conf`` is the pose model's joint threshold; without it the joints are not used.
+    """
+    body: tuple[float, float, dict[str, float], float] | None = None
+    try:
+        body = predict_vision_distance(list(box), image_wh, det_conf=det_conf, keypoints=keypoints, kpt_conf=kpt_conf)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("distance network unavailable: %s", exc)
     sensor_ok = (
         sensor_aimed
         and tof_m is not None
         and math.isfinite(float(tof_m))
-        and 0.05 < float(tof_m) <= sensor_max
+        and float(tof_m) <= float(load_calib()["tof_near_m"])
     )
     if sensor_ok:
-        body_m = body[0] if body else None
         return DistanceEstimate(
             distance_m=float(tof_m),
             z0_m=body[1] if body else float(tof_m),
-            vision_m=body_m if body_m is not None else float(tof_m),
+            vision_m=body[0] if body else float(tof_m),
             source="tof",
-            confidence=0.95,
-            method="tof_on_torso",
+            confidence=None,
+            method="tof_on_person",
             features=body[2] if body else None,
-            body_m=body_m,
+            body_m=body[0] if body else None,
         )
     if body is None:
         return None
-    vision_m, z0_m, named, conf, method = body
+    vision_m, z0_m, named, conf = body
     return DistanceEstimate(
         distance_m=float(vision_m),
         z0_m=float(z0_m),
         vision_m=float(vision_m),
         source="vision",
         confidence=conf,
-        method=method,
+        method=f"residual_mlp:{served_model()['experiment_id']}",
         features=named,
         body_m=float(vision_m),
     )
 
 
-def _midpoint(a: Sequence[float] | None, b: Sequence[float] | None) -> tuple[float, float, float] | None:
+def _midpoint(a: Sequence[float] | None, b: Sequence[float] | None, kpt_conf: float) -> tuple[float, float, float] | None:
     if a is None or b is None:
         return None
-    if a[2] < 0.3 or b[2] < 0.3:
+    if a[2] < kpt_conf or b[2] < kpt_conf:
         return None
     return ((a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, min(a[2], b[2]))
 
@@ -342,10 +293,13 @@ def extract_features(
     *,
     det_conf: float = 1.0,
     keypoints: Sequence[Sequence[float]] | None = None,
+    kpt_conf: float | None = None,
 ) -> tuple[np.ndarray, float, dict[str, float]]:
     """Build feature vector + Z0 from bbox (and optional COCO-17 keypoints).
 
     keypoints: list of (x, y, conf) in pixel coords, length 17 when present.
+    A joint counts when its confidence reaches ``kpt_conf``, the pose model's
+    joint threshold; without one, the keypoints are not used.
     """
     w, h = image_wh
     x1, y1, x2, y2 = [float(v) for v in box_xyxy]
@@ -367,18 +321,18 @@ def extract_features(
     pose_conf_mean = 0.0
     pose_inv_height = 0.0
 
-    if keypoints is not None and len(keypoints) >= 17:
+    if keypoints is not None and len(keypoints) >= 17 and kpt_conf is not None:
         kps = [(float(p[0]), float(p[1]), float(p[2])) for p in keypoints]
-        confs = [p[2] for p in kps if p[2] >= 0.3]
+        confs = [p[2] for p in kps if p[2] >= kpt_conf]
         if confs:
             pose_conf_mean = float(sum(confs) / len(confs))
-        nose = kps[_NOSE] if kps[_NOSE][2] >= 0.3 else None
+        nose = kps[_NOSE] if kps[_NOSE][2] >= kpt_conf else None
         l_sho, r_sho = kps[_L_SHO], kps[_R_SHO]
         l_hip, r_hip = kps[_L_HIP], kps[_R_HIP]
         l_ank, r_ank = kps[_L_ANK], kps[_R_ANK]
-        shoulders = _midpoint(l_sho, r_sho)
-        hips = _midpoint(l_hip, r_hip)
-        ankles = _midpoint(l_ank, r_ank)
+        shoulders = _midpoint(l_sho, r_sho, kpt_conf)
+        hips = _midpoint(l_hip, r_hip, kpt_conf)
+        ankles = _midpoint(l_ank, r_ank, kpt_conf)
         head_y = nose[1] if nose else (shoulders[1] if shoulders else None)
         foot_y = ankles[1] if ankles else None
         if head_y is not None and foot_y is not None and foot_y > head_y:
@@ -387,10 +341,10 @@ def extract_features(
             pose_inv_height = 1.0 / max(pose_height_rel, 1e-3)
             height_px = max(height_px, pose_h)
             pose_available = 1.0
-        if l_sho[2] >= 0.3 and r_sho[2] >= 0.3:
+        if l_sho[2] >= kpt_conf and r_sho[2] >= kpt_conf:
             shoulder_width_rel = abs(r_sho[0] - l_sho[0]) / max(1, w)
             pose_available = 1.0
-        if l_hip[2] >= 0.3 and r_hip[2] >= 0.3:
+        if l_hip[2] >= kpt_conf and r_hip[2] >= kpt_conf:
             hip_width_rel = abs(r_hip[0] - l_hip[0]) / max(1, w)
             pose_available = 1.0
         if shoulders and hips:
@@ -463,10 +417,11 @@ def predict_vision_distance(
     *,
     det_conf: float = 1.0,
     keypoints: Sequence[Sequence[float]] | None = None,
+    kpt_conf: float | None = None,
 ) -> tuple[float, float, dict[str, float], float]:
     """Return (vision_m, z0_m, feature_dict, nn_confidence)."""
     feats, z0, named = extract_features(
-        box_xyxy, image_wh, det_conf=det_conf, keypoints=keypoints
+        box_xyxy, image_wh, det_conf=det_conf, keypoints=keypoints, kpt_conf=kpt_conf
     )
     model = get_model()
     with torch.no_grad():

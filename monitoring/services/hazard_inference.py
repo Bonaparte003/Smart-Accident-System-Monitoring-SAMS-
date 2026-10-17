@@ -3,7 +3,7 @@
 Fire and smoke come from the detector trained in
 ``notebooks/06_vision_hazard_detection_training.ipynb``. Which output name is
 fire or smoke is that notebook's ``metadata.json``. A fall comes from the
-accident detector (``accident_inference``), not from the pose angle.
+accident detector (``accident_inference``).
 
 Without those weights the detectors report ``available=False`` and zero scores.
 """
@@ -198,10 +198,6 @@ def smooth_scores(result: dict[str, Any]) -> dict[str, Any]:
 
 def detect_falls(image) -> dict[str, Any]:
     return accident.detect_falls(image)
-
-
-def fall_for_person(box: list[float] | None, falls: dict[str, Any], keypoints=None) -> dict[str, Any]:
-    return accident.fall_for_box(box, falls, keypoints)
 
 
 def reset() -> None:
