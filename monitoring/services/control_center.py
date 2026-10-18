@@ -1,304 +1,161 @@
-"""Join live vision, distance, and vibration into the SAMS fusion decision."""
+"""The SAMS decision: the fusion model's label for what the other models measured.
+
+Every fusion input comes from a model output or a sensor reading in this
+frame. When one of the inputs the fusion model was trained on was not
+measured, there is no decision, and the reason names what is missing.
+"""
 
 from __future__ import annotations
 
-import threading
-import time
 from typing import Any
 
 from hardware.stream import apply_risk_actuators, get_stream
 
-from .feature_builder import build_features, zone_label
-from .fusion_inference import predict_fusion
+from .fusion_inference import absent_worker_values, get_feature_cols, predict_fusion, zones_m
 
-_MEASURED_SOURCES = {"tof", "vision", "pinhole"}
+_INPUT_NAMES = {
+    "ppe_missing": "PPE",
+    "worker_detected": "person",
+    "vision_confidence": "person",
+    "worker_distance": "distance",
+    "inside_caution_zone": "distance",
+    "inside_danger_zone": "distance",
+    "worker_speed": "worker motion",
+    "approaching_machine": "worker motion",
+    "approach_velocity": "worker motion",
+    "machine_active": "machine state",
+    "vibration_state": "vibration",
+    "vibration_anomaly_score": "vibration",
+    "fire_score": "fire/smoke",
+    "smoke_score": "fire/smoke",
+    "fall_detected": "fall",
+}
 
-_lock = threading.Lock()
-_track = {"dist": None, "t": None}
 _last_label: str | None = None
 
 
-def observe_motion(distance_m: float | None, detected: bool) -> tuple[float, bool]:
-    """Speed (m/s) and whether the worker moved closer since the last sample."""
-    now = time.monotonic()
-    speed = 0.0
-    approaching = False
-    with _lock:
-        prev_d = _track["dist"]
-        prev_t = _track["t"]
-        if detected and distance_m is not None and prev_d is not None and prev_t is not None:
-            dt = max(now - float(prev_t), 0.05)
-            delta = float(prev_d) - float(distance_m)
-            speed = min(3.0, abs(delta) / dt)
-            approaching = delta > 0.05
-        if detected and distance_m is not None:
-            _track["dist"] = float(distance_m)
-            _track["t"] = now
-    return speed, approaching
-
-
-def measured_distance(vision: dict[str, Any] | None) -> float | None:
-    """Metres from the sensor or the distance network. Anything else is absent."""
-    vision = vision or {}
-    source = vision.get("distance_source")
-    measured = vision.get("worker_distance_est")
-    if measured is None:
-        measured = vision.get("distance_m")
-    if source not in _MEASURED_SOURCES or measured is None:
-        return None
-    try:
-        value = float(measured)
-    except (TypeError, ValueError):
-        return None
-    return value
-
-
-def classify(
+def measured_inputs(
     vision: dict[str, Any] | None,
     vibration: dict[str, Any] | None,
     *,
-    machine_on: bool,
-    speed: float = 0.0,
-    approaching: bool = False,
-) -> dict[str, Any]:
-    """Fusion-model label.
+    machine_on: bool | None,
+    absent_worker: dict[str, float] | None = None,
+) -> dict[str, float]:
+    """Fusion inputs that a model or sensor produced for this frame. Nothing else.
 
-    A person with no measured distance is DEGRADED. The model is not given a
-    stand-in distance for that person. With no person in frame, distance 99
-    is the training value for "nobody", and the model still scores vibration.
+    With nobody in the frame, the person inputs take ``absent_worker``: the
+    values the fusion model was trained with for an empty frame.
     """
     vision = vision or {}
-    detected = bool(vision.get("worker_detected"))
-    distance_m = measured_distance(vision) if detected else None
-    if detected and distance_m is None:
+    out: dict[str, float] = {"worker_detected": 1.0 if vision.get("worker_detected") else 0.0}
+    if not vision.get("worker_detected"):
+        out.update(absent_worker or {})
+    else:
+        if vision.get("confidence") is not None:
+            out["vision_confidence"] = float(vision["confidence"])
+        distance = vision.get("worker_distance_est")
+        if distance is not None:
+            zones = zones_m()
+            out["worker_distance"] = float(distance)
+            out["inside_caution_zone"] = 1.0 if float(distance) <= zones["caution"] else 0.0
+            out["inside_danger_zone"] = 1.0 if float(distance) <= zones["danger"] else 0.0
+        if vision.get("worker_speed") is not None:
+            out["worker_speed"] = float(vision["worker_speed"])
+        if vision.get("approaching") is not None:
+            out["approaching_machine"] = 1.0 if vision["approaching"] else 0.0
+        if vision.get("approach_velocity") is not None:
+            out["approach_velocity"] = float(vision["approach_velocity"])
+        ppe = vision.get("ppe") if isinstance(vision.get("ppe"), dict) else {}
+        if ppe.get("available"):
+            out["ppe_missing"] = 1.0 if vision.get("ppe_complete") is False else 0.0
+    if machine_on is not None:
+        out["machine_active"] = 1.0 if machine_on else 0.0
+    if vibration:
+        out["vibration_state"] = 1.0 if vibration.get("abnormal") else 0.0
+        out["vibration_anomaly_score"] = float(vibration["anomaly_score"])
+    hazards = vision.get("hazards") if isinstance(vision.get("hazards"), dict) else {}
+    if hazards.get("available"):
+        out["fire_score"] = float(hazards.get("fire_score") or 0.0)
+        out["smoke_score"] = float(hazards.get("smoke_score") or 0.0)
+    if vision.get("falls_available"):
+        out["fall_detected"] = 1.0 if vision.get("fall_detected") else 0.0
+    return out
+
+
+def decide(
+    vision: dict[str, Any] | None,
+    vibration: dict[str, Any] | None,
+    *,
+    machine_on: bool | None,
+) -> dict[str, Any]:
+    """The fusion model's label, or no label when one of its inputs was not measured."""
+    features = measured_inputs(vision, vibration, machine_on=machine_on, absent_worker=absent_worker_values())
+    cols = get_feature_cols()
+    missing = sorted({_INPUT_NAMES.get(col, col) for col in cols if col not in features})
+    if missing:
         return {
-            "label": "DEGRADED",
+            "label": None,
             "label_idx": None,
             "confidence": None,
-            "probabilities": {"NORMAL": 0.0, "CAUTION": 0.0, "DANGER": 0.0},
+            "probabilities": None,
             "model_id": None,
-            "model_label": None,
-            "reason": "Person seen, distance unavailable.",
-            "distance_m": None,
+            "reason": "No decision · not measured: " + ", ".join(missing),
+            "missing": missing,
+            "features": features,
         }
-
-    ppe = vision.get("ppe") if isinstance(vision.get("ppe"), dict) else None
-    confidence = vision.get("confidence")
-    abnormal = bool(vibration and vibration.get("abnormal"))
-    vib_score = float(vibration["anomaly_score"]) if vibration and vibration.get("anomaly_score") is not None else None
-    features = build_features(
-        worker_distance=distance_m if distance_m is not None else 99.0,
-        approaching_machine=approaching,
-        machine_active=machine_on,
-        abnormal_vibration=abnormal,
-        hard_hat=_ppe_bool(ppe, "hard_hat"),
-        vest=_ppe_bool(ppe, "vest"),
-        gloves=_ppe_bool(ppe, "gloves"),
-        boots=_ppe_bool(ppe, "boots"),
-        worker_detected=detected,
-        worker_speed=speed,
-        vision_confidence=float(confidence) if confidence is not None else 0.0,
-    )
-    if vib_score is not None:
-        features["vibration_anomaly_score"] = vib_score
-        features["vibration_state"] = 1.0 if abnormal else 0.0
-    fusion = predict_fusion(features)
-    return {
-        **fusion,
-        "model_label": fusion["label"],
-        "reason": "",
-        "distance_m": distance_m,
-        "features": features,
-    }
+    fusion = predict_fusion({col: features[col] for col in cols})
+    return {**fusion, "reason": "", "missing": [], "features": features}
 
 
-LEVEL_RANK = {"NORMAL": 0, "DEGRADED": 1, "CAUTION": 2, "DANGER": 3}
-
-
-def scene_events(
-    *,
-    fallen_ids: list[Any] | None = None,
-    fire: bool = False,
-    smoke: bool = False,
-    behaviour: dict[str, Any] | None = None,
-) -> list[tuple[str, str]]:
-    """Scene findings the fusion model has no input for, each with the level it demands."""
-    events: list[tuple[str, str]] = []
-    fallen_ids = list(fallen_ids or [])
-    if fallen_ids:
-        named = [f"person {pid}" for pid in fallen_ids if pid is not None]
-        who = ", ".join(named) if named else "a person"
-        events.append(("DANGER", f"Fall: {who} down"))
-    if fire:
-        events.append(("DANGER", "Fire detected"))
-    if smoke:
-        events.append(("CAUTION", "Smoke detected"))
-    if behaviour and behaviour.get("unsafe"):
-        events.append(("CAUTION", f"Unsafe behaviour: {behaviour['label']}"))
-    return events
-
-
-def apply_scene_events(level: str, reason: str, events: list[tuple[str, str]]) -> tuple[str, str]:
-    """Raise the fusion level to the worst scene finding. Findings lead the reason."""
-    if not events:
-        return level, reason
-    worst = max(events, key=lambda event: LEVEL_RANK.get(event[0], 0))[0]
-    if LEVEL_RANK.get(worst, 0) > LEVEL_RANK.get(level, 0):
-        level = worst
-    found = " · ".join(text for _level, text in events)
-    return level, f"{found} · {reason}" if reason else found
-
-
-def decide_alert(
-    vision: dict[str, Any] | None,
-    vibration: dict[str, Any] | None,
-    *,
-    machine_on: bool | None = None,
-) -> str:
-    """Class from the fusion model, for the buzzer and LEDs."""
-    return _live_decision(vision, vibration, machine_on=machine_on)["label"]
-
-
-def _ppe_bool(ppe: dict[str, Any] | None, key: str) -> bool:
-    """True only when the detector saw the item being worn.
-
-    Unknown stays False here so fusion features do not record gear that was
-    never seen. The alert itself still ignores unknown and buzzes only on an
-    explicit miss (see decide_alert). A disabled detector assumes worn.
-    """
-    if not ppe or not ppe.get("available"):
-        return True
-    return ppe.get(key) is True
-
-
-def _live_decision(
-    vision: dict[str, Any] | None,
-    vibration: dict[str, Any] | None,
-    *,
-    machine_on: bool | None = None,
-) -> dict[str, Any]:
-    vision = vision or {}
-    detected = bool(vision.get("worker_detected"))
-    distance_m = measured_distance(vision) if detected else None
-    speed, approaching = observe_motion(distance_m, detected)
-    stream = get_stream()
-    if machine_on is None:
-        machine_on = stream.machine_on
-    decision = classify(
-        vision,
-        vibration,
-        machine_on=machine_on,
-        speed=speed,
-        approaching=approaching,
-    )
-    if stream.is_live:
-        apply_proximity(decision, _tof_reading())
-    return decision
-
-
-def _tof_reading() -> float | None:
-    try:
-        from hardware.tof import get_tof
-
-        return get_tof().read_metres()
-    except Exception:
-        return None
-
-
-def proximity_limit_m() -> float:
-    from .distance_estimation import load_calib
-
-    try:
-        return float(load_calib()["tof_near_m"])
-    except (OSError, ValueError, KeyError):
-        return 1.5
-
-
-def apply_proximity(decision: dict[str, Any], tof_m: float | None) -> dict[str, Any]:
-    """Raise the decision to CAUTION when the ToF sees something inside its range.
-
-    The sensor cannot tell a person from an object, so a close reading never
-    lowers a level and never reaches DANGER on its own.
-    """
-    if tof_m is None or not 0.05 < tof_m <= proximity_limit_m():
-        return decision
-    finding = f"Object {tof_m:.2f} m from the sensor"
-    level, reason = apply_scene_events(str(decision["label"]), decision.get("reason") or "", [("CAUTION", finding)])
-    decision["label"] = level
-    decision["reason"] = reason
-    decision["proximity_m"] = round(float(tof_m), 3)
-    return decision
+def zone_label(features: dict[str, float]) -> str:
+    if "worker_distance" not in features:
+        return "—"
+    if features.get("inside_danger_zone", 0.0) >= 0.5:
+        return "Danger"
+    if features.get("inside_caution_zone", 0.0) >= 0.5:
+        return "Caution"
+    return "Clear"
 
 
 def assemble(
     vision: dict[str, Any] | None,
     vibration: dict[str, Any] | None,
     *,
+    machine: dict[str, Any] | None = None,
     actuate: bool = False,
 ) -> dict[str, Any]:
-    """Fusion-model decision for one vision frame and one vibration window."""
+    """Fusion decision for one vision frame, one vibration window, and the machine-state label."""
+    global _last_label
     vision = vision or {}
-    detected = bool(vision.get("worker_detected"))
-    source = vision.get("distance_source")
-    confidence = vision.get("confidence")
-    ppe = vision.get("ppe") if isinstance(vision.get("ppe"), dict) else None
-    abnormal = bool(vibration and vibration.get("abnormal"))
-    decision = _live_decision(vision, vibration)
-    distance_m = decision.get("distance_m")
-    features = decision.get("features") or {
-        "worker_detected": 1.0 if detected else 0.0,
-        "inside_caution_zone": 0.0,
-        "inside_danger_zone": 0.0,
-        "worker_speed": 0.0,
-        "approaching_machine": 0.0,
-        "vision_confidence": float(confidence) if confidence is not None else 0.0,
-        "machine_active": 1.0 if get_stream().machine_on else 0.0,
-        "vibration_state": 1.0 if abnormal else 0.0,
-        "vibration_anomaly_score": float(vibration["anomaly_score"])
-        if vibration and vibration.get("anomaly_score") is not None
-        else 0.0,
-    }
-    fusion = {key: value for key, value in decision.items() if key not in {"features", "distance_m"}}
-    label = str(fusion["label"])
-    if actuate:
-        global _last_label
-        if label != _last_label:
-            _last_label = label
-            stream = get_stream()
-            apply_risk_actuators(
-                label,
-                buzzer=stream.buzzer_auto,
-                leds=stream.leds_auto,
-            )
+    stream = get_stream()
+    decision = decide(vision, vibration, machine_on=machine["running"] if machine else None)
+    features = decision.pop("features")
+    label = decision["label"]
+    if actuate and label != _last_label:
+        _last_label = label
+        apply_risk_actuators(label, buzzer=stream.buzzer_auto, leds=stream.leds_auto)
 
+    detected = bool(vision.get("worker_detected"))
+    ppe = vision.get("ppe") if isinstance(vision.get("ppe"), dict) else None
+    distance_m = features.get("worker_distance")
     return {
-        "fusion": fusion,
-        "features": {
-            **{k: features[k] for k in (
-                "worker_detected",
-                "inside_caution_zone",
-                "inside_danger_zone",
-                "worker_speed",
-                "approaching_machine",
-                "vision_confidence",
-                "machine_active",
-                "vibration_state",
-                "vibration_anomaly_score",
-            )},
-            "worker_distance": distance_m,
-        },
-        "zone": "—" if detected and distance_m is None else zone_label(features),
+        "fusion": decision,
+        "features": features,
+        "zone": zone_label(features),
         "vision": {
             "label": vision.get("label") or ("Person" if detected else "No person"),
-            "confidence": confidence,
+            "confidence": vision.get("confidence"),
             "worker_detected": detected,
             "person_count": vision.get("person_count"),
             "people": vision.get("people") or [],
             "worker_distance_est": distance_m,
-            "distance_source": source if distance_m is not None else None,
+            "distance_source": vision.get("distance_source") if distance_m is not None else None,
             "vision_distance_m": vision.get("vision_distance_m"),
             "ppe": ppe,
             "ppe_summary": vision.get("ppe_summary") or (ppe or {}).get("summary"),
+            "fire_score": vision.get("fire_score"),
+            "smoke_score": vision.get("smoke_score"),
+            "fall_detected": vision.get("fall_detected"),
             "thumbnail": vision.get("thumbnail") or vision.get("annotated_thumbnail"),
         },
         "vibration": None
@@ -306,8 +163,17 @@ def assemble(
         else {
             "label": vibration.get("label"),
             "confidence": vibration.get("confidence"),
-            "abnormal": abnormal,
+            "abnormal": bool(vibration.get("abnormal")),
             "anomaly_score": vibration.get("anomaly_score"),
             "ready": True,
+            "declared": bool(vibration.get("declared")),
+        },
+        "machine": None
+        if machine is None
+        else {
+            "label": machine.get("label"),
+            "confidence": machine.get("confidence"),
+            "model_id": machine.get("model_id"),
+            "declared": bool(machine.get("declared")),
         },
     }

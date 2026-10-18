@@ -5,6 +5,7 @@ once through Django's thread pool. The board reader stays on its own thread.
 """
 
 import os
+import threading
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SAMS.settings")
 
@@ -12,6 +13,14 @@ from django.contrib.staticfiles.handlers import ASGIStaticFilesHandler
 from django.core.asgi import get_asgi_application
 
 django_application = ASGIStaticFilesHandler(get_asgi_application())
+
+
+def _resume_recordings() -> None:
+    """Finish live sessions and analyse uploads that a restart left half done."""
+    from monitoring.services import live_recorder, video_analysis
+
+    live_recorder.finalize_orphans()
+    video_analysis.resume_pending()
 
 
 async def _lifespan(receive, send) -> None:
@@ -22,12 +31,7 @@ async def _lifespan(receive, send) -> None:
 
             prepare_environment()
             start_hardware()
-            try:
-                from monitoring.services.video_jobs import resume_pending
-
-                resume_pending()
-            except Exception as exc:  # noqa: BLE001
-                print(f"Video jobs did not start: {exc}", flush=True)
+            threading.Thread(target=_resume_recordings, name="sams-resume", daemon=True).start()
             await send({"type": "lifespan.startup.complete"})
         elif message["type"] == "lifespan.shutdown":
             from hardware.stream import get_stream

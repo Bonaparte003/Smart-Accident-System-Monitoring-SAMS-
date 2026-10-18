@@ -2,15 +2,40 @@
 Django settings for SAMS project.
 """
 
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-)x83x3mr-p-crdi7_w!hg#e#af#(fwxgwi3$u-gjjke4utnmet"
 
-DEBUG = True
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = ["*"]
+
+def _env_list(name: str, default: list[str]) -> list[str]:
+    raw = os.environ.get(name, "").strip()
+    return [item.strip() for item in raw.split(",") if item.strip()] if raw else default
+
+
+# Defaults keep `python manage.py runserver` on a laptop working; docker-compose sets the rest.
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-)x83x3mr-p-crdi7_w!hg#e#af#(fwxgwi3$u-gjjke4utnmet",
+)
+
+DEBUG = _env_bool("DJANGO_DEBUG", True)
+
+ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", ["*"])
+CSRF_TRUSTED_ORIGINS = _env_list("DJANGO_CSRF_TRUSTED_ORIGINS", [])
+
+# Behind a TLS-terminating proxy (Caddy in docker-compose), trust its X-Forwarded-Proto.
+if _env_bool("SAMS_BEHIND_PROXY", False):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -58,7 +83,7 @@ ASGI_APPLICATION = "SAMS.asgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": os.environ.get("SAMS_DB_PATH", str(BASE_DIR / "db.sqlite3")),
     }
 }
 
@@ -78,7 +103,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = []
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = Path(os.environ.get("SAMS_MEDIA_ROOT", str(BASE_DIR / "media")))
 
 LOGIN_URL = "review_entrance"
 LOGIN_REDIRECT_URL = "review_entrance"
@@ -87,7 +112,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Allow short workplace video uploads for the Vision lab
+# Headroom for full-resolution phone camera frames
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 

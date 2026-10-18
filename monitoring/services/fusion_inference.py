@@ -1,8 +1,8 @@
 """Lazy-load and run the selected fusion risk classifier.
 
-The model's own metadata names its input columns, so a retrained model with
-more inputs (hazards, approach velocity) drops in without code changes. A
-feature the caller does not supply is sent as 0.0.
+The model's own metadata names its input columns and the zone limits its
+training data used, so a retrained model with more inputs drops in without
+code changes. Every column must be supplied; nothing is filled in here.
 """
 
 from __future__ import annotations
@@ -15,37 +15,6 @@ from typing import Any
 import joblib
 import numpy as np
 from django.conf import settings
-
-BASE_FEATURE_COLS = [
-    "worker_detected",
-    "worker_distance",
-    "inside_caution_zone",
-    "inside_danger_zone",
-    "worker_speed",
-    "approaching_machine",
-    "vision_confidence",
-    "machine_active",
-    "vibration_state",
-    "vibration_anomaly_score",
-]
-HAZARD_FEATURE_COLS = [
-    "approach_velocity",
-    "fire_score",
-    "smoke_score",
-    "fall_detected",
-]
-FEATURE_COLS = BASE_FEATURE_COLS
-
-CLASS_NAMES = ["NORMAL", "CAUTION", "DANGER"]
-CAUTION_ZONE_M = 2.0
-DANGER_ZONE_M = 0.8
-
-DEFAULT_DECISION = {
-    "danger_threshold": 0.35,
-    "caution_threshold": 0.45,
-    "instant_danger": 0.7,
-    "smoothing_windows": 3,
-}
 
 _lock = threading.Lock()
 _model = None
@@ -66,12 +35,32 @@ def get_metadata() -> dict[str, Any]:
 
 
 def get_feature_cols() -> list[str]:
-    cols = get_metadata().get("feature_cols")
-    return list(cols) if cols else list(BASE_FEATURE_COLS)
+    return list(get_metadata()["feature_cols"])
 
 
-def get_decision_config() -> dict[str, float]:
-    return {**DEFAULT_DECISION, **(get_metadata().get("decision") or {})}
+def class_names() -> list[str]:
+    """Risk levels in the model's class order."""
+    return list(get_metadata()["class_names"])
+
+
+def motion_window_s() -> float:
+    """Seconds of distance history that speed and approach were measured over for this model."""
+    return float(get_metadata()["motion_window_s"])
+
+
+def zones_m() -> dict[str, float]:
+    """Caution and danger limits the fusion training data was labelled with."""
+    zones = get_metadata()["zones_m"]
+    return {"caution": float(zones["caution"]), "danger": float(zones["danger"])}
+
+
+def absent_worker_values() -> dict[str, float]:
+    """The person inputs the model was trained with for a frame with nobody in it.
+
+    Empty for a model trained without such rows: there, a frame with nobody in
+    it leaves the person inputs unmeasured.
+    """
+    return {name: float(value) for name, value in (get_metadata().get("absent_worker") or {}).items()}
 
 
 def get_model():
@@ -91,19 +80,23 @@ def reload_model() -> None:
 
 
 def predict_fusion(features: dict[str, float]) -> dict[str, Any]:
-    """Run the fusion model on a feature dict. Missing columns are 0.0."""
+    """Run the fusion model on a feature dict that holds every column it was trained on."""
     cols = get_feature_cols()
-    row = np.array([[float(features.get(c, 0.0)) for c in cols]], dtype=np.float32)
+    missing = [c for c in cols if c not in features]
+    if missing:
+        raise KeyError(f"Fusion inputs missing: {missing}")
+    row = np.array([[float(features[c]) for c in cols]], dtype=np.float32)
     model = get_model()
     proba = model.predict_proba(row)[0]
     classes = [int(c) for c in getattr(model, "classes_", range(len(proba)))]
-    probabilities = {name: 0.0 for name in CLASS_NAMES}
+    names = class_names()
+    probabilities = {name: 0.0 for name in names}
     for index, cls in enumerate(classes):
-        probabilities[CLASS_NAMES[cls]] = float(proba[index])
-    label = max(CLASS_NAMES, key=lambda name: probabilities[name])
+        probabilities[names[cls]] = float(proba[index])
+    label = max(names, key=lambda name: probabilities[name])
     return {
         "label": label,
-        "label_idx": CLASS_NAMES.index(label),
+        "label_idx": names.index(label),
         "confidence": float(probabilities[label]),
         "probabilities": probabilities,
         "model_id": get_metadata().get("experiment_id", "best_fusion_model"),
