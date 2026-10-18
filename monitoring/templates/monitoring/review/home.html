@@ -5,7 +5,12 @@
 <section class="overview">
   <header class="ov-head">
     <h1>Safety Overview</h1>
-    <button type="button" class="go-live" id="go-live">Go Live</button>
+    <div class="ov-actions">
+      <button type="button" class="scene-btn" data-stage-scene>
+        <i class="fa-solid fa-clapperboard" aria-hidden="true"></i> Stage a scene
+      </button>
+      <button type="button" class="go-live" id="go-live">Go Live</button>
+    </div>
   </header>
 
   <div class="kpis">
@@ -189,7 +194,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <p class="empty">No videos yet. Analyze a clip in System and the file is stored here.</p>
+    <p class="empty">No videos archived.</p>
     {% endif %}
   </section>
 </section>
@@ -208,6 +213,7 @@
     <i class="fa-solid fa-video" aria-hidden="true"></i> View video
   </a>
 </dialog>
+{% include "monitoring/review/_scene_dialog.html" %}
 {{ overview.chart|json_script:"events-data" }}
 {{ overview.distribution|json_script:"dist-data" }}
 {{ overview.causes|json_script:"causes-data" }}

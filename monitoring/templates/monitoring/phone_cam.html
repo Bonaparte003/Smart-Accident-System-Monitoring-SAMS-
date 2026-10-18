@@ -103,8 +103,10 @@
     const stopBtn = document.getElementById("stop");
     const insecureEl = document.getElementById("insecure");
     let stream = null;
-    let timer = null;
+    let running = false;
     let canvas = null;
+    // Upload back to back, at most this often; the next frame waits for the previous upload.
+    const FRAME_MS = 200;
 
     if (!window.isSecureContext) {
       insecureEl.hidden = false;
@@ -126,7 +128,7 @@
       if (!canvas) canvas = document.createElement("canvas");
       const w = video.videoWidth;
       const h = video.videoHeight;
-      const maxSide = 1280;
+      const maxSide = 960;
       const scale = Math.min(1, maxSide / Math.max(w, h));
       canvas.width = Math.round(w * scale);
       canvas.height = Math.round(h * scale);
@@ -136,14 +138,35 @@
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       ctx.restore();
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.75));
       if (!blob) return;
       const form = new FormData();
       form.append("frame", blob, "frame.jpg");
       const res = await fetch(`/cam/${token}/frame/`, { method: "POST", body: form });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `Upload failed (${res.status})`);
+        const err = new Error(data.error || `Upload failed (${res.status})`);
+        err.status = res.status;
+        throw err;
+      }
+    }
+
+    async function streamLoop() {
+      while (running) {
+        const t0 = performance.now();
+        try {
+          await pushFrame();
+          setStatus("Streaming to SAMS…", "ok");
+        } catch (err) {
+          if (err.status === 403) {
+            stop();
+            setStatus("Session ended — press Go Live on the Mac and scan the new QR", "err");
+            return;
+          }
+          setStatus(String(err.message || err), "err");
+        }
+        const wait = FRAME_MS - (performance.now() - t0);
+        if (wait > 0) await new Promise((r) => setTimeout(r, wait));
       }
     }
 
@@ -167,16 +190,10 @@
         await ackJoin();
         stopBtn.disabled = false;
         setStatus("Streaming to SAMS…", "ok");
-        clearInterval(timer);
-        timer = setInterval(async () => {
-          try {
-            await pushFrame();
-            setStatus("Streaming to SAMS…", "ok");
-          } catch (err) {
-            setStatus(String(err.message || err), "err");
-          }
-        }, 850);
-        await pushFrame();
+        if (!running) {
+          running = true;
+          streamLoop();
+        }
       } catch (err) {
         startBtn.disabled = false;
         setStatus(String(err.message || err), "err");
@@ -184,8 +201,7 @@
     }
 
     function stop() {
-      clearInterval(timer);
-      timer = null;
+      running = false;
       if (stream) {
         stream.getTracks().forEach((t) => t.stop());
         stream = null;

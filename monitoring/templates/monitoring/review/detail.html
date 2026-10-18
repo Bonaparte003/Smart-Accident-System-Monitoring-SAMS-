@@ -37,8 +37,13 @@
         </div>
       </div>
     </div>
-    {% if not baked %}
-    <p class="hint" id="frame-status">The framed copy is being prepared. Boxes stay on this view until it is ready.</p>
+    {% if recording.render_status == "pending" %}
+    <p class="hint" id="frame-status">{% if recording.source == "live" %}This live session is still recording. Its video appears when the session ends.{% else %}Analysing this video. The page reloads when the log cards are ready.{% endif %}</p>
+    {% elif recording.render_status == "failed" %}
+    <p class="hint" id="frame-status">{{ status_label|capfirst }}. Check the server log.</p>
+    {% endif %}
+    {% if recording.declared %}
+    <p class="hint">Declared at upload, not measured:{% if recording.declared.machine_state %} machine {{ recording.declared.machine_state|lower }}{% endif %}{% if recording.declared.machine_state and recording.declared.vibration %} ·{% endif %}{% if recording.declared.vibration %} vibration {{ recording.declared.vibration|lower }}{% endif %}.</p>
     {% endif %}
   </div>
 </section>

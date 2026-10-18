@@ -45,10 +45,6 @@
         <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
         <span class="rail-label">MLOps</span>
       </a>
-      <a class="rail-link" href="{% url 'app' %}" title="System">
-        <i class="fa-solid fa-gear" aria-hidden="true"></i>
-        <span class="rail-label">System</span>
-      </a>
       <span class="rail-gap"></span>
       {% if user.is_authenticated %}
       <form method="post" action="{% url 'review_logout' %}">

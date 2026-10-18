@@ -6,7 +6,7 @@
   <header class="ov-head">
     <div>
       <h1>MLOps</h1>
-      <p>Each clip keeps a clean video for the next training run, and a framed copy that carries the log.</p>
+      <p>Live sessions and uploaded clips keep a clean video and a log card per moment. Reviewed moments and staged scenes are the next training run.</p>
     </div>
     <div class="desk-actions">
       <a class="desk-ghost" href="{% url 'review_export' %}?scope=all">Download archive</a>
@@ -38,48 +38,112 @@
   </div>
 
   <div class="desk-grid">
-    <section class="card desk-card">
-      <header class="card-head">
-        <div>
-          <h2>Models in service</h2>
-          <p>The live weights stay as they are.</p>
-        </div>
-      </header>
-      <ul class="desk-models desk-scroll">
-        {% for model in models %}
-        <li>
-          <span class="health-icon" aria-hidden="true">
-            {% if model.name == "Person" %}
-            <i class="fa-solid fa-video"></i>
-            {% elif model.name == "PPE" %}
-            <i class="fa-solid fa-helmet-safety"></i>
-            {% elif model.name == "Distance" %}
-            <i class="fa-solid fa-ruler-horizontal"></i>
-            {% elif model.name == "Vibration" %}
-            <i class="fa-solid fa-gauge-high"></i>
+    <div class="desk-stack">
+      <section class="card desk-card">
+        <header class="card-head">
+          <div>
+            <h2>Models in service</h2>
+            <p>The live weights stay as they are.</p>
+          </div>
+        </header>
+        <ul class="desk-models desk-scroll">
+          {% for model in models %}
+          <li>
+            <span class="health-icon" aria-hidden="true">
+              {% if model.name == "Person" %}
+              <i class="fa-solid fa-video"></i>
+              {% elif model.name == "PPE" %}
+              <i class="fa-solid fa-helmet-safety"></i>
+              {% elif model.name == "Distance" %}
+              <i class="fa-solid fa-ruler-horizontal"></i>
+              {% elif model.name == "Vibration" %}
+              <i class="fa-solid fa-gauge-high"></i>
+              {% else %}
+              <i class="fa-solid fa-diagram-project"></i>
+              {% endif %}
+            </span>
+            <span class="model-copy">
+              <strong>{{ model.name }}</strong>
+              <span>{{ model.role }}</span>
+            </span>
+            {% if model.ready %}
+            <span class="health-state is-ok">Ready · {{ model.size_label }}</span>
             {% else %}
-            <i class="fa-solid fa-diagram-project"></i>
+            <span class="health-state">Weights missing</span>
             {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section class="card desk-card trial-card">
+        <header class="card-head">
+          <div>
+            <h2>Data collection</h2>
+            <p>Labelled live trials: give the true risk, act it out on Live, and every measured second is kept under that label.</p>
+          </div>
+          <a class="desk-ghost" href="{% url 'review_trial_export' %}">Download</a>
+        </header>
+        {% if active_trial %}
+        <div class="trial-now">
+          <span class="pill {{ active_trial.risk_label }}">REC {{ active_trial.code }}</span>
+          <span class="q-copy">
+            <strong>{{ active_trial.get_risk_label_display }}{% if active_trial.scenario %} · {{ active_trial.scenario }}{% endif %}</strong>
+            <span>Started {{ active_trial.started_at|time:"H:i:s" }}. Keep the scene matching its label until you stop.</span>
           </span>
-          <span class="model-copy">
-            <strong>{{ model.name }}</strong>
-            <span>{{ model.role }}</span>
-          </span>
-          {% if model.ready %}
-          <span class="health-state is-ok">Ready · {{ model.size_label }}</span>
-          {% else %}
-          <span class="health-state">Weights missing</span>
-          {% endif %}
-        </li>
-        {% endfor %}
-      </ul>
-    </section>
+          <form method="post" action="{% url 'review_trial_stop' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'review_mlops' %}" />
+            <button type="submit" class="go-live">Stop</button>
+          </form>
+        </div>
+        {% else %}
+        <form class="trial-form" method="post" action="{% url 'review_trial_start' %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'review_mlops' %}" />
+          <label>True risk
+            <select name="risk_label" required>
+              {% for value, name in risk_labels %}
+              <option value="{{ value }}">{{ name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+          <label>Scenario
+            <input name="scenario" maxlength="64" placeholder="e.g. walk into danger zone" />
+          </label>
+          <label>Participant
+            <input name="participant" maxlength="64" placeholder="optional" />
+          </label>
+          <button type="submit" class="go-live">Start trial</button>
+        </form>
+        {% endif %}
+        {% if trials %}
+        <ul class="desk-scroll trial-list">
+          {% for trial in trials %}
+          <li class="q-row">
+            <span class="q-copy">
+              <strong>{{ trial.code }} · {{ trial.get_risk_label_display|default:"No label" }}{% if trial.scenario %} · {{ trial.scenario }}{% endif %}</strong>
+              <span>{{ trial.started_at|date:"M j, H:i" }} · {{ trial.fusion_rows }} fusion row{{ trial.fusion_rows|pluralize }} · {{ trial.distance_rows }} distance row{{ trial.distance_rows|pluralize }}{% if not trial.ended_at %} · recording{% endif %}</span>
+            </span>
+            <form method="post" action="{% url 'review_trial_delete' trial.pk %}" onsubmit="return confirm('Delete {{ trial.code }} and its rows?');">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'review_mlops' %}" />
+              <button type="submit" value="excluded">Delete</button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty">No trials yet. Record at least three per risk level so training can hold whole trials out.</p>
+        {% endif %}
+      </section>
+    </div>
 
     <section class="card desk-card">
       <header class="card-head">
         <div>
           <h2>Review queue</h2>
-          <p>Kept frames go into the training download.</p>
+          <p>Live and uploaded moments, alerts first. Set the true risk and keep it: it becomes a fusion training row.</p>
         </div>
       </header>
       {% if queue %}
@@ -100,7 +164,7 @@
               {% endif %}
             </span>
             <span class="q-copy">
-              <strong>{{ row.recording.title }} · {{ row.clock }}</strong>
+              <strong>{% if row.recording.source == "live" %}<i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> {% endif %}{{ row.recording.title }} · {{ row.clock }}</strong>
               <span>{{ row.summary }}</span>
             </span>
           </a>
@@ -108,6 +172,11 @@
             {% csrf_token %}
             <input type="hidden" name="minute_id" value="{{ row.pk }}" />
             <input type="hidden" name="next" value="{% url 'review_mlops' %}" />
+            <select name="true_label" aria-label="True risk" title="True risk for training">
+              {% for value, name in risk_labels %}
+              <option value="{{ value }}"{% if value == row.level %} selected{% endif %}>{{ name }}</option>
+              {% endfor %}
+            </select>
             <button type="submit" name="status" value="kept">Keep</button>
             <button type="submit" name="status" value="excluded">Exclude</button>
           </form>
@@ -115,7 +184,7 @@
         {% endfor %}
       </ul>
       {% else %}
-      <p class="empty">Nothing waiting. New alert minutes land here after a video is analyzed.</p>
+      <p class="empty">Nothing waiting. Moments land here from Live sessions and analysed uploads.</p>
       {% endif %}
     </section>
   </div>

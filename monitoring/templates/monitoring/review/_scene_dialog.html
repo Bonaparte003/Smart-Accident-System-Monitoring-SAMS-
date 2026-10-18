@@ -1,0 +1,62 @@
+<dialog class="live-pop scene-pop" id="scene-dialog" aria-labelledby="scene-title">
+  <button type="button" class="live-close" data-close aria-label="Close">
+    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+  </button>
+  <p class="live-kicker" id="scene-title">Stage a scene</p>
+  <p class="scene-lead">Upload a video of the scene. The models read everything visual; a video carries no accelerometer, so state what the machine was doing.</p>
+  <form class="scene-form" method="post" action="{% url 'review_upload' %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label class="scene-file">
+      <input type="file" name="video" accept="video/*" required />
+      <i class="fa-solid fa-film" aria-hidden="true"></i>
+      <span class="scene-file-name" data-empty="Choose a video">Choose a video</span>
+    </label>
+    <fieldset class="scene-choice">
+      <legend>Machine</legend>
+      <label>
+        <input type="radio" name="machine_state" value="RUNNING" required checked />
+        <span><i class="fa-solid fa-gear" aria-hidden="true"></i> Running</span>
+      </label>
+      <label>
+        <input type="radio" name="machine_state" value="STOPPED" required />
+        <span><i class="fa-solid fa-power-off" aria-hidden="true"></i> Stopped</span>
+      </label>
+    </fieldset>
+    <fieldset class="scene-choice">
+      <legend>Vibration</legend>
+      <label>
+        <input type="radio" name="vibration" value="NORMAL" required checked />
+        <span>Normal</span>
+      </label>
+      <label>
+        <input type="radio" name="vibration" value="ABNORMAL" required />
+        <span>Abnormal</span>
+      </label>
+    </fieldset>
+    <p class="scene-note">These stand in for the board's readings for the whole clip and are marked as declared on every log card.</p>
+    <button type="submit" class="live-view">Analyse scene</button>
+  </form>
+</dialog>
+<script>
+  (function () {
+    const dialog = document.getElementById("scene-dialog");
+    const file = dialog.querySelector('input[type="file"]');
+    const name = dialog.querySelector(".scene-file-name");
+    document.querySelectorAll("[data-stage-scene]").forEach((button) =>
+      button.addEventListener("click", () => {
+        if (typeof dialog.showModal === "function") dialog.showModal();
+        else dialog.setAttribute("open", "");
+      })
+    );
+    dialog.querySelector("[data-close]").addEventListener("click", () => dialog.close());
+    file.addEventListener("change", () => {
+      name.textContent = file.files.length ? file.files[0].name : name.dataset.empty;
+      name.parentElement.classList.toggle("has-file", file.files.length > 0);
+    });
+    dialog.querySelector("form").addEventListener("submit", (event) => {
+      const button = event.target.querySelector('button[type="submit"]');
+      button.disabled = true;
+      button.textContent = "Uploading…";
+    });
+  })();
+</script>

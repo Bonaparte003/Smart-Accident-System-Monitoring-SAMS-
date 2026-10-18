@@ -22,6 +22,11 @@
       </select>
     </label>
   </form>
+  <div class="archive-actions">
+    <button type="button" class="scene-btn" data-stage-scene>
+      <i class="fa-solid fa-clapperboard" aria-hidden="true"></i> Stage a scene
+    </button>
+  </div>
   {% if cards %}
   <ul class="poster-grid">
     {% for item in cards %}
@@ -30,6 +35,7 @@
         {% if item.poster %}
         <img src="{{ item.poster }}" alt="" />
         {% endif %}
+        <span class="poster-tag">{% if item.source == "live" %}<i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i> {% endif %}{{ item.title }}{% if item.status != "ready" %} · {{ item.status_label }}{% endif %}</span>
       </a>
     </li>
     {% endfor %}
@@ -38,4 +44,5 @@
   <p class="empty">No videos match these filters.</p>
   {% endif %}
 </section>
+{% include "monitoring/review/_scene_dialog.html" %}
 {% endblock %}

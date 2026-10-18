@@ -13,7 +13,10 @@
       </div>
       <div class="player-top">
         <span class="pill live-pill" id="live-pill"><i class="fa-solid fa-circle" aria-hidden="true"></i> LIVE</span>
-        <span class="pill" id="live-level" hidden></span>
+        <span class="player-pills">
+          <span class="pill rec" id="live-trial" hidden></span>
+          <span class="pill" id="live-level" hidden></span>
+        </span>
       </div>
     </div>
     <div class="sensor-strip">
@@ -24,6 +27,15 @@
           <em id="vib-score"></em>
         </header>
         <canvas id="vib-wave" width="640" height="90"></canvas>
+        <div class="machine-sim" role="group" aria-label="Simulated machine">
+          <span class="sensor-name"><i class="fa-solid fa-gear" aria-hidden="true"></i> Machine</span>
+          <button type="button" data-level="off" aria-pressed="true">Off</button>
+          <button type="button" data-level="low" aria-pressed="false">Low</button>
+          <button type="button" data-level="medium" aria-pressed="false">Medium</button>
+          <button type="button" data-level="high" aria-pressed="false">High</button>
+          <button type="button" data-level="intermittent" aria-pressed="false">Intermittent</button>
+          <em id="machine-note"></em>
+        </div>
       </section>
       <section class="sensor-panel">
         <header>
@@ -77,6 +89,7 @@
   function stateIcon(level) {
     if (level === "DANGER") return "fa-circle-exclamation";
     if (level === "CAUTION" || level === "DEGRADED") return "fa-triangle-exclamation";
+    if (!level) return "fa-circle-question";
     return "fa-circle-check";
   }
 
@@ -129,7 +142,7 @@
     const text = document.createElement("span");
     text.className = "log-line";
     const ico = document.createElement("span");
-    ico.className = "state-ico " + (level || "NORMAL");
+    ico.className = "state-ico " + (level || "NONE");
     ico.innerHTML = '<i class="fa-solid ' + stateIcon(level) + '"></i>';
     const ts = document.createElement("span");
     ts.className = "ts";
@@ -167,6 +180,38 @@
     poll();
   });
 
+  const machineBtns = document.querySelectorAll(".machine-sim button");
+  const machineNote = document.getElementById("machine-note");
+
+  let machineError = "";
+
+  function paintMachine(motor) {
+    const level = (motor && motor.level) || "off";
+    machineBtns.forEach((btn) => btn.setAttribute("aria-pressed", String(btn.dataset.level === level)));
+    machineNote.textContent = machineError || (motor && !motor.linked ? "board offline" : "");
+    machineNote.className = machineError ? "is-bad" : "";
+  }
+
+  async function setMachine(level) {
+    try {
+      const res = await fetch("/api/hardware/motor/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ level }),
+      });
+      const data = await res.json();
+      machineError = data.error || (data.motor && data.motor.acked === false
+        ? "board didn't answer — run hw.sh flash" : "");
+      paintMachine(data.motor);
+    } catch (err) {
+      machineError = String(err.message || err);
+      paintMachine(null);
+    }
+  }
+
+  machineBtns.forEach((btn) => btn.addEventListener("click", () => setMachine(btn.dataset.level)));
+  fetch("/api/hardware/motor/").then((r) => r.json()).then((d) => paintMachine(d.motor)).catch(() => {});
+
   const TOF_HISTORY = 90;
   const tofHistory = [];
 
@@ -179,6 +224,11 @@
     return { ctx, w: canvas.width, h: canvas.height };
   }
 
+  // One shared scale (g away from each axis's mean) so a still sensor draws flat lines and
+  // the machine levels show as bigger swings. It never shrinks below ±VIB_FLOOR_G.
+  const VIB_FLOOR_G = 0.05;
+  let vibScale = VIB_FLOOR_G;
+
   function drawVibration(series) {
     const { ctx, w, h } = blankCanvas("vib-wave");
     if (!series) return;
@@ -187,15 +237,16 @@
       { key: "y", color: "#1a7f4b", y0: h * 0.5 },
       { key: "z", color: "#c9372c", y0: h * 0.8 },
     ];
+    let peak = 0;
+    for (const { key } of lanes) for (const v of series[key] || []) peak = Math.max(peak, Math.abs(v));
+    vibScale = Math.max(VIB_FLOOR_G, peak, vibScale * 0.9);
     for (const { key, color, y0 } of lanes) {
       const arr = series[key] || [];
       if (arr.length < 2) continue;
-      const min = Math.min(...arr);
-      const span = Math.max(Math.max(...arr) - min, 1e-6);
       ctx.beginPath();
       arr.forEach((v, i) => {
         const x = (i / (arr.length - 1)) * (w - 16) + 8;
-        const y = y0 - ((v - min) / span - 0.5) * (h * 0.24);
+        const y = y0 - (v / vibScale) * (h * 0.15);
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
@@ -238,14 +289,42 @@
     ctx.stroke();
   }
 
+  // The model's verdict arrives with the camera poll; the raw signal has its own faster feed.
+  let vibModel = {};
+  let vibRaw = {};
+
+  function paintVibration() {
+    const vibState = document.getElementById("vib-state");
+    vibState.textContent = vibModel.label || (vibRaw.ready ? "Streaming" : vibRaw.detail || "Not streaming");
+    vibState.className = vibModel.abnormal ? "is-bad" : "";
+    document.getElementById("vib-score").textContent = [
+      vibRaw.ready ? `±${vibRaw.mag_std_mg} mg` : "",
+      vibModel.anomaly != null ? `anomaly ${Number(vibModel.anomaly).toFixed(2)}` : "",
+      vibModel.machine ? `machine ${vibModel.machine.toLowerCase()}` : "",
+    ].filter(Boolean).join(" · ");
+  }
+
+  async function pollVibration() {
+    try {
+      const res = await fetch("/api/hardware/vibration/");
+      vibRaw = await res.json();
+      drawVibration(vibRaw.ready ? vibRaw.series : null);
+      if (vibRaw.motor) paintMachine(vibRaw.motor);
+    } catch (err) {
+      vibRaw = { detail: "Not streaming" };
+    }
+    paintVibration();
+  }
+
   function paintSensors(data) {
     const vib = data.vibration || {};
-    const vibState = document.getElementById("vib-state");
-    vibState.textContent = vib.label || "Not streaming";
-    vibState.className = vib.abnormal ? "is-bad" : "";
-    document.getElementById("vib-score").textContent =
-      vib.anomaly_score != null ? `anomaly ${Number(vib.anomaly_score).toFixed(2)}` : "";
-    drawVibration(vib.series);
+    vibModel = {
+      label: vib.label,
+      abnormal: vib.abnormal,
+      anomaly: vib.anomaly_score,
+      machine: (data.machine || {}).label,
+    };
+    paintVibration();
 
     const tof = data.tof || {};
     const metres = tof.available ? tof.distance_m : null;
@@ -254,12 +333,19 @@
     document.getElementById("tof-value").textContent = metres != null ? `${metres.toFixed(2)} m` : "No signal";
     const usedSource = (data.vision || {}).distance_source;
     const note = document.getElementById("tof-note");
-    if (metres == null) note.textContent = tof.enabled === false ? "disabled" : "";
-    else if ((data.fusion || {}).proximity_m != null) note.textContent = "too close · caution";
+    if (metres == null) note.textContent = tof.online === false ? "sensor offline" : "out of range";
     else if (usedSource === "tof") note.textContent = "used in decision";
     else if (tof.near_m != null && metres > tof.near_m) note.textContent = `beyond ${tof.near_m.toFixed(1)} m`;
     else note.textContent = "clear";
     drawTof(tof.near_m);
+  }
+
+  const trialPill = document.getElementById("live-trial");
+  function paintTrial(trial) {
+    trialPill.hidden = !trial;
+    if (!trial) return;
+    trialPill.textContent = `REC ${trial.code} · ${trial.risk_label} · ${trial.fusion_rows} rows`;
+    trialPill.title = `Trial ${trial.code}: ${trial.fusion_rows} fusion rows, ${trial.distance_rows} distance rows kept`;
   }
 
   async function poll() {
@@ -268,6 +354,7 @@
     try {
       const res = await fetch("/api/control/live/");
       const data = await res.json();
+      paintTrial(data.trial);
       if (data.tof || data.vibration) paintSensors(data);
       const camera = data.camera || {};
       if (!camera.live) {
@@ -279,11 +366,11 @@
         return;
       }
       const vision = data.vision || {};
-      const level = data.fusion.label || "NORMAL";
+      const level = data.fusion.label || null;
       const line = data.fusion.reason || vision.ppe_summary || vision.label || "";
-      if (level + line !== lastLine) {
-        lastLine = level + line;
-        addLog(level, line || level, vision.ppe, vision.thumbnail);
+      if (`${level}|${line}` !== lastLine) {
+        lastLine = `${level}|${line}`;
+        addLog(level, line || level || "No decision", vision.ppe, vision.thumbnail);
       }
       if (pinned) return;
       showFrame(vision.thumbnail);
@@ -299,6 +386,7 @@
   document.getElementById("live-stop").addEventListener("click", async () => {
     clearInterval(timer);
     try {
+      await setMachine("off");
       await fetch("/api/hardware/camera/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -308,7 +396,9 @@
     location.href = "{% url 'review_entrance' %}";
   });
 
-  timer = setInterval(poll, 1000);
+  timer = setInterval(poll, 400);
   poll();
+  setInterval(pollVibration, 250);
+  pollVibration();
 </script>
 {% endblock %}
