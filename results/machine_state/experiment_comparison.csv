@@ -1,0 +1,3 @@
+experiment_id,val_f1_macro,val_stopped_recall,val_running_recall,val_log_loss,test_f1_macro,test_stopped_recall,test_running_recall,test_log_loss,loro_min_accuracy,loro_recordings_scored
+machine_state_rf,1.0,1.0,1.0,0.0012050253723798554,1.0,1.0,1.0,2.2204460492503136e-16,0.0,3.0
+machine_state_logreg,1.0,1.0,1.0,0.021327165826847586,1.0,1.0,1.0,0.014954771146116593,0.0,3.0

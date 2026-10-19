@@ -1,4 +1,4 @@
 parameter,value,meaning
-epochs,EPOCHS_TRANSFER,Training epochs
-lr,1e-3,Head learning rate
-freeze_backbone,True,ImageNet trunk frozen
+architecture,ResNet18 (ImageNet),"Backbone frozen, new linear head"
+epochs_max,8,Epoch limit
+lr,0.001,Head learning rate

@@ -1,0 +1,9 @@
+label,test,train
+Authorized Intervention,45,68
+Carrying Overload with Forklift,24,144
+Closed Panel Cover,38,57
+Opened Panel Cover,39,387
+Safe Carrying,24,66
+Safe Walkway,73,148
+Safe Walkway Violation,93,530
+Unauthorized Intervention,33,290

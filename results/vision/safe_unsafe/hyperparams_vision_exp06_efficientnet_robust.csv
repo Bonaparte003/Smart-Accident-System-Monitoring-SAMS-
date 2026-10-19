@@ -1,4 +1,6 @@
 parameter,value,meaning
-epochs,EPOCHS_FINETUNE,Training epochs
-class_weights,balanced,Weighted CE loss
-augmentation,strong,Extra Albumentations
+architecture,EfficientNet-B0 (ImageNet),Every layer trainable
+epochs_max,10,Epoch limit
+lr,3e-05,Low rate to keep the pretrained features
+loss,class-weighted cross-entropy,"Inverse class frequency, mean weight 1"
+augmentation,"crop, flip, colour jitter, rotation",torchvision transforms

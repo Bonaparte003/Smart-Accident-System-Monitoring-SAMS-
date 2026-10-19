@@ -1,0 +1,5 @@
+recording,state,motor,windows,accuracy,note
+2026-10-20_19-53-55_rig01,STOPPED,off,59,,"only STOPPED recording, cannot be left out"
+2026-10-20_19-55-15_rig01_running_low,RUNNING,low,59,0.0,
+2026-10-20_19-58-10_rig01_running_high,RUNNING,high,59,1.0,
+2026-10-20_19-59-24_rig01_running_intermittent,RUNNING,intermittent,58,1.0,

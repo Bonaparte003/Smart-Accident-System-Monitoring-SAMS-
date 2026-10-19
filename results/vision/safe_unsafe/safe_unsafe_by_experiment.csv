@@ -1,0 +1,7 @@
+experiment_id,test_binary_accuracy,test_unsafe_recall,test_unsafe_precision,test_safe_recall
+vision_exp03_resnet18_finetune,0.753,0.889,0.706,0.611
+vision_exp04_efficientnet_b0_frozen,0.648,0.963,0.597,0.317
+vision_exp05_mobilenet_v3_small,0.634,0.974,0.586,0.278
+vision_exp06_efficientnet_robust,0.575,0.984,0.547,0.144
+vision_exp02_resnet18_frozen,0.572,0.995,0.545,0.128
+vision_exp01_tinycnn_scratch,0.545,1.0,0.529,0.067

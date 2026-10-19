@@ -1,4 +1,4 @@
 parameter,value,meaning
-epochs,EPOCHS_FINETUNE,Fine-tune epochs
-lr,3e-5,Lower LR for full network
-freeze_backbone,False,All layers trainable
+architecture,ResNet18 (ImageNet),Every layer trainable
+epochs_max,10,Epoch limit
+lr,3e-05,Low rate to keep the pretrained features

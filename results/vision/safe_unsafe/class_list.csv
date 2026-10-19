@@ -1,0 +1,9 @@
+class,index,group
+Authorized Intervention,0,SAFE
+Carrying Overload with Forklift,1,UNSAFE
+Closed Panel Cover,2,SAFE
+Opened Panel Cover,3,UNSAFE
+Safe Carrying,4,SAFE
+Safe Walkway,5,SAFE
+Safe Walkway Violation,6,UNSAFE
+Unauthorized Intervention,7,UNSAFE

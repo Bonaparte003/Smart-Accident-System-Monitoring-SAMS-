@@ -1,0 +1,9 @@
+label,test,train,total,group
+Safe Walkway Violation,32,178,210,UNSAFE
+Opened Panel Cover,13,129,142,UNSAFE
+Unauthorized Intervention,11,97,108,UNSAFE
+Safe Walkway,25,50,75,SAFE
+Carrying Overload with Forklift,8,48,56,UNSAFE
+Authorized Intervention,15,23,38,SAFE
+Closed Panel Cover,13,19,32,SAFE
+Safe Carrying,8,22,30,SAFE

@@ -1,4 +1,4 @@
 parameter,value,meaning
-epochs,EPOCHS_TRANSFER,Training epochs
-lr,1e-3,Head LR
-architecture,efficientnet_b0,Frozen backbone
+architecture,EfficientNet-B0 (ImageNet),"Backbone frozen, new linear head"
+epochs_max,8,Epoch limit
+lr,0.001,Head learning rate

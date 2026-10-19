@@ -1,0 +1,3 @@
+,pred SAFE,pred UNSAFE
+true SAFE,110,70
+true UNSAFE,21,168

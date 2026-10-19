@@ -1,4 +1,4 @@
 parameter,value,meaning
-epochs,EPOCHS_BASELINE,Training epochs
-lr,1e-3,AdamW learning rate
-architecture,TinyCNN,From-scratch CNN
+architecture,TinyCNN,"4 conv blocks, random initialisation"
+epochs_max,12,Epoch limit (early stopping may end sooner)
+lr,0.001,AdamW learning rate
