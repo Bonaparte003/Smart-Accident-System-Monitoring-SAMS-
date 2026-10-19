@@ -1,0 +1,9 @@
+label_name,rule,test rows,share correct
+CAUTION,PPE missing near running machine,37,0.703
+CAUTION,"running machine, worker in caution zone",164,0.988
+CAUTION,smoke,78,1.0
+DANGER,fallen worker,57,1.0
+DANGER,fire,89,1.0
+DANGER,"running machine, fast approach in caution zone",25,0.96
+DANGER,"running machine, worker in danger zone",45,1.0
+NORMAL,no hazard near a worker,684,0.999

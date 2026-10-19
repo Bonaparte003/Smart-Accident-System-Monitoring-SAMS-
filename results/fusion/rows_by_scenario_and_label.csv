@@ -1,0 +1,13 @@
+scenario,NORMAL,CAUTION,DANGER
+abnormal_vibration,421,167,0
+approach_machine,103,295,190
+empty_scene,600,0,0
+fall,159,82,347
+fire,58,0,537
+maintenance_stopped,309,279,0
+ppe_missing,356,232,0
+rush_in_and_out,370,89,129
+smoke,79,508,6
+walk_past,534,54,0
+work_at_running_machine,74,447,67
+worker_far,586,2,0

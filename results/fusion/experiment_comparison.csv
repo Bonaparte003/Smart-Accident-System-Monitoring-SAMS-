@@ -1,5 +1,5 @@
-,experiment_id,approach,val_danger_recall,danger_recall,f1_macro,accuracy,missed_dangers
-0,fusion_exp01_random_forest,Classical baseline - Random Forest on fusion features,1.0,1.0,1.0,1.0,0
-1,fusion_exp02_xgboost,Boosted trees - XGBoost on fusion features,1.0,1.0,1.0,1.0,0
-2,fusion_exp03_svm_rbf,Margin classifier - SVM RBF on scaled fusion features,1.0,1.0,1.0,1.0,0
-3,fusion_exp04_mlp,Neural net - MLP on scaled fusion features,0.92,1.0,1.0,1.0,0
+experiment_id,approach,val_danger_recall,val_f1_macro,val_false_alarm_rate,test_danger_recall,test_f1_macro,test_missed_dangers,test_dangers_called_normal,test_false_alarm_rate
+fusion_exp01_random_forest,Random Forest on fusion inputs,1.0,0.9988,0.0,1.0,0.9969,0,0,0.0
+fusion_exp02_xgboost,XGBoost on fusion inputs,1.0,0.9981,0.0,1.0,0.9986,0,0,0.0
+fusion_exp04_mlp,MLP on scaled fusion inputs,1.0,0.9959,0.0069,0.9954,0.9888,1,0,0.0029
+fusion_exp03_svm_rbf,RBF SVM on scaled fusion inputs,1.0,0.9952,0.0069,0.9954,0.9856,1,0,0.0015

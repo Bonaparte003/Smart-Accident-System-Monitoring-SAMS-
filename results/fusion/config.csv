@@ -1,8 +1,15 @@
 setting,value,meaning
-SEED,42.0,Random seed
-CAUTION_ZONE_M,2.0,Distance threshold for caution zone (m)
-DANGER_ZONE_M,0.8,Distance threshold for danger zone (m)
-N_TRIALS,60.0,Synthetic experimental trials
-SAMPLES_PER_TRIAL,40.0,Fusion rows per trial
-MLP_MAX_ITER,300.0,Max MLP epochs (sklearn early stopping)
-MLP_PATIENCE,15.0,MLP validation patience
+SEED,42.0,"Seed for scenario generation, splits and models"
+CAUTION_ZONE_M,2.0,Caution zone radius around the machine (m)
+DANGER_ZONE_M,0.8,Danger zone radius around the machine (m)
+NEARBY_M,3.0,Range where a faulty machine or missing PPE matters (m)
+FAST_APPROACH_MPS,0.8,Approach speed that turns the caution zone into DANGER (m/s)
+FIRE_ALARM_SCORE,0.05,Fire score that counts as fire (hazard model's fire threshold)
+SMOKE_ALARM_SCORE,0.374,Smoke score that counts as smoke (hazard model's smoke threshold)
+VIBRATION_ABNORMAL_SCORE,0.5,P(ABNORMAL) above which the vibration model says ABNORMAL
+N_TRIALS_PER_SCENARIO,12.0,Synthetic trials per scenario
+SAMPLES_PER_TRIAL,50.0,Frames per synthetic trial
+FRAME_DT_S,0.4,Seconds between frames (the live page polls every 0.4 s)
+MOTION_WINDOW_S,1.5,Seconds of distance history the live tracker fits speed to
+MLP_MAX_ITER,300.0,MLP epoch limit
+MLP_PATIENCE,15.0,MLP early-stopping patience

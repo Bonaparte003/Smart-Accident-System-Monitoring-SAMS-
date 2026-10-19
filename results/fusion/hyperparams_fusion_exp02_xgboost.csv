@@ -1,4 +1,5 @@
 parameter,value,meaning
-n_estimators,250.0,Rounds
-max_depth,5.0,Depth
+objective,multi:softprob,Outputs a probability per level
+n_estimators,250,Boosting rounds
+max_depth,5,Tree depth
 learning_rate,0.1,Shrinkage

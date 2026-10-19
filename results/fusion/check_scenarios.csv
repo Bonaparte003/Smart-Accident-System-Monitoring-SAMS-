@@ -1,0 +1,16 @@
+,expected,rule,fusion_exp01_random_forest,fusion_exp02_xgboost,fusion_exp04_mlp,fusion_exp03_svm_rbf
+"empty frame, machine running",NORMAL,no hazard near a worker,NORMAL,NORMAL,NORMAL,NORMAL
+"empty frame, machine stopped",NORMAL,no hazard near a worker,NORMAL,NORMAL,NORMAL,NORMAL
+"worker far, machine running",NORMAL,no hazard near a worker,NORMAL,NORMAL,NORMAL,NORMAL
+"worker at 1.5 m, machine running",CAUTION,"running machine, worker in caution zone",CAUTION,CAUTION,CAUTION,CAUTION
+"worker at 0.5 m, machine running",DANGER,"running machine, worker in danger zone",DANGER,DANGER,DANGER,DANGER
+"worker at 0.5 m, machine stopped",CAUTION,"stopped machine, worker in danger zone",CAUTION,CAUTION,CAUTION,CAUTION
+worker rushing in at 1.6 m,DANGER,"running machine, fast approach in caution zone",DANGER,DANGER,DANGER,DANGER
+"fire, worker far",DANGER,fire,DANGER,DANGER,DANGER,DANGER
+"fire, nobody in view",DANGER,fire,DANGER,DANGER,DANGER,DANGER
+"smoke, worker far",CAUTION,smoke,CAUTION,CAUTION,CAUTION,CAUTION
+fallen worker far from machine,DANGER,fallen worker,DANGER,DANGER,DANGER,DANGER
+"abnormal vibration, worker at 2.5 m",CAUTION,"abnormal vibration, worker nearby",CAUTION,CAUTION,CAUTION,CAUTION
+"abnormal vibration, worker far",NORMAL,no hazard near a worker,NORMAL,NORMAL,NORMAL,NORMAL
+PPE missing at 2.5 m,CAUTION,PPE missing near running machine,CAUTION,CAUTION,CAUTION,CAUTION
+PPE missing far away,NORMAL,no hazard near a worker,NORMAL,NORMAL,NORMAL,NORMAL

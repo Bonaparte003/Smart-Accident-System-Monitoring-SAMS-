@@ -1,0 +1,11 @@
+label_name,rule,rows
+NORMAL,no hazard near a worker,3649
+CAUTION,PPE missing near running machine,123
+CAUTION,"abnormal vibration, worker nearby",133
+CAUTION,"running machine, worker in caution zone",1045
+CAUTION,smoke,493
+CAUTION,"stopped machine, worker in danger zone",361
+DANGER,fallen worker,340
+DANGER,fire,537
+DANGER,"running machine, fast approach in caution zone",151
+DANGER,"running machine, worker in danger zone",248
