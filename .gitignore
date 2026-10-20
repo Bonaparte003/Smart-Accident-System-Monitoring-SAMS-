@@ -9,3 +9,7 @@ yolov8n-pose.pt__pycache__/
 .DS_Store
 mygithub
 mygithub.*
+.env
+
+# local helper scripts
+push_6_days.sh

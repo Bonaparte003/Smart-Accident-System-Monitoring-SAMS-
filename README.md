@@ -1,31 +1,42 @@
 # SAMS — Smart Accident Monitoring System
 
-SAMS warns workers **before** they get hurt near industrial machines. A phone camera and an accelerometer watch the machine area. Machine-learning models detect the worker, estimate how far they are from the machine, check their protective gear, and read the machine's vibration. A fusion model then turns all of that into one risk level, **NORMAL**, **CAUTION** or **DANGER**, and drives a buzzer and warning LEDs in real time. Every analysed clip is archived so a safety officer can review incidents and label data for retraining.
+![Python 3.12](https://img.shields.io/badge/python-3.12-3776AB)
+![Django 6.1](https://img.shields.io/badge/django-6.1-092E20)
+![YOLOv8](https://img.shields.io/badge/vision-YOLOv8-111F68)
+![Arduino Uno](https://img.shields.io/badge/hardware-Arduino%20Uno-00979D)
+![Tests](https://img.shields.io/badge/tests-49%20passing-2EA44F)
 
-- **Repository:** <https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS->
-- **Video demo:** <https://www.youtube.com/watch?v=tkwJFKNSVD8>
-- **Track:** ML Track (models, notebooks, metrics) with a full-stack web MVP and hardware integration
-- **ML report:** [`notebooks/README.md`](notebooks/README.md) covers data visualisation, EDA, model architectures, experiments and metrics for all eight models
+SAMS warns workers **before** they get hurt near industrial machines. A phone camera watches the machine area and an accelerometer sits on the machine. Machine-learning models find each worker, estimate their distance to the machine, check their protective gear, and look for fire, smoke and falls. Other models read whether the machine is running and whether it vibrates abnormally. A fusion model turns all of it into one risk level, **NORMAL**, **CAUTION** or **DANGER**, and drives a buzzer and warning LEDs in real time.
+
+Every live session is archived with the decision for each moment. Uploaded videos go through the same pipeline. A safety officer reviews those moments, and the reviewed moments become the training data for the next model.
+
+| | |
+|---|---|
+| **Repository** | <https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS-> |
+| **Video demo** | <https://www.youtube.com/watch?v=tkwJFKNSVD8> |
+| **Track** | ML track (models, notebooks, metrics) with a full-stack web MVP and hardware integration |
+| **Training** | Eight Colab notebooks in [`notebooks/`](notebooks/), one per model |
 
 ---
 
-## Table of contents
+## Contents
 
 1. [Features](#features)
 2. [System architecture](#system-architecture)
-3. [Tech stack](#tech-stack)
-4. [Project structure](#project-structure)
-5. [Setting up the environment](#setting-up-the-environment)
-6. [Running the app](#running-the-app)
-7. [Using the app](#using-the-app)
-8. [Hardware](#hardware)
+3. [Quick start](#quick-start)
+4. [Configuration](#configuration)
+5. [Using the app](#using-the-app)
+6. [Hardware](#hardware)
+7. [Machine-learning models](#machine-learning-models)
+8. [Retraining (MLOps)](#retraining-mlops)
 9. [API](#api)
 10. [Database schema](#database-schema)
-11. [Machine-learning models](#machine-learning-models)
-12. [Designs and screenshots](#designs-and-screenshots)
-13. [Testing](#testing)
-14. [Deployment plan](#deployment-plan)
-15. [Known limitations and next steps](#known-limitations-and-next-steps)
+11. [Project structure](#project-structure)
+12. [Testing](#testing)
+13. [Deployment](#deployment)
+14. [Security notes](#security-notes)
+15. [Known limitations and roadmap](#known-limitations-and-roadmap)
+16. [Designs and screenshots](#designs-and-screenshots)
 
 ---
 
@@ -33,18 +44,19 @@ SAMS warns workers **before** they get hurt near industrial machines. A phone ca
 
 | Feature | What it does |
 |---|---|
-| **Control Center** | Combines person detection, distance, PPE and vibration into one live NORMAL / CAUTION / DANGER decision with class probabilities |
-| **Live phone camera** | An Android phone joins by scanning a QR code and streams frames over Wi-Fi (HTTPS) |
-| **Video upload** | Drop an MP4 / MOV / WebM clip and SAMS analyses sampled frames |
-| **Person and distance** | YOLOv8 finds each worker; a pose-based neural network (plus an optional time-of-flight sensor) estimates distance to the machine |
-| **PPE check** | Detects hard hat, safety vest, gloves and safety shoes on each worker |
-| **Fire / smoke and falls** | YOLOv8 detectors for fire and smoke hazards and for a person lying on the floor |
-| **Vibration monitoring** | An MPU6050 accelerometer streams 50 Hz windows into a NORMAL / ABNORMAL classifier |
-| **Alerts on hardware** | Buzzer patterns and green / yellow / red LEDs follow the risk level automatically |
-| **Review dashboard** | Signed-in home overview with trends, device health and storage |
-| **Archive** | Every analysed clip is saved with a timestamped log card per sampled second and a "framed" copy with boxes burned in |
-| **Alerts page** | All CAUTION and DANGER moments in one list, linked to the exact second in the recording |
-| **MLOps desk** | Model inventory, labelling of archived moments, and a ZIP export (clean frames plus `labels.csv`) for retraining |
+| **Live risk decision** | The fusion model combines 14 measured inputs into NORMAL / CAUTION / DANGER on every frame |
+| **Phone camera** | An Android phone joins by scanning the **Go Live** QR code and streams frames over Wi-Fi (HTTPS) |
+| **Worker distance** | A VL53L0X time-of-flight sensor measures close range; a pose-based neural network estimates everyone else |
+| **Worker motion** | Speed and approach are measured from each tracked worker's distance history |
+| **PPE check** | Hard hat, vest, gloves, boots and goggles per worker, each with its own tuned threshold |
+| **Fire, smoke and falls** | YOLOv8 detectors for fire and smoke, and for a worker lying on the floor |
+| **Machine state** | The accelerometer on the machine tells STOPPED from RUNNING |
+| **Vibration monitoring** | Each accelerometer window is labelled NORMAL or ABNORMAL |
+| **Alerts on hardware** | Buzzer patterns and green / yellow / red LEDs follow the risk level |
+| **Live recording** | Every Go Live session is archived: the clean video plus a log card every 2 s and at every decision change |
+| **Video upload** | Analyse a clip with the same models; the operator declares the machine and vibration state the board would have read |
+| **Alerts page** | Every live CAUTION / DANGER change and every problem moment in the archive |
+| **MLOps desk** | Model inventory, review queue for archived moments, labelled data-collection trials, and a training-set export |
 
 ---
 
@@ -54,59 +66,347 @@ SAMS warns workers **before** they get hurt near industrial machines. A phone ca
 flowchart LR
     subgraph EDGE["Edge devices"]
         PHONE["Android phone camera"]
-        ARD["Arduino: MPU6050, VL53L0X ToF, buzzer, LEDs"]
+        ARD["Arduino Uno: MPU6050/6500 accelerometer,<br/>VL53L0X ToF, buzzer, LEDs, vibration motors"]
     end
-    subgraph SERVER["SAMS server: Django on uvicorn, HTTPS"]
-        VIS["vision_inference: YOLOv8 person + pose"]
-        PPE[ppe_inference]
+    subgraph SERVER["SAMS server: Django on uvicorn (HTTPS)"]
+        VIS["vision_inference<br/>PPE + pose + tracking"]
         HAZ[hazard_inference]
         ACC[accident_inference]
         DIST[distance_estimation]
+        MS[machine_state_inference]
         VIB[vibration_inference]
         CC["control_center + fusion_inference"]
-        REC["recordings + video_jobs"]
-        DB[(SQLite)]
+        REC[recordings]
+        DB[(SQLite + media/)]
     end
-    UI["Web UI: Control Center and review dashboard"]
+    UI["Review dashboard and Live view"]
 
-    PHONE -- frames over Wi-Fi --> VIS
-    ARD -- serial 115200 baud --> VIB
-    ARD -- ToF distance --> DIST
-    VIS --> PPE
+    PHONE -- JPEG frames --> VIS
+    ARD -- "ax,ay,az @ 50 Hz" --> MS
+    ARD -- "ax,ay,az @ 50 Hz" --> VIB
+    ARD -- "TOF:m" --> DIST
     VIS --> DIST
     VIS --> HAZ
     VIS --> ACC
+    VIS --> CC
     DIST --> CC
+    HAZ --> CC
+    ACC --> CC
+    MS --> CC
     VIB --> CC
-    PPE --> CC
-    CC -- buzzer / LED commands --> ARD
+    CC -- "B0-B2 / L0-LR" --> ARD
+    CC --> REC --> DB --> UI
     CC --> UI
-    REC --> DB
-    DB --> UI
 ```
 
-**How a decision is made** (`monitoring/services/control_center.py`):
+### How a decision is made
 
-1. The vision pipeline detects the worker and estimates distance, from the ToF sensor at close range or the distance network further away.
-2. The worker's speed and whether they are approaching are computed from successive distance readings.
-3. The vibration window from the MPU6050 gives an anomaly score and a NORMAL / ABNORMAL state.
-4. These become the fusion feature vector: caution zone ≤ 2.0 m, danger zone ≤ 0.8 m, plus speed, approach, machine on/off and vibration.
-5. The fusion model returns NORMAL, CAUTION or DANGER with probabilities. If a person is seen but no distance can be measured, SAMS reports **DEGRADED** instead of guessing.
-6. When the label changes, the buzzer and LEDs are updated, and the interaction is written to the database.
+The service code only joins what the models measure. Every class name, threshold, image size, window length, zone limit and input order comes from the model's own `metadata.json`, so a retrained model drops in without code changes.
+
+1. **People and gear.** The PPE checkpoint finds each person and their gear. Each class is kept above its own tuned threshold. Pose places joints inside each person box. Gear and fall boxes belong to the person box that holds their centre.
+2. **Distance.** The person in the ToF beam gets the ToF reading, if it falls inside the calibrated near range. Everyone else gets the distance network's estimate.
+3. **Motion.** Speed and approach are the slope of each tracked person's distances over the fusion model's `motion_window_s`.
+4. **Machine.** The machine-state model labels the latest accelerometer window STOPPED or RUNNING. The vibration model gives P(ABNORMAL) for that window.
+5. **Hazards.** The fire and smoke scores are the strongest boxes above their thresholds. The fall flag is set by a lying-person box.
+6. **Fusion.** These values form the 14-input vector the fusion model was trained on. For an empty frame, the person inputs take the model's `absent_worker` values. Any input that was not measured means **no decision**, and the reason names what is missing; nothing is filled in.
+7. **Actuation.** When the label changes, the buzzer and LEDs follow it and the change is logged.
+
+| Fusion input | Source |
+|---|---|
+| `worker_detected`, `vision_confidence` | Person detector |
+| `worker_distance`, `inside_caution_zone`, `inside_danger_zone` | ToF or distance network, and the model's `zones_m` |
+| `worker_speed`, `approaching_machine` | Distance history of the tracked person |
+| `ppe_missing` | PPE detector |
+| `machine_active` | Machine-state model |
+| `vibration_state`, `vibration_anomaly_score` | Vibration model |
+| `fire_score`, `smoke_score` | Hazard detector |
+| `fall_detected` | Fall detector |
 
 ---
 
-## Tech stack
+## Quick start
 
-| Layer | Tools |
+### Prerequisites
+
+- **Python 3.12.** Python 3.13+ will not work: `torch==2.2.2` and `numpy==1.26.4` have no wheels for it. On macOS, `brew install python@3.12`.
+- **OpenSSL**, for the self-signed HTTPS certificate (preinstalled on macOS and most Linux distributions).
+- For live sensing: an Arduino Uno with the parts under [Hardware](#hardware), [`arduino-cli`](https://arduino.github.io/arduino-cli/), and an Android phone on the same Wi-Fi.
+
+### Install
+
+```bash
+git clone https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS-.git
+cd Smart-Accident-System-Monitoring-SAMS-
+
+python3.12 -m venv myenv
+source myenv/bin/activate            # Windows: myenv\Scripts\activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+python manage.py migrate
+python manage.py createsuperuser     # account for the review dashboard
+```
+
+### Models
+
+Trained weights (about 1.2 GB) are kept out of git. Place them under `models/`, or retrain them with the notebooks (see [Retraining](#retraining-mlops)).
+
+| Model | Path |
 |---|---|
-| Backend | Python 3.12, Django 6.1, uvicorn (ASGI, HTTPS), django-cors-headers |
-| Database | SQLite (Django ORM, migrations in `monitoring/migrations/`) |
-| Frontend | Django templates, vanilla JavaScript, CSS, Font Awesome, Inter font |
-| ML / CV | PyTorch 2.2, torchvision, Ultralytics YOLOv8, scikit-learn 1.5, XGBoost, OpenCV, NumPy, SciPy |
-| Video | imageio + imageio-ffmpeg |
-| Hardware | Arduino Uno / Nano, MPU6050, VL53L0X, buzzer, LEDs, pyserial, arduino-cli |
-| Notebooks | Jupyter (training, EDA and evaluation for every model) |
+| Fusion | `models/fusion/best_fusion_model/` (`model.joblib`, `metadata.json`) |
+| Vibration | `models/vibration/best/` |
+| Machine state | `models/machine_state/` (`model.joblib`, `metadata.json`) |
+| PPE | `models/vision/ppe/` (`best.pt`, `metadata.json`) |
+| Fire / smoke | `models/vision/hazard/` (`best.pt`, `metadata.json`) |
+| Fall | `models/vision/accident/` (`best.pt`, `metadata.json`) |
+| Pose | `models/vision/pose/` (`best.pt`, `metadata.json`) |
+| Distance | `models/vision/distance/` (`distance_nn.pt`, `calib.json`) |
+
+The app starts with any subset of models. A missing model shows as unavailable, and fusion gives no decision until every input it needs is measured.
+
+### Run
+
+```bash
+python manage.py runserver
+```
+
+`runserver` is overridden in `manage.py`. It creates a self-signed certificate if needed and starts **uvicorn over HTTPS** on `0.0.0.0:8000`. HTTPS is required because phone browsers block the camera on plain HTTP.
+
+```text
+SAMS is starting with uvicorn (HTTPS):
+  Mac:   https://127.0.0.1:8000/
+  Phone: https://192.168.x.x:8000/  (camera needs HTTPS)
+```
+
+With the Arduino connected, use the helper. It sets the serial port and HTTPS mode:
+
+```bash
+export SAMS_HW_SERIAL_PORT=/dev/cu.usbserial-1410
+./hardware/tools/hw.sh run
+```
+
+Without the board, the dashboard and the phone camera still work (people, PPE, hazards, falls, distance). Machine state and vibration show as offline, so fusion gives no decision.
+
+---
+
+## Configuration
+
+Every variable has a default; none is needed for a first run.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `DJANGO_SECRET_KEY` | development key | **Set in production** |
+| `DJANGO_DEBUG` | `true` | Set to `false` in production |
+| `DJANGO_ALLOWED_HOSTS` | `*` | Comma-separated host names |
+| `SAMS_DB_PATH` | `db.sqlite3` | SQLite file |
+| `SAMS_MEDIA_ROOT` | `media/` | Recorded videos and frames |
+| `SAMS_HW_SERIAL_PORT` | first USB serial device | Arduino port, e.g. `/dev/cu.usbserial-1410` |
+| `SAMS_HW_SERIAL_BAUD` | `115200` | Serial speed |
+| `SAMS_HW_BUZZER_ENABLED` / `SAMS_HW_BUZZER_AUTO` | `true` | Enable the buzzer / follow the risk level |
+| `SAMS_HW_LEDS_ENABLED` / `SAMS_HW_LEDS_AUTO` | `true` | Enable the LEDs / follow the risk level |
+| `SAMS_HW_TOF_M` | unset | Lab only: a fixed near-range distance in place of the ToF |
+| `SAMS_HW_TOF_STALE_S` | `2.0` | Seconds a ToF reading stays usable |
+| `SAMS_HTTPS` | set by `hw.sh run` | Makes the phone QR code use `https://` |
+| `SAMS_PUBLIC_BASE` / `SAMS_PUBLIC_HOST` | LAN IP | Override the address in the phone QR code |
+| `SAMS_VISION_POSE`, `SAMS_VISION_PPE`, `SAMS_VISION_HAZARD` | on | Set `false` to switch a vision model off |
+| `SAMS_VIDEO_ANALYSIS_FPS` | `2` | Frames per second analysed in an uploaded clip |
+| `SAMS_PPE_WEIGHTS`, `SAMS_POSE_WEIGHTS`, `SAMS_HAZARD_WEIGHTS`, `SAMS_ACCIDENT_WEIGHTS`, `SAMS_DISTANCE_WEIGHTS` | `models/…` | Override a weights path |
+
+Sample rate and window length are not configured here: each accelerometer model's metadata states the rate and window it was trained on, and the stream serves each model its own window.
+
+---
+
+## Using the app
+
+Everything is in the review dashboard (sign-in required).
+
+| Page | URL | Purpose |
+|---|---|---|
+| Home | `/` | CAUTION / DANGER trends, device health, storage, **Go Live** |
+| Live | `/live/` | Annotated phone frame, decision, distance, machine, vibration, PPE, motor controls |
+| Archive | `/archive/` | Live sessions and uploaded clips; **Upload video** |
+| Recording | `/recordings/<id>/` | Framed video with timestamped log cards |
+| Alerts | `/alerts/` | Live decision changes and archived problem moments |
+| MLOps | `/mlops/` | Models in service, review queue, data-collection trials, training-set export |
+
+### Demo flow
+
+1. Sign in and check device health on **Home**.
+2. Press **Go Live** and scan the QR code with the phone. Accept the certificate warning, allow the camera, then press **View video**.
+3. Start the machine from the Live page's **Machine** buttons. The machine-state model switches to RUNNING.
+4. Walk toward the camera. The zone goes from clear to caution (≤ 2.0 m) to danger (≤ 0.8 m), and the decision, buzzer and LEDs follow.
+5. Review the session in **Alerts** and **Archive**, then label its moments in **MLOps**.
+
+---
+
+## Hardware
+
+Pin-level details, the serial protocol and recording tools are in [`hardware/README.md`](hardware/README.md).
+
+### Schematic
+
+![SAMS schematic: Arduino Uno with status LEDs and the 2N2222A-driven vibration motors](Design/Schematic-Design.png)
+
+The firmware ([`mpu6050_serial.ino`](hardware/firmware/mpu6050_serial/mpu6050_serial.ino)) is the reference for pin numbers; the table below is taken from it.
+
+| Arduino pin | Connects to | Notes |
+|---|---|---|
+| A2 / A3 | Accelerometer SDA / SCL | Software I2C. MPU6050, MPU6500, MPU9250 and MPU9255 all work; the board reports the chip at boot |
+| A0 / A1 | VL53L0X SDA / SCL | Software I2C; leave XSHUT open |
+| 5V / GND | Accelerometer and ToF power | Common ground for every part |
+| D2 / D3 / D5 | Green / yellow / red LED anodes | Each through a series resistor (220 Ω–1 kΩ), cathode to GND |
+| D8 | Buzzer + | Active buzzer; use a transistor if D8 cannot drive it |
+| D9 | 330 Ω → 2N2222A base | Switches the vibration motors that simulate a running machine |
+| — | 2 × DC vibration motors | Between the battery + and the 2N2222A collector, each with a 1N4007 flyback diode; emitter to GND |
+| — | 2 × AAA (≈ 3 V) | Motor supply; its − joins the Arduino GND |
+
+### Bill of materials
+
+| Part | Qty | Role |
+|---|---|---|
+| Arduino Uno (AVR + CH340) | 1 | Reads sensors, drives actuators, USB serial at 115200 baud |
+| MPU6050 / MPU6500 / MPU9250 module | 1 | Machine vibration and machine state, 50 Hz |
+| VL53L0X time-of-flight module | 1 | Close-range worker distance |
+| Active buzzer | 1 | Audible caution / danger patterns |
+| LEDs (green, yellow, red) + resistors | 3 | Visual risk level |
+| DC vibration motors | 2 | Simulated machine |
+| 2N2222A NPN transistor, 330 Ω resistor | 1 each | Motor driver |
+| 1N4007 diodes | 2 | Flyback protection |
+| 2 × AAA battery holder | 1 | Motor supply |
+| Android phone | 1 | Live camera over Wi-Fi |
+
+### Helper commands
+
+```bash
+./hardware/tools/hw.sh ports            # list connected boards
+./hardware/tools/hw.sh flash            # compile and upload the main firmware
+./hardware/tools/hw.sh check            # verify accelerometer, ToF and actuators
+./hardware/tools/hw.sh test-leds        # LED cycle
+./hardware/tools/hw.sh record-steady    # record the machine STOPPED (training data)
+./hardware/tools/hw.sh record-running --motor medium   # record it RUNNING
+./hardware/tools/hw.sh certs            # regenerate the HTTPS certificate after an IP change
+./hardware/tools/hw.sh run              # start SAMS with the board
+```
+
+---
+
+## Machine-learning models
+
+Each model is trained, evaluated and documented in its own Colab notebook. Every notebook splits by recording, trial, video or subject so that no near-duplicate sits on both sides of a split, picks its winner on **validation**, and reports **test** once.
+
+| # | Notebook | Served model | Headline result (test) |
+|---|---|---|---|
+| 01 | Safe / unsafe behaviour | ResNet18, fine-tuned | Accuracy 0.60, macro-F1 0.63 (research model, not served) |
+| 02 | Vibration | SVM (RBF) on 48 window features, UCI accelerometer data | Macro-F1 0.80 (validation 0.86) |
+| 02 §8 | Machine state | Random Forest on magnitude features, SAMS board recordings | STOPPED and RUNNING recall 1.0 on held-out windows |
+| 03 | Fusion risk | Random Forest, 14 inputs | DANGER recall 1.0, macro-F1 0.997; all 15 scenario checks pass |
+| 04 | Distance | Pinhole estimate × learned residual MLP | Mean error 0.22 m on an unseen person (pinhole alone 0.79 m) |
+| 05 | PPE | YOLOv8n, 640 px | mAP50-95 0.235 (validation 0.333) |
+| 06 | Fire / smoke | YOLOv8s, 960 px | mAP50-95 0.394; fire found in 98.9% of fire frames (validation) |
+| 07 | Fall | YOLOv8s, 640 px | 17 / 17 falls found, no false falls on the test set |
+| 08 | Pose | YOLOv8s-pose, fine-tuned | Joint accuracy (PCK) 0.854 vs 0.767 for stock YOLOv8n-pose |
+
+Figures, ledgers and metric tables are written to `results/`. Read the headline numbers together with the [limitations](#known-limitations-and-roadmap).
+
+---
+
+## Retraining (MLOps)
+
+Real site data comes from two places:
+
+- **Archive moments.** Each log card keeps the clean frame, every model's output and the exact fusion inputs. In **MLOps → Review queue**, set the true risk level and **Keep** or **Exclude** each one.
+- **Trials.** In **MLOps → Data collection**, start a trial with the scene's true risk level and act it out live. Every fully measured second is kept under that label, together with ToF-labelled distance rows.
+
+Then:
+
+1. Press **Download training set** and unzip it into `MyDrive/SAMS/`. It holds `datasets/fusion/fusion_experiment_logs.csv` (notebook 03 trains on it instead of synthetic scenarios) and `datasets/vision/distance/site_labels.csv` (notebook 04 fine-tunes on it).
+2. Run the notebook in Colab.
+3. Copy the promoted model folder into `models/` and restart. The service reads the new contract from `metadata.json`.
+
+Retrain **fusion last**: notebook 03 reads the hazard model's thresholds and must match the other models' outputs.
+
+---
+
+## API
+
+JSON endpoints share the server. Device-facing POST endpoints are CSRF-exempt. Use `curl -k` because the certificate is self-signed.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health/` | Status of every loaded model |
+| GET | `/api/control/live/` | Classify the latest frame, read the board, run fusion, drive the actuators |
+| GET | `/api/hardware/status/` | Board, buzzer, LEDs, camera and ToF status |
+| GET · POST | `/api/hardware/camera/` | Phone QR session status, or `{ "action": "start" \| "stop" }` |
+| GET | `/cam/<token>/` | Phone join page opened from the QR code |
+| POST | `/cam/<token>/join/`, `/cam/<token>/frame/` | Phone joins, then uploads JPEG frames |
+
+```bash
+curl -k https://127.0.0.1:8000/api/health/
+```
+
+---
+
+## Database schema
+
+Defined in [`monitoring/models.py`](monitoring/models.py). Users and sessions use Django's built-in `auth` tables.
+
+```mermaid
+erDiagram
+    Recording ||--o{ RecordingMinute : "has log cards"
+    Trial ||--o{ TrainingSample : "records"
+    Recording {
+        int id PK
+        datetime created_at
+        string title
+        file video "clean clip"
+        file framed "copy with boxes drawn"
+        string source "live / upload"
+        json declared "machine and vibration state stated at upload"
+        float duration_s
+        int problem_count
+    }
+    RecordingMinute {
+        int id PK
+        int recording_id FK
+        float offset_s
+        string level "NORMAL / CAUTION / DANGER"
+        string summary
+        image snapshot
+        json detail "every model output and the fusion inputs"
+        string train_status
+        string true_label
+    }
+    InteractionEvent {
+        int id PK
+        datetime created_at
+        string level
+        string reason
+        float distance_m
+        string distance_source
+        bool machine_on
+        float vibration_score
+        json detail
+    }
+    Trial {
+        int id PK
+        datetime started_at
+        datetime ended_at
+        string scenario
+        string risk_label
+    }
+    TrainingSample {
+        int id PK
+        int trial_id FK
+        string kind "fusion / distance"
+        json features
+        string target "risk level"
+        float target_value "ToF metres"
+    }
+```
+
+- **Recording / RecordingMinute:** each archived clip and its log cards; the review pages and the MLOps export read from them.
+- **InteractionEvent:** one row per live decision change (audit trail).
+- **Trial / TrainingSample:** a staged data-collection session and the rows it logged under its label.
 
 ---
 
@@ -114,510 +414,26 @@ flowchart LR
 
 ```text
 SAMS/
-├── SAMS/                    # Django project: settings, urls, asgi/wsgi
-├── monitoring/              # Main Django app
-│   ├── models.py            # Recording, RecordingMinute, InteractionEvent, Trial
-│   ├── views.py             # Control Center page + JSON API
-│   ├── review_views.py      # Signed-in dashboard: home, archive, alerts, MLOps
-│   ├── services/            # Inference, fusion, recordings, MLOps logic
-│   ├── templates/monitoring/
-│   ├── static/monitoring/   # css/, js/ (app.js, control.js, vision.js, vibration.js)
+├── SAMS/                      Django project: settings, urls, asgi
+├── monitoring/                Main app
+│   ├── services/              Inference, fusion, tracking, recordings, MLOps
+│   ├── templates/monitoring/  Review dashboard and phone camera pages
+│   ├── static/monitoring/
+│   ├── models.py
+│   ├── views.py               Live decision, phone camera and health API
+│   ├── review_views.py        Dashboard pages
 │   └── tests.py
-├── hardware/                # Serial stream, buzzer, LEDs, ToF, phone camera, certs
-│   ├── firmware/            # Arduino sketches (mpu6050_serial, buzzer_d8_debug)
-│   └── tools/hw.sh          # Flash, test and run helper
-├── notebooks/               # 8 training notebooks + README (ML report)
-├── results/                 # EDA figures, experiment ledgers, metric CSVs
-├── models/                  # Trained weights (not in git, see setup step 4)
-├── scripts/                 # Stand-alone training scripts
+├── hardware/                  Serial stream, buzzer, LEDs, motor, ToF, phone camera
+│   ├── firmware/              Arduino sketches
+│   └── tools/                 hw.sh, recording and check scripts
+├── notebooks/                 Eight Colab training notebooks
+├── models/                    Trained weights and metadata (not in git)
+├── results/                   Figures and metric tables from the notebooks
+├── stead_dataset/mpu6050/     Board recordings for the machine-state model
+├── Design/                    Schematic and UI screenshots
 ├── requirements.txt
-└── manage.py                # `runserver` is overridden to start uvicorn over HTTPS
+└── manage.py                  `runserver` starts uvicorn over HTTPS
 ```
-
----
-
-## Setting up the environment
-
-### Prerequisites
-
-- **Python 3.12.** Python 3.13 and 3.14 will **not** work, because `torch==2.2.2` and `numpy==1.26.4` have no wheels for them. On macOS: `brew install python@3.12`.
-- **Git.**
-- **OpenSSL**, used to create the self-signed HTTPS certificate (preinstalled on macOS and most Linux distributions).
-- Optional, for the live hardware demo: an Arduino Uno or Nano with the sensors listed under [Hardware](#hardware), [`arduino-cli`](https://arduino.github.io/arduino-cli/), and an Android phone on the same Wi-Fi network.
-
-### Steps
-
-```bash
-# 1. Clone
-git clone https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS-.git
-cd Smart-Accident-System-Monitoring-SAMS-
-
-# 2. Create and activate a virtual environment (Python 3.12)
-python3.12 -m venv myenv
-source myenv/bin/activate          # Windows: myenv\Scripts\activate
-
-# 3. Install dependencies
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# 4. Download the trained models (about 1.2 GB, kept out of git)
-#    Link: add link here
-#    Unzip so that the folder layout is ./models/fusion, ./models/vibration, ./models/vision
-
-# 5. Create the database and an account for the review dashboard
-python manage.py migrate
-python manage.py createsuperuser
-```
-
-After step 4 the app expects these files (the paths are read by the services in `monitoring/services/`):
-
-| Model | Path |
-|---|---|
-| Fusion | `models/fusion/best_fusion_model/model.joblib` + `metadata.json` |
-| Vibration | `models/vibration/` (`best/` and the per-experiment folders) |
-| PPE | `models/vision/ppe/best.pt` + `metadata.json` |
-| Fire / smoke | `models/vision/hazard/best.pt` |
-| Fall | `models/vision/accident/best.pt` |
-| Distance | `models/vision/distance/distance_nn.pt` + `calib.json` |
-| Pose | `models/vision/pose/best.pt`, or the stock `models/vision/yolov8n-pose.pt` |
-
-If you would rather retrain than download, run the notebooks in `notebooks/`. Each one writes its promoted model into `models/`.
-
-### Optional environment variables
-
-All have sensible defaults, so none are required for a first run.
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `SAMS_HW_SERIAL_PORT` | empty (no board) | Arduino serial port, e.g. `/dev/cu.usbserial-1410` |
-| `SAMS_HW_SERIAL_BAUD` | `115200` | Serial speed |
-| `SAMS_HW_SAMPLE_RATE` | `50` | Accelerometer sample rate (Hz) |
-| `SAMS_HW_WINDOW_SIZE` | `100` | Samples per vibration window (2 s at 50 Hz) |
-| `SAMS_HW_BUZZER_ENABLED` / `SAMS_HW_BUZZER_AUTO` | `true` | Enable the buzzer / buzz automatically on risk |
-| `SAMS_HW_LEDS_ENABLED` / `SAMS_HW_LEDS_AUTO` | `true` | Enable the LEDs / follow the risk level automatically |
-| `SAMS_HW_TOF_M` | unset | Inject a fixed near-range distance (m) for testing without a ToF sensor |
-| `SAMS_HTTPS` | set by `hw.sh run` | Makes the phone QR code use `https://` |
-| `SAMS_VISION_POSE`, `SAMS_VISION_PPE`, `SAMS_VISION_HAZARD` | on | Set to `false` to switch a vision model off |
-| `SAMS_POSE_WEIGHTS`, `SAMS_HAZARD_WEIGHTS`, `SAMS_ACCIDENT_WEIGHTS`, `SAMS_DISTANCE_WEIGHTS` | model folder | Override a weights path |
-
----
-
-## Running the app
-
-```bash
-source myenv/bin/activate
-python manage.py runserver
-```
-
-`runserver` is overridden in `manage.py`. Instead of Django's development server, it creates a self-signed certificate (if needed) and starts **uvicorn over HTTPS** on `0.0.0.0:8000` with auto-reload. HTTPS is required because phone browsers block the camera on plain HTTP. The terminal prints both addresses:
-
-```text
-SAMS is starting with uvicorn (HTTPS):
-  Mac:   https://127.0.0.1:8000/
-  Phone: https://192.168.x.x:8000/  (camera needs HTTPS)
-The certificate is self-signed. In the browser choose Advanced, then continue.
-```
-
-With the Arduino connected, use the helper instead. It sets the serial port and HTTPS mode for you:
-
-```bash
-export SAMS_HW_SERIAL_PORT=/dev/cu.usbserial-1410   # find yours with: ./hardware/tools/hw.sh ports
-./hardware/tools/hw.sh run
-```
-
-The app also runs **without any hardware**. Upload a video on the Control Center and every vision feature works; vibration and the buzzer simply show as offline.
-
----
-
-## Using the app
-
-### Navigation
-
-SAMS has two areas, linked to each other:
-
-**1. Review dashboard** (sign-in required). A collapsible left rail holds these pages:
-
-| Page | URL | Purpose |
-|---|---|---|
-| Sign in | `/` | Login with the account from `createsuperuser` |
-| Home | `/` | Overview: CAUTION / DANGER trends by time range, device health, storage |
-| Archive | `/archive/` | Every analysed clip, filterable by date and time |
-| Recording detail | `/recordings/<id>/` | Video player with the framed copy and per-second log cards |
-| Alerts | `/alerts/` | All CAUTION and DANGER moments, linked to the recording |
-| MLOps | `/mlops/` | Model inventory, labelling of archived moments, training-data export |
-| System | `/system/` | Opens the live operations console (below) |
-
-**2. Operations console** (`/system/`). A sidebar switches between:
-
-| Section | Purpose |
-|---|---|
-| **Control** | The full SAMS decision: camera (upload or live phone), distance, zone, vibration, PPE checklist, fusion probabilities, machine on/off switch |
-| **Vision** | Vision lab: per-frame detections, person count, distance and PPE |
-| **Vibration** | Live MPU6050 waveform, NORMAL / ABNORMAL prediction, buzzer and LED controls |
-| **Activity** | Event stream from the vision and vibration services |
-| **Logs** | Back to the review dashboard |
-
-### Typical demo flow
-
-1. Sign in, then look at **Home** for the overview.
-2. Open **System**, then **Control**. Either drop a workplace video and press **Run SAMS**, or choose **Live phone**, press **Show QR** and scan it with the phone. Accept the certificate warning on the phone, then allow the camera.
-3. Walk toward the camera. The zone goes from outside to caution (≤ 2.0 m) to danger (≤ 0.8 m), and the decision, buzzer and LEDs follow.
-4. Toggle **Machine on** and shake the sensor to see vibration turn ABNORMAL.
-5. Back on the dashboard, open **Alerts** and **Archive** to review what was recorded, then **MLOps** to label moments and export them.
-
----
-
-## Hardware
-
-Full details are in [`hardware/README.md`](hardware/README.md).
-
-| Component | Required? | Connection | Role |
-|---|---|---|---|
-| Arduino Uno / Nano | Yes, for live sensing | USB serial | Reads sensors, drives buzzer and LEDs |
-| MPU6050 accelerometer | Yes | SDA A4, SCL A5 | Machine vibration |
-| Buzzer | Yes, for alerts | D8 and GND | Audible caution / danger patterns |
-| VL53L0X time-of-flight | Optional | SDA A0, SCL A1 (software I2C), 5V, GND | Accurate close-range distance |
-| LEDs green / yellow / red | Optional | D2 / D3 / D5 | Visual risk level |
-| Android phone | Yes, for live vision | Same Wi-Fi, HTTPS | Camera |
-
-```mermaid
-erDiagram
-    SAMS_SERVER ||--o| ARDUINO_UNO : "USB serial 115200"
-    SAMS_SERVER ||--o{ ANDROID_PHONE : "HTTPS over Wi-Fi (QR join)"
-    ARDUINO_UNO ||--|| MPU6050 : "hardware I2C"
-    ARDUINO_UNO ||--o| VL53L0X : "software I2C"
-    ARDUINO_UNO ||--|| BUZZER : "digital out"
-    ARDUINO_UNO ||--o{ LED : "digital out"
-
-    SAMS_SERVER {
-        string host "Mac, Django on uvicorn"
-        string url "https://0.0.0.0:8000"
-        string serial_port "SAMS_HW_SERIAL_PORT"
-        int baud "115200"
-    }
-    ARDUINO_UNO {
-        string board "Uno / AVR + CH340"
-        string firmware "mpu6050_serial.ino"
-        string sends "ax,ay,az at 50 Hz and TOF:m"
-        string receives "B0/B1/B2 and L0/LG/LY/LR"
-        int status_led "D13"
-    }
-    MPU6050 {
-        string role "machine vibration"
-        string sda "A4"
-        string scl "A5"
-        string power "5V / GND"
-    }
-    VL53L0X {
-        string role "close-range distance (optional)"
-        string sda "A0"
-        string scl "A1"
-        string power "5V / GND, XSHUT open"
-    }
-    BUZZER {
-        string role "caution / danger alerts"
-        string signal "D8"
-        string ground "GND"
-    }
-    LED {
-        string colour "green / yellow / red (optional)"
-        string pin "D2 / D3 / D5"
-        string meaning "normal / caution / danger"
-    }
-    ANDROID_PHONE {
-        string role "live camera"
-        string join_page "/cam/token/"
-        string upload "POST /cam/token/frame/ (JPEG)"
-    }
-```
-
-- **SAMS server and Arduino**: the board streams accelerometer lines (`ax,ay,az`) and distance lines (`TOF:1.23`), and the server sends buzzer (`B0`/`B1`/`B2`) and LED (`L0`/`LG`/`LY`/`LR`) commands back. The board is optional; without it, vibration and the buzzer show as offline.
-- **SAMS server and phones**: each phone scans the QR code from **Vision lab → Live phone** and uploads camera frames over HTTPS.
-- **Arduino and parts**: the MPU6050 and buzzer are required for live sensing; the VL53L0X and LEDs are optional.
-
-```bash
-./hardware/tools/hw.sh ports       # list connected boards
-./hardware/tools/hw.sh flash       # compile and upload hardware/firmware/mpu6050_serial
-./hardware/tools/hw.sh test        # buzzer test over serial
-./hardware/tools/hw.sh test-leds   # LED cycle
-./hardware/tools/hw.sh certs       # regenerate the HTTPS certificate after a Wi-Fi IP change
-./hardware/tools/hw.sh run         # start SAMS with hardware
-```
-
-### Circuit diagram
-
-Pin-level wiring, taken from `hardware/firmware/mpu6050_serial/mpu6050_serial.ino`. Every part shares the Arduino's 5V and GND rails; the board itself is powered over the USB cable to the Mac.
-
-```mermaid
-erDiagram
-    MAC_HOST ||--|| ARDUINO_UNO : "USB cable: power + serial 115200"
-    ARDUINO_UNO ||--|| RAIL_5V : "5V pin"
-    ARDUINO_UNO ||--|| RAIL_GND : "GND pin"
-
-    ARDUINO_UNO ||--|| MPU6050 : "A4 to SDA, A5 to SCL"
-    RAIL_5V ||--|| MPU6050 : "to VCC"
-    RAIL_GND ||--|| MPU6050 : "to GND"
-
-    ARDUINO_UNO ||--o| VL53L0X : "A0 to SDA, A1 to SCL"
-    RAIL_5V ||--o| VL53L0X : "to VIN"
-    RAIL_GND ||--o| VL53L0X : "to GND"
-
-    ARDUINO_UNO ||--|| BUZZER : "D8 to plus"
-    RAIL_GND ||--|| BUZZER : "to minus"
-
-    ARDUINO_UNO ||--o| LED_GREEN : "D2 to anode"
-    ARDUINO_UNO ||--o| LED_YELLOW : "D3 to anode"
-    ARDUINO_UNO ||--o| LED_RED : "D5 to anode"
-    RAIL_GND ||--o| LED_GREEN : "to cathode"
-    RAIL_GND ||--o| LED_YELLOW : "to cathode"
-    RAIL_GND ||--o| LED_RED : "to cathode"
-
-    MAC_HOST {
-        string role "runs SAMS (uvicorn HTTPS)"
-        string port "/dev/cu.usbserial-*"
-    }
-    ARDUINO_UNO {
-        string board "Uno / Nano AVR + CH340"
-        pin A4 "SDA hardware I2C"
-        pin A5 "SCL hardware I2C"
-        pin A0 "SDA software I2C"
-        pin A1 "SCL software I2C"
-        pin D2 "green LED"
-        pin D3 "yellow LED"
-        pin D5 "red LED"
-        pin D8 "buzzer"
-        pin D13 "onboard status LED"
-    }
-    RAIL_5V {
-        string source "Arduino 5V pin"
-    }
-    RAIL_GND {
-        string source "Arduino GND pin (common ground)"
-    }
-    MPU6050 {
-        pin VCC "5V"
-        pin GND "GND"
-        pin SDA "A4"
-        pin SCL "A5"
-        string i2c_address "0x68"
-    }
-    VL53L0X {
-        pin VIN "5V"
-        pin GND "GND"
-        pin SDA "A0"
-        pin SCL "A1"
-        pin XSHUT "leave unconnected"
-    }
-    BUZZER {
-        string type "active buzzer"
-        pin plus "D8"
-        pin minus "GND"
-        string note "use a transistor if D8 cannot drive it"
-    }
-    LED_GREEN {
-        pin anode "D2 via 220 ohm resistor"
-        pin cathode "GND"
-        string meaning "normal"
-    }
-    LED_YELLOW {
-        pin anode "D3 via 220 ohm resistor"
-        pin cathode "GND"
-        string meaning "caution"
-    }
-    LED_RED {
-        pin anode "D5 via 220 ohm resistor"
-        pin cathode "GND"
-        string meaning "danger"
-    }
-```
-
-| Arduino pin | Connects to | Notes |
-|---|---|---|
-| 5V | MPU6050 VCC, VL53L0X VIN | Shared 5V rail |
-| GND | MPU6050 GND, VL53L0X GND, buzzer −, LED cathodes | Common ground |
-| A4 / A5 | MPU6050 SDA / SCL | Hardware I2C, address `0x68` |
-| A0 / A1 | VL53L0X SDA / SCL | Software I2C; leave XSHUT open |
-| D8 | Buzzer + | Active buzzer; add a transistor if it is too quiet |
-| D2 / D3 / D5 | Green / yellow / red LED anodes | Each through a ~220 Ω resistor |
-
----
-
-## API
-
-JSON endpoints are served from the same server. POST endpoints that devices call are CSRF-exempt, so they can be tested directly in Postman or with `curl` (use `-k` because the certificate is self-signed).
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/health/` | Status of the loaded fusion, vibration and vision models |
-| GET | `/api/config/` | Fusion feature list, class names and zone thresholds |
-| POST | `/api/fusion/predict/` | Risk level from the 10 fusion features |
-| GET | `/api/control/live/` | Live Control Center decision: classify the latest phone frame, read vibration, run fusion |
-| POST | `/api/control/fuse/` | Fusion decision for a supplied vision result |
-| POST | `/api/vision/predict/` | Detections for one image (`image` file, or a data URL in JSON) |
-| POST | `/api/vision/video/` | Analyse an uploaded video and save it to the archive |
-| GET | `/api/vision/live/` | Latest live phone-camera result |
-| POST | `/api/vibration/predict/` | Vibration classification for the current live window |
-| GET | `/api/vibration/live/` | Latest live vibration window and prediction |
-| GET | `/api/hardware/status/` | Serial board, buzzer, LED and camera status |
-| POST | `/api/hardware/buzzer/`, `/api/hardware/leds/` | Drive the buzzer or LEDs manually |
-| GET | `/api/logs/` · POST `/api/logs/clear/` | Read or clear the activity log |
-
-Example: ask the fusion model for a risk level.
-
-```bash
-curl -k -X POST https://127.0.0.1:8000/api/fusion/predict/ \
-  -H "Content-Type: application/json" \
-  -d '{
-        "worker_detected": 1, "worker_distance": 0.6,
-        "inside_caution_zone": 1, "inside_danger_zone": 1,
-        "worker_speed": 0.45, "approaching_machine": 1,
-        "vision_confidence": 0.9, "machine_active": 1,
-        "vibration_state": 0, "vibration_anomaly_score": 0.2
-      }'
-```
-
-If any feature is missing, the API answers `400` with the list of missing columns.
-
-Example: detect people and PPE in an image.
-
-```bash
-curl -k -X POST https://127.0.0.1:8000/api/vision/predict/ -F "image=@worker.jpg"
-```
-
-_Postman collection: add `docs/SAMS.postman_collection.json`._
-
----
-
-## Database schema
-
-Defined in `monitoring/models.py`. Users and sessions use Django's built-in `auth` tables.
-
-```mermaid
-erDiagram
-    Recording ||--o{ RecordingMinute : "has log cards"
-    Recording {
-        int id PK
-        datetime created_at
-        string title
-        file video "clean clip"
-        file framed "copy with boxes burned in"
-        string render_status
-        float duration_s
-        float fps
-        int problem_count
-    }
-    RecordingMinute {
-        int id PK
-        int recording_id FK
-        int minute
-        float offset_s "second in the clip"
-        string level "NORMAL / CAUTION / DANGER"
-        string summary
-        image snapshot
-        json detail "boxes, PPE, distance, vibration"
-        string train_status "labelling state for MLOps"
-    }
-    InteractionEvent {
-        int id PK
-        datetime created_at
-        string person_id
-        string level
-        string reason
-        float distance_m
-        string distance_source "tof / vision / pinhole"
-        bool machine_on
-        float vibration_score
-        bool vibration_unusual
-        bool approaching
-        json detail
-    }
-    Trial {
-        int id PK
-        datetime started_at
-        datetime ended_at
-        string code
-        string participant
-        string scenario
-        string risk_label
-        string vibration_label
-    }
-```
-
-- **Recording** and **RecordingMinute** store each analysed clip and one log card per sampled second. The review pages and the MLOps export are built on these.
-- **InteractionEvent** stores one row each time the live decision changes, as an audit trail.
-- **Trial** labels a controlled data-collection session, for future real fusion training data.
-
----
-
-## Machine-learning models
-
-Each model is trained, evaluated and documented in its own notebook. The full report, with EDA figures, the reasoning behind every experiment, architectures and metric tables, is in [`notebooks/README.md`](notebooks/README.md).
-
-| # | Notebook | Model | Headline result |
-|---|---|---|---|
-| 01 | Safe / unsafe behaviour | ResNet18, fully fine-tuned | Test accuracy 0.596, macro-F1 0.639 (research model, not used live) |
-| 02 | Vibration | SVM / XGBoost on 48 window features | Val macro-F1 0.863; test accuracy 0.863 (XGBoost) |
-| 03 | Fusion risk | Random Forest | DANGER recall 1.0 on synthetic rule-labelled data |
-| 04 | Distance | Pinhole estimate × learned residual MLP | Mean error 0.221 m on an unseen person (pinhole alone: 0.793 m) |
-| 05 | PPE detection | YOLOv8n, 640 px | Val mAP50-95 0.333, test 0.235 |
-| 06 | Fire / smoke | YOLOv8s, 960 px | Val mAP50-95 0.413, test 0.394; 98.9% frame-level fire recall |
-| 07 | Fall detection | YOLOv8s, two-stage training | Test `laying` mAP50-95 0.975 |
-| 08 | Pose keypoints | YOLOv8-pose (planned) | Not trained yet; app uses stock `yolov8n-pose` |
-
-Supporting figures and CSVs are in `results/`.
-
----
-
-## Designs and screenshots
-
-All screens are in [`Design/`](Design/).
-
-### Sign in
-
-![Sign in](Design/login.png)
-
-### Safety overview
-
-Headline counts, safety events per hour, and the **Go Live** button.
-
-![Safety overview](Design/Homepage.png)
-
-Alert distribution, top alert causes, the latest alerts and system health.
-
-![Safety overview, lower half](Design/Home2.png)
-
-### Go Live (phone QR)
-
-Scan the QR code with the phone to stream its camera to SAMS over HTTPS.
-
-![Go Live QR code](Design/qrcode-phone.png)
-
-### Alerts
-
-![Alerts](Design/Alerts.png)
-
-### Archive
-
-![Archive](Design/ArchiveSection.png)
-
-### Recording view
-
-The framed clip with person, PPE and pose overlays, and one log card per sampled second showing which safety gear was seen.
-
-![Recording view](Design/VideoView.png)
-
-### MLOps and data retraining
-
-Models in service, and a review queue where flagged frames are kept or excluded before downloading the training set.
-
-![MLOps](Design/MLOPS-DaatRetraining.png)
-
-**Design choices:**
-- **Two areas for two users.** The operations console is for whoever stands at the machine. The review dashboard is for the safety officer after the fact.
-- **One decision, always visible.** The Control Center header shows the current decision with a colour and an icon (green tick, amber triangle, red cross), so it reads at a glance and doesn't rely on colour alone.
-- **Plain-language states.** NORMAL / CAUTION / DANGER / DEGRADED, and log cards written as one sentence.
-- **Consistent layout.** Each page has a header, then a controls card on the left and a results card on the right.
-- **Responsive.** The rail collapses to icons, and the layout adapts to small screens; the phone camera page is mobile-first.
 
 ---
 
@@ -627,24 +443,25 @@ Models in service, and a review queue where flagged frames are kept or excluded 
 python manage.py test monitoring
 ```
 
-`monitoring/tests.py` contains 31 tests covering:
-- PPE decisions: gear only counts inside the right body region, and hidden gear is not reported as missing.
-- Alert rules: a person without a measured distance is DEGRADED, not guessed.
-- Distance honesty: partial bodies get no range, and the ToF reading is only given to the person in its beam.
-- Recording log cards and saved boxes.
-- Review pages: sign-in is required, and alerts and the MLOps export use archived data.
-- Interaction logging, vibration shake detection, serial port selection and hardware health.
+49 tests cover:
+
+- **Fusion contract:** the decision is the model's label as is; an unmeasured input gives no decision; an empty frame uses the model's absent-worker values; PPE, fire, smoke and falls reach the model.
+- **Models read from metadata:** per-class PPE thresholds, accelerometer window length and sample rate, class names.
+- **Vision:** gear and fall boxes go to the person holding their centre; the stronger worn or missing box decides each PPE item; ToF goes only to the person in its beam.
+- **Motion and vibration:** speed and approach from distance slopes; window features and labels.
+- **Dashboard and data:** sign-in, alerts, archive, uploads with declared inputs, trial rows, and an export that matches what the notebooks read.
+- **Hardware:** port selection, ToF presence, motor commands and health.
 
 ---
 
-## Deployment plan
+## Deployment
 
-SAMS runs **on site, next to the machine**. Video never leaves the workshop, alerts don't depend on the internet, and the buzzer reacts in real time.
+SAMS runs **on site, next to the machine**: video stays in the workshop, alerts don't depend on the internet, and the buzzer reacts in real time.
 
 ```mermaid
 flowchart LR
     CAM[Phone camera] -- Wi-Fi --> BOX
-    SENS[Arduino sensors + buzzer] -- USB --> BOX
+    SENS[Arduino sensors + actuators] -- USB --> BOX
     subgraph BOX[SAMS edge server]
         APP[Django + uvicorn HTTPS]
         AI[ML models]
@@ -655,8 +472,56 @@ flowchart LR
 
 | Stage | Where it runs | What changes |
 |---|---|---|
-| **1. MVP (today)** | A laptop on the local Wi-Fi | One command, `python manage.py runserver`, starts everything over HTTPS. SQLite stores the data, `media/` stores the videos. |
-| **2. Pilot** | A small edge computer (mini PC or NVIDIA Jetson) mounted by the machine | The app is packaged with **Docker**, so it installs with one command and restarts on its own after a power cut. It switches to PostgreSQL, and secrets move to environment variables. |
-| **3. Scale** | One edge box per machine, plus a shared dashboard | Each box keeps its video locally and shares only its alerts, so a safety officer sees every machine on one screen. |
+| **MVP (today)** | A laptop on the local Wi-Fi | `python manage.py runserver` starts everything; SQLite and `media/` store the data |
+| **Pilot** | An edge computer (mini PC or NVIDIA Jetson) by the machine | Docker image with restart-on-boot, PostgreSQL, secrets from the environment, a certificate from a local CA |
+| **Scale** | One edge box per machine plus a shared dashboard | Each box keeps its video and shares only alerts, so one officer sees every machine |
 
-**Updating models is painless.** Each model ships with a `metadata.json` that holds its classes, thresholds and image size, and the app reads it at start-up. A better model from the notebooks or the MLOps export is a drop-in replacement: copy the new folder into `models/`, restart, done.
+**Model updates are drop-in:** copy the new model folder into `models/` and restart.
+
+---
+
+## Security notes
+
+Before running SAMS anywhere but a lab bench:
+
+- Set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=false` and an explicit `DJANGO_ALLOWED_HOSTS`.
+- Replace the self-signed certificate with one from a CA the site's devices trust.
+- Keep the server on the site network; the phone camera endpoints are protected only by the session token in the QR code.
+- Back up `db.sqlite3` and `media/`. They hold video of workers, so apply the site's retention policy.
+
+---
+
+## Known limitations and roadmap
+
+SAMS is an MVP. The headline numbers above come from public or synthetic data and need to be confirmed on site.
+
+| Area | Limitation | Next step |
+|---|---|---|
+| Per-frame decisions | One wrong fire, fall or PPE box on one frame can raise DANGER | Require a detection to persist over several frames, with the count stored in each model's metadata |
+| Fusion | Trained on synthetic, rule-labelled scenarios, so its scores show it learned the rules | Retrain on reviewed archive moments and trials |
+| Fall | 111 synthetic images, all containing a fall; the false-fall rate on normal scenes is unmeasured, and crouching workers have been flagged | Add real standing, bending and crouching scenes and staged falls |
+| Fire / smoke | 5% of empty frames raise fire; sunlit metal has been flagged | Add site background frames; raise the fire threshold |
+| PPE | Missing-gear recall drops from 0.45 (validation) to 0.05 (test); boots are weak | More real site images; choose thresholds by F1 |
+| Vibration | Trained on UCI data; on the SAMS board it outputs a near-constant score | Train on the SAMS board: healthy-only anomaly model first, then recorded faults |
+| Machine state | A speed left out of training is missed | Record every motor speed and more stopped sessions with disturbances |
+| Distance | No training data below 1.8 m; the phone camera differs from the dataset's | Fine-tune on ToF-labelled site rows |
+
+---
+
+## Designs and screenshots
+
+All screens are in [`Design/`](Design/).
+
+| | |
+|---|---|
+| **Sign in**<br/>![Sign in](Design/login.png) | **Go Live (phone QR)**<br/>![Go Live QR code](Design/qrcode-phone.png) |
+| **Safety overview**<br/>![Safety overview](Design/Homepage.png) | **Overview, lower half**<br/>![Safety overview, lower half](Design/Home2.png) |
+| **Alerts**<br/>![Alerts](Design/Alerts.png) | **Archive**<br/>![Archive](Design/ArchiveSection.png) |
+| **Recording view**<br/>![Recording view](Design/VideoView.png) | **MLOps and retraining**<br/>![MLOps](Design/MLOPS-DaatRetraining.png) |
+
+**Design principles**
+
+- **One place.** The operator watching the machine and the safety officer use the same dashboard.
+- **One decision, always visible.** Colour plus a label, so it reads at a glance without relying on colour alone.
+- **Plain language.** NORMAL / CAUTION / DANGER, or "No decision" with what was not measured.
+- **Responsive.** The rail collapses to icons; the phone camera page is mobile-first.

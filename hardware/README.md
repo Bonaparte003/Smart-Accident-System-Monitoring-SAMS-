@@ -1,136 +1,177 @@
 # SAMS hardware
 
-Physical sensors and actuators for **live** (non-simulation) monitoring.
+The board side of SAMS: an Arduino Uno that streams the machine's vibration and the worker's close-range distance to the server, and drives the buzzer, the risk LEDs and the vibration motors that simulate a running machine.
 
-## What you need now
+- [Schematic](#schematic)
+- [Wiring](#wiring)
+- [Flashing and checking the board](#flashing-and-checking-the-board)
+- [Phone camera](#phone-camera)
+- [Recording machine-state training data](#recording-machine-state-training-data)
+- [Serial protocol](#serial-protocol)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
 
-| Piece | Required? | Role |
-| --- | --- | --- |
-| MPU6050 | Yes | Live accelerometer → vibration model |
-| Buzzer on **D8** | Yes (for alerts) | Beeps on caution / danger |
-| Android phone (Wi‑Fi) | Yes (for vision) | Live camera → YOLOv8n person + distance NN |
-| Time-of-flight (UART `TOF:m`) | Optional (near range) | Close-range metres; vision NN covers far |
-| LEDs | **Optional** | Green / yellow / red — skip until you have them |
+---
 
-### Wiring (Arduino / Nano)
+## Schematic
 
-See [`firmware/mpu6050_serial.ino`](firmware/mpu6050_serial.ino).
+![SAMS schematic: Arduino Uno with status LEDs and the 2N2222A-driven vibration motors](../Design/Schematic-Design.png)
 
-**Minimum**
+The firmware, [`firmware/mpu6050_serial/mpu6050_serial.ino`](firmware/mpu6050_serial/mpu6050_serial.ino), is the reference for pin numbers. The tables below are taken from it.
 
-| Device | Pin |
-| --- | --- |
-| MPU6050 SDA / SCL | A4 / A5 (Uno) |
-| VL53L0X SDA / SCL | **A0 / A1** |
-| VL53L0X VIN / GND | 5V / GND. Leave XSHUT open. |
-| Buzzer | **D8** and **GND** (`+`→D8, `−`→GND for active; or VCC/GND/I/O module). If it sings on 3V but not on D8, use a transistor so D8 only switches the rail. |
+---
 
-**LED Setup**
+## Wiring
 
-| LED | Pin |
-| --- | --- |
-| Green | D2 |
-| Yellow | D3 |
-| Red | D5 |
+### Sensors
 
-Re-flash after updates. On upload/reset you should hear a **double chirp** and
-see the onboard LED (D13) follow the buzzer when commands arrive.
+| Device | Pins | Notes |
+|---|---|---|
+| Accelerometer SDA / SCL | **A2 / A3** | Software I2C. MPU6050, MPU6500, MPU9250 and MPU9255 are read the same way; the boot banner names the chip |
+| Accelerometer VCC / GND | 5V / GND | Mount it on the machine surface |
+| VL53L0X SDA / SCL | **A0 / A1** | Software I2C |
+| VL53L0X VIN / GND | 5V / GND | Leave XSHUT open. Aim it where the worker stands |
 
-### Android phone camera (QR join)
+### Actuators
 
-Phone browsers **block the camera on plain HTTP**. Run Django over HTTPS:
+| Device | Pins | Notes |
+|---|---|---|
+| Green LED | **D2** | Anode through a series resistor (220 Ω–1 kΩ), cathode to GND. NORMAL |
+| Yellow LED | **D3** | Same. CAUTION |
+| Red LED | **D5** | Same. DANGER |
+| Buzzer | **D8** → +, − → GND | Active buzzer. If it sounds on 3V but not on D8, switch it with a transistor |
+| Motor driver | **D9** → 330 Ω → 2N2222A base | Emitter to GND. Never drive a motor straight from a pin |
+| Vibration motors (×2) | Battery + → motor → collector | Each with a 1N4007 flyback diode across it (cathode to +) |
+| Motor supply | 2 × AAA (≈ 3 V) | Battery − to the Arduino GND (common ground) |
+
+The board is powered and read over USB from the server.
+
+---
+
+## Flashing and checking the board
+
+The board on `cu.usbserial-*` is an **Arduino Uno (AVR + CH340)**. Upload as **Uno**.
 
 ```bash
-./hardware/tools/hw.sh certs   # once / after Wi‑Fi IP changes
-./hardware/tools/hw.sh run     # uvicorn https://0.0.0.0:8000
+export SAMS_HW_SERIAL_PORT=/dev/cu.usbserial-1410
+
+./hardware/tools/hw.sh ports        # list boards
+./hardware/tools/hw.sh flash        # full firmware: accelerometer, ToF, buzzer, LEDs, motor
+./hardware/tools/hw.sh check        # accelerometer, ToF and actuators answer
+./hardware/tools/hw.sh test         # buzzer (expect "RX # ACK B1")
+./hardware/tools/hw.sh test-leds    # LED cycle
+./hardware/tools/hw.sh monitor      # raw serial; type commands such as M180, V0, ST
+./hardware/tools/hw.sh run          # start SAMS with the board
 ```
 
-Then open the Mac UI at `https://192.168.x.x:8000` (accept the cert warning),
-go to **Vision lab → Live phone**, and scan the QR with the phone.
+Test sketches for isolating one part: `flash-buzzer` (D8), `flash-motor` (D9), `flash-scan` (I2C scan), `flash-mpu-diag` (accelerometer).
 
-On the phone: accept the certificate warning → **Allow camera**. Frames stream
-to the Mac; YOLOv8n detects people live (bounding boxes + `worker_detected`).
-Distance uses a residual pose-geometry NN for **far** range; inject near-range
-with `SAMS_HW_TOF_M=1.2` or firmware lines `TOF:1.23` (see
-[`models/vision/distance/README.md`](../models/vision/distance/README.md)).
+On boot the board prints `# SAMS ready chip=…` and plays the **startup sequence**: a beep, green → yellow → red, then a short motor run. On `hw.sh run` the server sends `ST`; the board ignores it for 5 s after a reset, so the sequence doesn't play twice.
 
-If the QR still shows `http://…`, restart with `hw.sh run` (sets `SAMS_HTTPS=1`).
-Override explicitly with:
+Only one program can hold the serial port. Stop Django before `monitor`, `check` or a recording. While Django runs, the board's `#` lines appear in the server log as `MCU RX …`.
+
+---
+
+## Phone camera
+
+Phone browsers block the camera on plain HTTP, so SAMS runs over HTTPS.
+
+```bash
+./hardware/tools/hw.sh certs   # after the Mac's Wi-Fi IP changes
+./hardware/tools/hw.sh run
+```
+
+Open `https://<mac-lan-ip>:8000`, accept the certificate warning, sign in, press **Go Live** and scan the QR code with the phone. On the phone, accept the warning and allow the camera.
+
+If the QR code shows `http://`, restart with `hw.sh run` (it sets `SAMS_HTTPS=1`), or set the address yourself:
 
 ```bash
 export SAMS_PUBLIC_BASE=https://192.168.1.198:8000
 ```
 
-### Terminal workflow (recommended)
+---
 
-Your board on `cu.usbserial-*` is an **Arduino Uno / AVR + CH340**. Upload with
-`arduino-cli` as **Uno** — do not use Board “Nano 33 BLE” for this port.
+## Recording machine-state training data
+
+The machine-state model (notebook 02, section 8) learns STOPPED vs RUNNING from this board, mounted as it will stay. Stop Django, then record each state:
 
 ```bash
-cd /Users/avellin/Desktop/Campus/SAMS
-
-export SAMS_HW_SERIAL_PORT=/dev/cu.usbserial-1410
-
-./hardware/tools/hw.sh flash-buzzer   # buzzer-only test sketch
-./hardware/tools/hw.sh test           # expect: RX # ACK B1
-
-./hardware/tools/hw.sh flash          # full MPU6050 + buzzer
-./hardware/tools/hw.sh test
-./hardware/tools/hw.sh run            # uvicorn with the serial port set
+./hardware/tools/hw.sh record-steady  --seconds 60 --name press01 --note "machine off"
+./hardware/tools/hw.sh record-running --seconds 60 --name press01 --motor medium --note "machine on"
 ```
 
-Then in the UI: **Vibration lab → Live → Test buzzer**. Server log should show
-`MCU TX B1` and `MCU RX # ACK B1`.
+`record-running` drives the D9 motors itself (`--motor low | medium | high | intermittent | none`), waits for the board's acknowledgement, and switches them off when it ends.
 
-If ACK works but there is no sound: D8 cannot power the buzzer — use a transistor
-(or 3‑pin module with VCC to 5V). Active buzzers beep on DC HIGH; passive piezos
-need `tone()` (not used here — firmware drives a solid HIGH on B1/B2).
+Each run writes `stead_dataset/mpu6050/<time>_<name>[_running].csv` (`sample, seconds_elapsed, x, y, z` in g) and a `.json` with the state, motor setting, chip, port, measured rate and note. A run is rejected when the sensor returns identical samples, the reading is not about 1 g, or the rate is not about 50 Hz.
 
-### Serial protocol (115200)
+Record at least three runs per state, covering every motor speed and stopped sessions with bumps and footsteps. Upload `stead_dataset/` to `MyDrive/SAMS/` and run notebook 02.
 
-**MCU → host** (~50 Hz): `ax,ay,az`
+---
 
-**Host → MCU**
+## Serial protocol
+
+115200 baud, newline-terminated text.
+
+**Board → server**
+
+| Line | Rate | Meaning |
+|---|---|---|
+| `ax,ay,az` | 50 Hz | Acceleration in g |
+| `TOF:1.23` | ~5 Hz | ToF distance in metres (0.02–4 m only) |
+| `# TOF raw=… timeout=… status=…` | ~1 Hz | ToF alive, nothing in range |
+| `# TOF ready` / `# TOF not found model=0x..` | on (re)init | ToF presence |
+| `# SAMS ready chip=<name>` | boot | Firmware up; chip from WHO_AM_I (0x68 MPU6050, 0x70 MPU6500, 0x71 MPU9250, 0x73 MPU9255) |
+| `# MPU6050 not found` / `not responding` | boot / ~1 Hz | Accelerometer silent on A2/A3; followed by `# I2C A2/A3 …` diagnostics |
+| `# ACK <cmd>` | per command | Command applied |
+
+The ToF runs in continuous mode and is read only when a result is ready, so the accelerometer keeps 50 Hz with or without it.
+
+**Server → board**
 
 | Command | Effect |
-| --- | --- |
+|---|---|
 | `B0` / `B1` / `B2` | Buzzer off / caution / danger |
-| `L0` / `LG` / `LY` / `LR` | LEDs (optional) |
+| `L0` / `LG` / `LY` / `LR` | LEDs off / green / yellow / red |
+| `V0` / `V1` / `V2` | Motors off / intermittent (2 s on, 1 s off) / full speed |
+| `M<0-255>` | Motors at that PWM duty |
+| `ST` | Startup sequence (ignored for 5 s after boot) |
 
-### Environment
+---
+
+## Configuration
 
 | Variable | Default | Meaning |
-| --- | --- | --- |
-| `SAMS_HW_SERIAL_PORT` | _(required for Live vib)_ | e.g. `/dev/cu.usbserial-1410` |
-| `SAMS_HW_SERIAL_BAUD` | `115200` | UART baud |
-| `SAMS_HW_BUZZER_AUTO` | `true` | Drive buzzer from live risk labels |
-| `SAMS_HW_BUZZER_ENABLED` | `true` | Master buzzer enable |
-| `SAMS_HW_LEDS_AUTO` | `true` | Green on normal; yellow / red on risk |
-| `SAMS_HW_LEDS_ENABLED` | `true` | Master LED enable |
-| `SAMS_PUBLIC_BASE` | _(auto LAN IP)_ | Base URL encoded in the phone QR, e.g. `http://192.168.1.20:8000` |
-| `SAMS_PUBLIC_HOST` | | Optional host/IP override used when building the QR |
-| `SAMS_VISION_POSE` | `false` | Optional YOLOv8n-pose keypoints for distance features |
-| `SAMS_VISION_PPE` | `true` | Live hard-hat / vest / goggles / gloves detector |
-| `SAMS_PPE_WEIGHTS` | `models/vision/ppe/best.pt` | Override PPE weights path |
-| `SAMS_HW_TOF_M` | | Inject ToF metres (lab without sensor) |
-| `SAMS_HW_TOF_ENABLED` | `true` | Master ToF enable |
+|---|---|---|
+| `SAMS_HW_SERIAL_PORT` | first USB serial device | e.g. `/dev/cu.usbserial-1410` |
+| `SAMS_HW_SERIAL_BAUD` | `115200` | UART speed |
+| `SAMS_HW_BUZZER_ENABLED` / `SAMS_HW_BUZZER_AUTO` | `true` | Enable the buzzer / follow the risk level |
+| `SAMS_HW_LEDS_ENABLED` / `SAMS_HW_LEDS_AUTO` | `true` | Enable the LEDs / follow the risk level |
+| `SAMS_HW_TOF_M` | unset | Lab only: a fixed ToF distance in place of the sensor |
+| `SAMS_HW_TOF_STALE_S` | `2.0` | Seconds a ToF reading stays usable |
+| `SAMS_PUBLIC_BASE` / `SAMS_PUBLIC_HOST` | LAN IP | Address encoded in the phone QR code |
 
-```bash
-export SAMS_HW_SERIAL_PORT=/dev/cu.usbserial-1410
-./hardware/tools/hw.sh run
-# open https://<your-lan-ip>:8000 on the browser
-```
+The accelerometer sample rate and window length come from each model's metadata, not from configuration.
 
-Then: **Vibration lab → Live → Buzz caution** and **Vision lab → Live phone** (phone scans QR).
+---
 
-### API
+## Troubleshooting
 
-- `GET /api/hardware/status/`
-- `POST /api/hardware/mode/` — `{ "mode": "live"|"simulate" }`
-- `POST /api/hardware/buzzer/` — `{ "state": "off"|"caution"|"danger" }`
-- `POST /api/hardware/leds/` — optional
-- `GET|POST /api/hardware/camera/` — `{ "action": "start"|"stop" }` (QR session)
-- `GET /cam/<token>/` — phone join page (from QR)
-- `POST /cam/<token>/frame/` — phone uploads JPEG
-- `GET /api/vibration/live/`
-- `GET /api/vision/live/` — classify latest phone frame
+| Symptom | Cause and fix |
+|---|---|
+| `# MPU6050 not found` | Check SDA/SCL on A2/A3 and 5V. The `# I2C` lines show which addresses answer, including with SDA/SCL swapped |
+| `# TOF not found model=0xFF` | Nothing answered on A0/A1: check wiring and power |
+| Buzzer ACKs but stays silent | D8 can't power it: add a transistor, or use a 3-pin module with VCC on 5V. Passive piezos are not supported |
+| `no ACK for M120` | Old firmware: run `hw.sh flash` |
+| Motors don't spin | Check the battery, the common ground, and the transistor's orientation (E to GND) |
+| Port busy | Django holds it: stop the server first |
+| QR code shows `http://` | Start with `hw.sh run`, or set `SAMS_PUBLIC_BASE` |
+
+## API
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/hardware/status/` | Board, buzzer, LEDs, camera, ToF |
+| GET · POST | `/api/hardware/camera/` | QR session status, or `{ "action": "start" \| "stop" }` |
+| GET | `/cam/<token>/` | Phone join page |
+| POST | `/cam/<token>/frame/` | Phone uploads a JPEG |
+| GET | `/api/control/live/` | Classify the latest frame, read the board, run fusion, drive the actuators |
