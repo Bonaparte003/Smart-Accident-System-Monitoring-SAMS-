@@ -1,0 +1,18 @@
+{
+  "state": "STOPPED",
+  "sensor": "MPU6500 (hardware/firmware/mpu6050_serial)",
+  "chip": "MPU6500",
+  "units": "g",
+  "firmware_sample_rate_hz": 50.0,
+  "motor": "off",
+  "motor_command": "V0",
+  "measured_sample_rate_hz": 49.99,
+  "samples": 3000,
+  "duration_s": 60.51,
+  "port": "/dev/cu.usbserial-1410",
+  "started_local": "2026-10-20T19:53:55",
+  "started_utc": "2026-10-20T17:53:55+00:00",
+  "name": "rig01",
+  "note": "",
+  "check_problems": []
+}
