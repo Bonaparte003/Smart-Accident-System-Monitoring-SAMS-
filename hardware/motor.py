@@ -14,7 +14,6 @@ logger = logging.getLogger("hardware.motor")
 
 MotorLevel = Literal["off", "low", "medium", "high", "intermittent"]
 
-# Firmware: M<duty> steady PWM, V1 intermittent (2 s on / 1 s off), V0 off.
 _CMD: dict[MotorLevel, str] = {
     "off": "V0",
     "low": "M120",

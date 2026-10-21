@@ -64,7 +64,6 @@ def main() -> int:
 
     results: dict[str, bool] = {}
 
-    # 1. Boot banner (setup() plays buzzer → LEDs → motor, ~2 s, before printing it).
     banner = False
     boot_notes: list[str] = []
     deadline = time.time() + 6.0
@@ -77,7 +76,6 @@ def main() -> int:
     for note in boot_notes:
         print(f"  RX {note}")
 
-    # 2. MPU6050 stream: rate, ~1 g magnitude, and whether values move at all.
     print(f"\nSampling the MPU6050 for {args.seconds:.0f}s — tap or shake the sensor now")
     samples = []
     tof = []
@@ -119,14 +117,12 @@ def main() -> int:
     for note in sorted(set(notes)):
         print(f"  RX {note}")
 
-    # 3. ToF.
     if tof:
         print(f"\n  ToF: {len(tof)} readings, last {tof[-1]:.2f} m")
     else:
         print("\n  ToF: no in-range readings (nothing within 0.02–4 m, or sensor missing)")
     results["ToF readings"] = bool(tof)
 
-    # 4. Actuators — ST is ignored for 5 s after boot, so wait that out first.
     print("\nActuators — watch and listen")
     print("  B1 buzzer on (1 s)")
     results["buzzer ACK B1"] = _wait_ack(ser, "B1")
