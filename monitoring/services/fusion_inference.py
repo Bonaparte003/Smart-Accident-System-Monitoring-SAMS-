@@ -7,31 +7,25 @@ code changes. Every column must be supplied; nothing is filled in here.
 
 from __future__ import annotations
 
-import json
-import threading
 from pathlib import Path
 from typing import Any
 
-import joblib
 import numpy as np
 from django.conf import settings
 
-_lock = threading.Lock()
-_model = None
-_metadata: dict[str, Any] | None = None
+from .model_loader import JoblibModel
 
 
 def _model_dir() -> Path:
     return Path(settings.BASE_DIR) / "models" / "fusion" / "best_fusion_model"
 
 
+# Fusion has no fallback: a missing model raises, and the next call tries again.
+_loader = JoblibModel("fusion", _model_dir, require_proba=True, retry_after_error=True)
+
+
 def get_metadata() -> dict[str, Any]:
-    global _metadata
-    if _metadata is None:
-        meta_path = _model_dir() / "metadata.json"
-        with meta_path.open() as f:
-            _metadata = json.load(f)
-    return _metadata
+    return _loader.read_metadata()
 
 
 def get_feature_cols() -> list[str]:
@@ -64,19 +58,11 @@ def absent_worker_values() -> dict[str, float]:
 
 
 def get_model():
-    global _model
-    if _model is None:
-        with _lock:
-            if _model is None:
-                _model = joblib.load(_model_dir() / "model.joblib")
-    return _model
+    return _loader.get(raise_errors=True)
 
 
 def reload_model() -> None:
-    global _model, _metadata
-    with _lock:
-        _model = None
-        _metadata = None
+    _loader.reset()
 
 
 def predict_fusion(features: dict[str, float]) -> dict[str, Any]:

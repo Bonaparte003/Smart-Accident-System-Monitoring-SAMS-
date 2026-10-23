@@ -97,9 +97,21 @@ class LiveRecorder:
         self._token = None
         self._last_jpeg = None
         if recording is not None:
-            threading.Thread(
-                target=_finalize_in_thread, args=(recording.pk,), name=f"sams-live-{recording.pk}", daemon=True
-            ).start()
+            enqueue_finalize(recording.pk)
+
+
+def enqueue_finalize(recording_pk: int) -> None:
+    """Encode the live session on Celery, or a local thread if the broker is down."""
+    from monitoring.tasks import finalize_live_recording
+
+    pk = int(recording_pk)
+    try:
+        finalize_live_recording.delay(pk)
+        logger.info("Queued live finalize %s on Celery", pk)
+        return
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Celery unavailable for live %s (%s); using a local thread", pk, exc)
+    threading.Thread(target=_finalize_in_thread, args=(pk,), name=f"sams-live-{pk}", daemon=True).start()
 
 
 def finalize(recording_pk: int) -> None:
@@ -151,7 +163,7 @@ def finalize_orphans() -> None:
     close_old_connections()
     try:
         for pk in Recording.objects.filter(source="live", render_status="pending").values_list("pk", flat=True):
-            finalize(pk)
+            enqueue_finalize(pk)
     finally:
         close_old_connections()
 

@@ -51,11 +51,6 @@ def log_line_from_prediction(pred: dict | None, level: str = "") -> str:
     )
 
 
-# --- Archive log cards -------------------------------------------------------
-# Live sessions and uploaded clips are stored the same way: the clean video,
-# plus one card per sampled moment holding the clean frame, every model's
-# output, the fusion inputs, and the decision. The cards are the MLOps data.
-
 CARD_STEP_S = 2.0
 PROBLEM_LEVELS = {"CAUTION", "DANGER"}
 

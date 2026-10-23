@@ -19,6 +19,7 @@ SERVING = (
     ("Distance", "Residual network on the pinhole prior, from each person's box and pose", "models/vision/distance/distance_nn.pt"),
     ("Hazard", "Fire and smoke boxes", "models/vision/hazard/best.pt"),
     ("Accident", "A fallen worker", "models/vision/accident/best.pt"),
+    ("Behaviour", "Safe / unsafe workplace behaviour from one frame (ResNet18)", "models/vision/safe_unsafe/best.pt"),
     ("Vibration", "Labels each live accelerometer window NORMAL or ABNORMAL", "models/vibration/best/model.joblib"),
     ("Machine state", "Labels each live accelerometer window STOPPED or RUNNING", "models/machine_state/model.joblib"),
     ("Fusion", "Turns vision, distance, and vibration into an alert", "models/fusion/best_fusion_model/model.joblib"),

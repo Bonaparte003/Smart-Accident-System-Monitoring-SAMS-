@@ -8,60 +8,43 @@ is not measured.
 
 from __future__ import annotations
 
-import json
-import threading
 from pathlib import Path
 from typing import Any
 
-import joblib
 import numpy as np
 from django.conf import settings
 
+from .model_loader import JoblibModel
 from .vibration_inference import window_to_features
-
-_lock = threading.Lock()
-_model = None
-_metadata: dict[str, Any] | None = None
-_load_error: str | None = None
 
 
 def model_dir() -> Path:
     return Path(settings.BASE_DIR) / "models" / "machine_state"
 
 
+_loader = JoblibModel("machine state", model_dir)
+
+
 def get_model():
     """The trained classifier, or None when it is missing."""
-    global _model, _metadata, _load_error
-    if _model is None and _load_error is None:
-        with _lock:
-            if _model is None and _load_error is None:
-                try:
-                    _metadata = json.loads((model_dir() / "metadata.json").read_text())
-                    _model = joblib.load(model_dir() / "model.joblib")
-                except Exception as exc:  # noqa: BLE001
-                    _load_error = str(exc)
-    return _model
+    return _loader.get()
 
 
 def get_metadata() -> dict[str, Any]:
     get_model()
-    return _metadata or {}
+    return _loader.metadata
 
 
 def get_status() -> dict[str, Any]:
     return {
         "available": get_model() is not None,
         "model_id": get_metadata().get("model_id"),
-        "error": _load_error,
+        "error": _loader.error,
     }
 
 
 def reload_model() -> None:
-    global _model, _metadata, _load_error
-    with _lock:
-        _model = None
-        _metadata = None
-        _load_error = None
+    _loader.reset()
 
 
 def window_size() -> int | None:

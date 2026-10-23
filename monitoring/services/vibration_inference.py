@@ -8,51 +8,32 @@ Without that model there is no vibration state.
 
 from __future__ import annotations
 
-import json
-import threading
 import warnings
 from pathlib import Path
 from typing import Any
 
-import joblib
 import numpy as np
 from django.conf import settings
 from scipy.stats import kurtosis, skew
 
-_lock = threading.Lock()
-_model = None
-_metadata: dict[str, Any] | None = None
-_load_error: str | None = None
+from .model_loader import JoblibModel
 
 
 def model_dir() -> Path:
     return Path(settings.BASE_DIR) / "models" / "vibration" / "best"
 
 
+_loader = JoblibModel("vibration", model_dir, require_proba=True)
+
+
 def get_model():
     """The promoted classifier, or None when it is missing or cannot give probabilities."""
-    global _model, _metadata, _load_error
-    if _model is None and _load_error is None:
-        with _lock:
-            if _model is None and _load_error is None:
-                folder = model_dir()
-                try:
-                    model = joblib.load(folder / "model.joblib")
-                    if not hasattr(model, "predict_proba"):
-                        raise TypeError(
-                            f"{folder / 'model.joblib'} has no predict_proba. "
-                            "Retrain with notebooks/02_vibration_uci_accelerometer.ipynb"
-                        )
-                    _metadata = json.loads((folder / "metadata.json").read_text())
-                    _model = model
-                except Exception as exc:  # noqa: BLE001
-                    _load_error = str(exc)
-    return _model
+    return _loader.get()
 
 
 def get_metadata() -> dict[str, Any]:
     get_model()
-    return _metadata or {}
+    return _loader.metadata
 
 
 def get_status() -> dict[str, Any]:
@@ -60,16 +41,12 @@ def get_status() -> dict[str, Any]:
     return {
         "available": model is not None,
         "experiment_id": get_metadata().get("experiment_id"),
-        "error": _load_error,
+        "error": _loader.error,
     }
 
 
 def reload_model() -> None:
-    global _model, _metadata, _load_error
-    with _lock:
-        _model = None
-        _metadata = None
-        _load_error = None
+    _loader.reset()
 
 
 def window_size() -> int | None:

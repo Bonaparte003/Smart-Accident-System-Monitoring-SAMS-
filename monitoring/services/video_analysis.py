@@ -5,15 +5,16 @@ the operator declared at upload: the machine state (STOPPED / RUNNING) and the
 vibration state (NORMAL / ABNORMAL). A declared input is marked ``declared``
 on every card, and one left undeclared stays unmeasured, so those frames get
 no decision, as on Live. People are tracked through the clip with the clip's
-own tracker and clock, so motion comes from the video itself. One clip is
-analysed at a time on a background worker.
+own tracker and clock, so motion comes from the video itself.
+
+Queued work runs on Celery (``monitoring.tasks.analyze_upload_recording``).
+If the broker is down, the same job falls back to a local daemon thread.
 """
 
 from __future__ import annotations
 
 import logging
 import os
-import queue
 import threading
 from typing import Any
 
@@ -25,6 +26,8 @@ from .recordings import CARD_STEP_S, PROBLEM_LEVELS, card_detail, store_card
 logger = logging.getLogger("monitoring.video_analysis")
 
 ANALYSIS_FPS = float(os.environ.get("SAMS_VIDEO_ANALYSIS_FPS", "2"))
+
+
 def _states(module) -> list[str]:
     """The classes a board model outputs, from its metadata; none without the model."""
     return list(module.get_metadata().get("class_names") or [])
@@ -130,18 +133,31 @@ def analyze_recording(pk: int) -> None:
     recording.save(update_fields=["duration_s", "fps", "problem_count", "render_status"])
 
 
-_queue: queue.Queue[int] = queue.Queue()
-_lock = threading.Lock()
-_thread: threading.Thread | None = None
-
-
 def enqueue(pk: int) -> None:
-    global _thread
-    with _lock:
-        if _thread is None or not _thread.is_alive():
-            _thread = threading.Thread(target=_run, name="sams-video-analysis", daemon=True)
-            _thread.start()
-    _queue.put(int(pk))
+    """Queue analysis on Celery, or a local thread when the broker is unavailable."""
+    from monitoring.tasks import analyze_upload_recording
+
+    pk = int(pk)
+    try:
+        analyze_upload_recording.delay(pk)
+        logger.info("Queued upload analysis %s on Celery", pk)
+        return
+    except Exception as exc:  # noqa: BLE001 — broker down, eager misconfig, etc.
+        logger.warning("Celery unavailable for upload %s (%s); using a local thread", pk, exc)
+
+    def _run() -> None:
+        from monitoring.models import Recording
+
+        close_old_connections()
+        try:
+            analyze_recording(pk)
+        except Exception:
+            logger.exception("Video analysis %s failed", pk)
+            Recording.objects.filter(pk=pk).update(render_status="failed")
+        finally:
+            close_old_connections()
+
+    threading.Thread(target=_run, name=f"sams-video-{pk}", daemon=True).start()
 
 
 def resume_pending() -> None:
@@ -154,19 +170,3 @@ def resume_pending() -> None:
             enqueue(pk)
     finally:
         close_old_connections()
-
-
-def _run() -> None:
-    from monitoring.models import Recording
-
-    while True:
-        pk = _queue.get()
-        close_old_connections()
-        try:
-            analyze_recording(pk)
-        except Exception:
-            logger.exception("Video analysis %s failed", pk)
-            Recording.objects.filter(pk=pk).update(render_status="failed")
-        finally:
-            close_old_connections()
-            _queue.task_done()
