@@ -16,7 +16,6 @@ import base64
 import io
 import json
 import os
-import threading
 from pathlib import Path
 from typing import Any
 
@@ -24,15 +23,14 @@ import numpy as np
 from django.conf import settings
 from PIL import Image, ImageDraw, ImageFont
 
+from . import behaviour_inference as behaviour
 from . import distance_estimation as distance
 from . import fusion_inference as fusion
 from . import hazard_inference as hazard
 from . import ppe_inference as ppe
+from .model_loader import YoloModel
 from .person_tracker import MotionLog
 
-_lock = threading.Lock()
-_pose_model = None
-_pose_spec: dict[str, Any] = {}
 _yolo_error: str | None = None
 
 
@@ -98,6 +96,7 @@ def get_torch_status() -> dict[str, Any]:
         },
         "ppe": ppe.get_status(),
         "hazard": hazard.get_status(),
+        "behaviour": behaviour.get_status(),
     }
 
 
@@ -115,34 +114,33 @@ def _model_id() -> str:
     accident_status = status.get("accident") or {}
     if accident_status.get("available"):
         parts.append(str(accident_status.get("model_id") or "accident"))
+    behaviour_status = behaviour.get_status()
+    if behaviour_status.get("available"):
+        parts.append(str(behaviour_status.get("model_id") or "behaviour"))
     return "+".join(part for part in parts if part)
+
+
+class PoseModel(YoloModel):
+    """The pose checkpoint plus the operating point its notebook exported."""
+
+    def __init__(self):
+        super().__init__("pose", _pose_weights_path)
+        self.spec: dict[str, Any] = {}
+
+    def load(self):
+        model = super().load()
+        self.spec = _load_pose_spec(_pose_weights_path())
+        return model
+
+
+_pose = PoseModel()
 
 
 def get_pose_model():
     """Pose checkpoint that places COCO-17 joints inside each worker crop."""
-    global _pose_model, _pose_spec
     if not _pose_enabled() or not yolo_available():
         return None
-    if _pose_model is None:
-        with _lock:
-            if _pose_model is None:
-                try:
-                    from ultralytics import YOLO
-
-                    weights = _pose_weights_path()
-                    if not weights.is_file():
-                        import logging
-
-                        logging.getLogger("monitoring.vision").warning("pose weights missing at %s", weights)
-                        return None
-                    _pose_spec = _load_pose_spec(weights)
-                    _pose_model = YOLO(str(weights))
-                except Exception as exc:  # noqa: BLE001
-                    import logging
-
-                    logging.getLogger("monitoring.vision").warning("pose model unavailable: %s", exc)
-                    return None
-    return _pose_model
+    return _pose.get()
 
 
 def _read_tof_m() -> float | None:
@@ -153,7 +151,7 @@ def _read_tof_m() -> float | None:
 
 def _pose_operating_point() -> dict[str, Any]:
     """Person cutoff and crop padding the pose notebook chose, when its metadata exists."""
-    return dict(_pose_spec.get("operating_point") or {})
+    return dict(_pose.spec.get("operating_point") or {})
 
 
 def _run_pose_frame(image: Image.Image) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
@@ -161,8 +159,8 @@ def _run_pose_frame(image: Image.Image) -> tuple[np.ndarray, np.ndarray, np.ndar
     if pose is None:
         return None
     kwargs: dict[str, Any] = {"verbose": False}
-    if _pose_spec.get("imgsz"):
-        kwargs["imgsz"] = int(_pose_spec["imgsz"])
+    if _pose.spec.get("imgsz"):
+        kwargs["imgsz"] = int(_pose.spec["imgsz"])
     if _pose_operating_point().get("person_conf") is not None:
         kwargs["conf"] = float(_pose_operating_point()["person_conf"])
     try:
@@ -367,6 +365,7 @@ def predict_image(
         hazards = hazard.smooth_scores(hazards)
     falls = hazard.detect_falls(rgb)
     falls_for, lone_falls = _assign(person_boxes, falls.get("detections") or [])
+    behaviour_result = behaviour.classify_frame(rgb)
 
     aimed_index = None
     for index, worker in enumerate(workers):
@@ -395,7 +394,6 @@ def predict_image(
         distance_m = estimate.distance_m if estimate else None
         source = estimate.source if estimate else None
         if estimate is not None and source == "tof" and estimate.features:
-            # The sensor's metres label this person's body features: a site row for notebook 04.
             distance_pairs.append(
                 {"features": estimate.features, "z0_m": estimate.z0_m, "distance_m": estimate.distance_m}
             )
@@ -530,8 +528,20 @@ def predict_image(
         "boots": ppe_result.get("boots"),
         "ppe_complete": ppe_result.get("ppe_complete"),
         "ppe_summary": ppe_result.get("summary"),
-        "unsafe": bool(ppe_result.get("ppe_complete") is False),
+        "behaviour": behaviour_result,
+        "behaviour_label": behaviour_result.get("label"),
+        "behaviour_group": behaviour_result.get("group"),
+        "behaviour_confidence": behaviour_result.get("confidence"),
+        "unsafe": _unsafe_flag(ppe_result, behaviour_result),
         "annotated_thumbnail": _image_to_data_url(annotated) if annotated is not None else None,
         "model_id": _model_id(),
         "backend": "ultralytics",
     }
+
+
+def _unsafe_flag(ppe_result: dict[str, Any], behaviour_result: dict[str, Any]) -> bool:
+    """True when the behaviour model flags UNSAFE, or PPE is known missing."""
+    ppe_missing = ppe_result.get("ppe_complete") is False
+    if behaviour_result.get("available") and behaviour_result.get("unsafe") is not None:
+        return bool(behaviour_result["unsafe"]) or ppe_missing
+    return ppe_missing

@@ -13,17 +13,14 @@ from __future__ import annotations
 import json
 import logging
 import os
-import threading
 from pathlib import Path
 from typing import Any
 
 from django.conf import settings
 
-logger = logging.getLogger("monitoring.ppe")
+from .model_loader import YoloModel
 
-# Item names, display labels, confidence, and image size come from
-# models/vision/ppe/metadata.json, written by
-# notebooks/05_vision_ppe_detection_training.ipynb from the checkpoint's classes.
+logger = logging.getLogger("monitoring.ppe")
 
 
 def _norm_label(label: str) -> str:
@@ -97,11 +94,6 @@ def is_worker_box(label: str, class_id: int = 0) -> bool:
     del class_id
     return _norm_label(label) in _person_names()
 
-_lock = threading.Lock()
-_model = None
-_load_error: str | None = None
-
-
 def _project_root() -> Path:
     try:
         from django.conf import settings as dj_settings
@@ -136,18 +128,20 @@ def weights_available() -> bool:
 def get_status() -> dict[str, Any]:
     return {
         "enabled": ppe_enabled(),
-        "available": ppe_enabled() and weights_available() and spec_available() and _load_error is None,
+        "available": ppe_enabled() and weights_available() and spec_available() and _loader.error is None,
         "model_id": model_id(),
         "weights": str(weights_path()) if weights_available() else None,
-        "detail": _load_error,
+        "detail": _loader.error,
         "items": list(load_spec()["items"]) if spec_available() else [],
         "dataset": "Ultralytics Construction-PPE (+ optional Mendeley PPE fine-tune)",
     }
 
 
+_loader = YoloModel("PPE", weights_path)
+
+
 def get_model():
     """Lazy-load PPE YOLO. Raises if disabled or weights missing."""
-    global _model, _load_error
     if not ppe_enabled():
         raise RuntimeError("PPE detection disabled (SAMS_VISION_PPE=0)")
     if not weights_available():
@@ -155,19 +149,7 @@ def get_model():
             f"PPE weights not found at {weights_path()}. "
             "Train with notebooks/05_vision_ppe_detection_training.ipynb"
         )
-    if _model is None:
-        with _lock:
-            if _model is None:
-                try:
-                    from ultralytics import YOLO
-
-                    _model = YOLO(str(weights_path()))
-                    _load_error = None
-                    logger.info("Loaded PPE model from %s", weights_path())
-                except Exception as exc:  # noqa: BLE001
-                    _load_error = str(exc)
-                    raise
-    return _model
+    return _loader.get(raise_errors=True)
 
 
 def load_private_model():
@@ -178,10 +160,7 @@ def load_private_model():
 
 
 def reload_model() -> None:
-    global _model, _load_error
-    with _lock:
-        _model = None
-        _load_error = None
+    _loader.reset()
 
 
 def _empty_item() -> dict[str, Any]:
@@ -290,7 +269,7 @@ def _unavailable(summary: str, source: str) -> dict[str, Any]:
 
 def reset_tracker() -> None:
     """Drop ByteTrack state on the loaded PPE model when a camera session ends."""
-    model = _model
+    model = _loader.cached
     predictor = getattr(model, "predictor", None) if model is not None else None
     for tracker in getattr(predictor, "trackers", None) or []:
         reset = getattr(tracker, "reset", None)

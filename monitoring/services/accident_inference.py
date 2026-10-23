@@ -12,15 +12,12 @@ from __future__ import annotations
 import json
 import logging
 import os
-import threading
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger("monitoring.accident")
+from .model_loader import YoloModel
 
-_lock = threading.Lock()
-_model = None
-_load_error: str | None = None
+logger = logging.getLogger("monitoring.accident")
 
 
 def _project_root() -> Path:
@@ -45,6 +42,9 @@ def metadata_path() -> Path:
     return weights_path().parent / "metadata.json"
 
 
+_loader = YoloModel("accident", weights_path)
+
+
 def load_spec() -> dict[str, Any]:
     path = metadata_path()
     if not path.is_file():
@@ -67,7 +67,7 @@ def model_id() -> str:
 
 
 def available() -> bool:
-    return weights_path().is_file() and metadata_path().is_file() and _load_error is None
+    return weights_path().is_file() and metadata_path().is_file() and _loader.error is None
 
 
 def get_status() -> dict[str, Any]:
@@ -75,27 +75,14 @@ def get_status() -> dict[str, Any]:
         "available": available(),
         "weights": str(weights_path()) if weights_path().is_file() else None,
         "model_id": model_id(),
-        "error": _load_error,
+        "error": _loader.error,
     }
 
 
 def get_model():
-    global _model, _load_error
     if not weights_path().is_file():
         return None
-    if _model is None:
-        with _lock:
-            if _model is None:
-                try:
-                    from ultralytics import YOLO
-
-                    _model = YOLO(str(weights_path()))
-                    _load_error = None
-                except Exception as exc:  # noqa: BLE001
-                    _load_error = str(exc)
-                    logger.warning("accident model unavailable: %s", exc)
-                    return None
-    return _model
+    return _loader.get()
 
 
 def _norm(label: str) -> str:

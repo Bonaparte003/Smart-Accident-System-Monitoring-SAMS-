@@ -16,7 +16,6 @@ import json
 import logging
 import math
 import os
-import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
@@ -24,6 +23,8 @@ from typing import Any, Sequence
 import numpy as np
 import torch
 import torch.nn as nn
+
+from .model_loader import LazyModel
 
 logger = logging.getLogger("monitoring.distance")
 
@@ -115,8 +116,6 @@ class ResidualDistanceMLP(nn.Module):
         return self.net(x).squeeze(-1)
 
 
-_lock = threading.Lock()
-_model: ResidualDistanceMLP | None = None
 _calib: dict[str, Any] | None = None
 _device = torch.device("cpu")
 
@@ -378,13 +377,13 @@ def extract_features(
     return feats, z0, named
 
 
-def get_model() -> ResidualDistanceMLP:
-    global _model
-    if _model is not None:
-        return _model
-    with _lock:
-        if _model is not None:
-            return _model
+class DistanceNet(LazyModel):
+    """The residual MLP that live inference serves (see ``served_model``)."""
+
+    def __init__(self):
+        super().__init__("distance")
+
+    def load(self) -> ResidualDistanceMLP:
         calib = load_calib()
         served = served_model()
         hidden = tuple(served.get("hidden") or calib["hidden"])
@@ -395,20 +394,23 @@ def get_model() -> ResidualDistanceMLP:
                 f"Distance weights not found at {path}. "
                 "Train notebooks/04_vision_distance_estimation_training.ipynb"
             )
-        state = torch.load(path, map_location="cpu", weights_only=True)
-        model.load_state_dict(state)
-        logger.info("Loaded distance NN from %s", path)
+        model.load_state_dict(torch.load(path, map_location="cpu", weights_only=True))
         model.eval()
-        _model = model
-        return _model
+        return model
+
+
+_net = DistanceNet()
+
+
+def get_model() -> ResidualDistanceMLP:
+    return _net.get(raise_errors=True)
 
 
 def reload_model() -> None:
     """Drop cached model/calib (after training / calib update)."""
-    global _model, _calib
-    with _lock:
-        _model = None
-        _calib = None
+    global _calib
+    _net.reset()
+    _calib = None
 
 
 def predict_vision_distance(

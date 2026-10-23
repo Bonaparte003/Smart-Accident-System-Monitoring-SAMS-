@@ -13,18 +13,15 @@ from __future__ import annotations
 import json
 import logging
 import os
-import threading
 from collections import deque
 from pathlib import Path
 from typing import Any
 
 from . import accident_inference as accident
+from .model_loader import YoloModel
 
 logger = logging.getLogger("monitoring.hazard")
 
-_lock = threading.Lock()
-_model = None
-_load_error: str | None = None
 _scores: dict[str, deque[float]] = {"fire": deque(), "smoke": deque()}
 
 
@@ -83,26 +80,17 @@ def get_status() -> dict[str, Any]:
         "available": hazard_enabled() and path.is_file() and metadata_path().is_file(),
         "model_id": model_id(),
         "accident": accident.get_status(),
-        "error": _load_error,
+        "error": _loader.error,
     }
 
 
+_loader = YoloModel("fire/smoke", weights_path)
+
+
 def get_model():
-    global _model, _load_error
     if not hazard_enabled() or not weights_path().is_file():
         return None
-    if _model is None:
-        with _lock:
-            if _model is None:
-                try:
-                    from ultralytics import YOLO
-
-                    _model = YOLO(str(weights_path()))
-                except Exception as exc:  # noqa: BLE001
-                    _load_error = str(exc)
-                    logger.warning("fire/smoke model unavailable: %s", exc)
-                    return None
-    return _model
+    return _loader.get()
 
 
 def _norm(label: str) -> str:
