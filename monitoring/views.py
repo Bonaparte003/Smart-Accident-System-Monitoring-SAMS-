@@ -241,7 +241,12 @@ def _apply_live_ppe(pred: dict) -> None:
     pred["boots"] = stable.get("boots")
     pred["ppe_complete"] = stable.get("ppe_complete")
     pred["ppe_summary"] = stable.get("summary")
-    pred["unsafe"] = stable.get("ppe_complete") is False
+    behaviour = pred.get("behaviour") if isinstance(pred.get("behaviour"), dict) else {}
+    ppe_missing = stable.get("ppe_complete") is False
+    if behaviour.get("available") and behaviour.get("unsafe") is not None:
+        pred["unsafe"] = bool(behaviour["unsafe"]) or ppe_missing
+    else:
+        pred["unsafe"] = ppe_missing
 
 
 def _live_vision_result(jpeg: bytes) -> dict:
@@ -280,6 +285,9 @@ def _live_vision_result(jpeg: bytes) -> dict:
             },
             "ppe_summary": pred.get("ppe_summary"),
             "ppe_complete": pred.get("ppe_complete"),
+            "behaviour": pred.get("behaviour"),
+            "behaviour_label": pred.get("behaviour_label"),
+            "behaviour_group": pred.get("behaviour_group"),
             "unsafe": pred.get("unsafe", False),
             "model_id": pred.get("model_id"),
             "track_id": pred.get("track_id"),

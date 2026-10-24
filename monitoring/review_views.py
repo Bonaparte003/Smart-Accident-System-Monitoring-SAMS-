@@ -3,19 +3,21 @@
 from __future__ import annotations
 
 import shutil
+from pathlib import Path
 from collections import Counter
 from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Case, Count, IntegerField, Q, Value, When
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 
-from .models import InteractionEvent, Recording, RecordingMinute
+from .models import RISK_LABELS, InteractionEvent, Recording, RecordingMinute, Trial
+from .services import trials, video_analysis
 from .services.mlops import export_zip, kept_minutes, model_cards
 from .services.recordings import log_line
 
@@ -28,9 +30,9 @@ PPE_ICONS = {
     "goggles": "fa-glasses",
 }
 RANGES = {
-    "24h": (timedelta(hours=24), "in the last 24 hours", "the previous 24 hours", "Number of detected events per hour"),
-    "7d": (timedelta(days=7), "in the last 7 days", "the previous 7 days", "Number of detected events per day"),
-    "30d": (timedelta(days=30), "in the last 30 days", "the previous 30 days", "Number of detected events per day"),
+    "24h": (timedelta(hours=24), "Number of detected events per hour"),
+    "7d": (timedelta(days=7), "Number of detected events per day"),
+    "30d": (timedelta(days=30), "Number of detected events per day"),
 }
 
 
@@ -54,27 +56,6 @@ def _desk() -> dict:
 
 def _event_time(mark: RecordingMinute):
     return mark.recording.created_at + timedelta(seconds=float(mark.offset_s or 0))
-
-
-def _trend(current: int, previous: int, *, fewer_is_better: bool, fresh: str, before: str, noun: str) -> dict:
-    if current == 0 and previous == 0:
-        return {"tone": "flat", "text": ""}
-    if current == previous:
-        return {"tone": "flat", "text": f"Same as {before}"}
-    if previous == 0:
-        tone = "bad" if fewer_is_better else "good"
-        return {"tone": tone, "text": f"{current} {noun} {fresh}"}
-    diff = current - previous
-    tone = "good" if (diff < 0) == fewer_is_better else "bad"
-    if abs(diff) <= 9 or previous < 8:
-        if diff < 0:
-            text = f"↓ {abs(diff)} less than {before}"
-        else:
-            text = f"↑ {diff} more than {before}"
-    else:
-        pct = round(100 * diff / previous)
-        text = f"{'↑' if pct > 0 else '↓'} {abs(pct)}% from {before}"
-    return {"tone": tone, "text": text}
 
 
 def _buckets(key: str, end):
@@ -240,7 +221,7 @@ def _health() -> list[dict]:
 
 def _overview(raw_range: str) -> dict:
     key = raw_range if raw_range in RANGES else "24h"
-    span, fresh, before, chart_caption = RANGES[key]
+    span, chart_caption = RANGES[key]
     end = timezone.now()
     start = end - span
     marks = list(
@@ -252,7 +233,6 @@ def _overview(raw_range: str) -> dict:
         return opening <= moment < closing
 
     current = [mark for mark in marks if inside(mark, start, end)]
-    previous = [mark for mark in marks if inside(mark, start - span, start)]
 
     def tally(rows, level=None) -> int:
         if level is None:
@@ -260,11 +240,6 @@ def _overview(raw_range: str) -> dict:
         return sum(1 for mark in rows if mark.level == level)
 
     videos_total = Recording.objects.count()
-    videos_now = Recording.objects.filter(created_at__gte=start, created_at__lt=end).count()
-    if videos_now:
-        video_trend = {"tone": "good", "text": f"{videos_now} added {fresh}"}
-    else:
-        video_trend = {"tone": "flat", "text": ""}
     levels = Counter(mark.level for mark in current)
     normal = levels.get("NORMAL", 0)
     caution = levels.get("CAUTION", 0)
@@ -288,7 +263,7 @@ def _overview(raw_range: str) -> dict:
             event_count=Count("minutes"),
             caution_count=Count("minutes", filter=Q(minutes__level="CAUTION")),
             danger_count=Count("minutes", filter=Q(minutes__level="DANGER")),
-        )[:4]
+        ).order_by("-created_at")[:4]
     )
     if recordings:
         for mark in RecordingMinute.objects.filter(recording_id__in=[item.pk for item in recordings]).exclude(snapshot=""):
@@ -297,19 +272,10 @@ def _overview(raw_range: str) -> dict:
         "overview": {
             "range": key,
             "caption": chart_caption,
-            "videos": {"value": videos_total, **video_trend},
-            "alerts": {
-                "value": tally(current),
-                **_trend(tally(current), tally(previous), fewer_is_better=True, fresh=fresh, before=before, noun="alerts"),
-            },
-            "caution": {
-                "value": caution,
-                **_trend(caution, tally(previous, "CAUTION"), fewer_is_better=True, fresh=fresh, before=before, noun="caution events"),
-            },
-            "danger": {
-                "value": danger,
-                **_trend(danger, tally(previous, "DANGER"), fewer_is_better=True, fresh=fresh, before=before, noun="danger events"),
-            },
+            "videos": {"value": videos_total},
+            "alerts": {"value": tally(current)},
+            "caution": {"value": caution},
+            "danger": {"value": danger},
             "chart": _chart(current, key, end),
             "distribution": {
                 "total": total,
@@ -343,9 +309,13 @@ def _overview(raw_range: str) -> dict:
                     "events": item.event_count,
                     "caution": item.caution_count,
                     "danger": item.danger_count,
+                    "status": item.render_status,
+                    "status_label": _status_label(item),
+                    "processing": item.render_status == "pending",
                 }
                 for item in recordings
             ],
+            "recordings_processing": any(item.render_status == "pending" for item in recordings),
         }
     }
 
@@ -407,6 +377,14 @@ def _created_bound(raw: str):
     return moment
 
 
+def _status_label(recording: Recording) -> str:
+    if recording.render_status == "failed":
+        return "analysis failed"
+    if recording.render_status == "pending":
+        return "recording" if recording.source == "live" else "analysing"
+    return ""
+
+
 @login_required(login_url="review_entrance")
 def archive(request: HttpRequest) -> HttpResponse:
     created_from = (request.GET.get("from") or "").strip()
@@ -430,7 +408,14 @@ def archive(request: HttpRequest) -> HttpResponse:
     recordings = list(recordings)
     posters = _posters(recordings)
     cards = [
-        {"id": item.pk, "title": item.title, "poster": posters.get(item.pk, "")}
+        {
+            "id": item.pk,
+            "title": item.title,
+            "poster": posters.get(item.pk, ""),
+            "source": item.source,
+            "status": item.render_status,
+            "status_label": _status_label(item),
+        }
         for item in recordings
     ]
     return render(
@@ -439,6 +424,7 @@ def archive(request: HttpRequest) -> HttpResponse:
         {
             "nav": "archive",
             "cards": cards,
+            "cards_processing": any(item.render_status == "pending" for item in recordings),
             "created_from": created_from if start is not None else "",
             "created_to": created_to if end is not None else "",
             "severity": severity,
@@ -464,16 +450,63 @@ def alerts(request: HttpRequest) -> HttpResponse:
 
 @login_required(login_url="review_entrance")
 def mlops(request: HttpRequest) -> HttpResponse:
+    # Every decided moment can become a training row; alerts come first.
     queue = (
-        RecordingMinute.objects.filter(level__in=PROBLEM_LEVELS, train_status="pending")
+        RecordingMinute.objects.filter(train_status="pending")
+        .exclude(level="")
         .select_related("recording")
-        .order_by("-recording__created_at", "minute")[:24]
+        .annotate(is_alert=Case(When(level__in=PROBLEM_LEVELS, then=Value(1)), default=Value(0), output_field=IntegerField()))
+        .order_by("-is_alert", "-recording__created_at", "minute")[:24]
     )
     return render(
         request,
         "monitoring/review/mlops.html",
-        {"nav": "mlops", "models": model_cards(), "queue": queue, **_desk()},
+        {
+            "nav": "mlops",
+            "models": model_cards(),
+            "queue": queue,
+            "active_trial": trials.active_trial(),
+            "trials": trials.with_counts(Trial.objects.all())[:12],
+            "risk_labels": RISK_LABELS,
+            **_desk(),
+        },
     )
+
+
+@login_required(login_url="review_entrance")
+@require_POST
+def start_trial(request: HttpRequest) -> HttpResponse:
+    try:
+        trials.start_trial(
+            risk_label=request.POST.get("risk_label") or "",
+            scenario=request.POST.get("scenario") or "",
+            participant=request.POST.get("participant") or "",
+            notes=request.POST.get("notes") or "",
+        )
+    except ValueError:
+        pass
+    return redirect(_safe_next(request.POST.get("next") or ""))
+
+
+@login_required(login_url="review_entrance")
+@require_POST
+def stop_trial(request: HttpRequest) -> HttpResponse:
+    trials.end_trial()
+    return redirect(_safe_next(request.POST.get("next") or ""))
+
+
+@login_required(login_url="review_entrance")
+@require_POST
+def delete_trial(request: HttpRequest, pk: int) -> HttpResponse:
+    trials.delete_trial(get_object_or_404(Trial, pk=pk))
+    return redirect(_safe_next(request.POST.get("next") or ""))
+
+
+@login_required(login_url="review_entrance")
+def export_trials(request: HttpRequest) -> HttpResponse:
+    response = HttpResponse(trials.export_zip(), content_type="application/zip")
+    response["Content-Disposition"] = 'attachment; filename="sams-trial-data.zip"'
+    return response
 
 
 @login_required(login_url="review_entrance")
@@ -483,7 +516,10 @@ def label_minute(request: HttpRequest) -> HttpResponse:
     status = request.POST.get("status") or ""
     if status in {"pending", "kept", "excluded"}:
         mark.train_status = status
-        mark.save(update_fields=["train_status"])
+        true_label = request.POST.get("true_label") or ""
+        if true_label in dict(RISK_LABELS):
+            mark.true_label = true_label
+        mark.save(update_fields=["train_status", "true_label"])
     return redirect(_safe_next(request.POST.get("next") or ""))
 
 
@@ -500,6 +536,32 @@ def export_training(request: HttpRequest) -> HttpResponse:
     response = HttpResponse(payload, content_type="application/zip")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required(login_url="review_entrance")
+@require_POST
+def upload_video(request: HttpRequest) -> HttpResponse:
+    """Keep an uploaded clip and analyse it in the background with what the operator declared."""
+    upload = request.FILES.get("video")
+    if not upload:
+        return redirect("review_archive")
+    title = Path(upload.name or "clip.mp4").name.replace("\x00", "") or "clip.mp4"
+    recording = Recording.objects.create(
+        title=title[:200],
+        source="upload",
+        declared=video_analysis.clean_declared(request.POST.get("machine_state"), request.POST.get("vibration")),
+        render_status="pending",
+    )
+    recording.video.save(title, upload, save=True)
+    video_analysis.enqueue(recording.pk)
+    # Stay on the list so the new clip shows as processing — do not open the detail page.
+    next_path = (request.POST.get("next") or "").strip()
+    if next_path.startswith("/") and not next_path.startswith("//"):
+        if next_path.rstrip("/") in {"", "/"} or next_path.startswith("/?"):
+            return redirect("review_entrance")
+        if next_path.startswith("/archive"):
+            return redirect("review_archive")
+    return redirect("review_archive")
 
 
 @login_required(login_url="review_entrance")
@@ -595,5 +657,6 @@ def recording_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "minutes": minutes,
             "play_url": play_url,
             "baked": baked,
+            "status_label": _status_label(recording),
         },
     )

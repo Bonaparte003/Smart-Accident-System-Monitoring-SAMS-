@@ -1699,6 +1699,68 @@ body.mlops-page .stage {
 .pill.rec { background: var(--danger); }
 .player-pills { display: flex; gap: 6px; }
 
+.declared-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem 1.25rem;
+  margin: 0.85rem 0.85rem 0.95rem;
+  padding: 0.9rem 1rem;
+  background: #161616;
+  color: #f4f4f2;
+  border-radius: 10px;
+}
+.declared-copy { min-width: 0; }
+.declared-copy strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.declared-copy p {
+  margin: 0.25rem 0 0;
+  color: rgba(244, 244, 242, 0.72);
+  font-size: 12px;
+  line-height: 1.35;
+}
+.declared-pills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.declared-pills li {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.55rem 0.35rem 0.65rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+.declared-pills span {
+  color: rgba(244, 244, 242, 0.65);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.declared-pills em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: #f4f4f2;
+  color: #161616;
+}
+.declared-pills em.is-on { background: #e6a100; color: #161616; }
+.declared-pills em.is-off { background: #d9d9d6; color: #3a3a3a; }
+.declared-pills em.is-ok { background: #1f7a45; color: #ffffff; }
+.declared-pills em.is-warn { background: #c2332a; color: #ffffff; }
+
 .tapes { display: flex; gap: 0.8rem; overflow-x: auto; }
 .tape {
   display: grid;
@@ -1749,6 +1811,29 @@ body.mlops-page .stage {
 }
 .tape-pills i.caution { background: #e6a100; color: #161616; }
 .tape-pills i.danger { background: #c2332a; color: #ffffff; }
+.tape-pills i.busy { background: #e8e4da; color: #5a5346; }
+.tape.is-processing .tape-still img { opacity: 0.45; filter: grayscale(0.2); }
+.tape-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #161616;
+  font-size: 1.25rem;
+  background: rgba(247, 247, 245, 0.35);
+}
+.tape-still em.is-busy { background: #5a5346; text-transform: capitalize; }
+.poster-card.is-processing img { opacity: 0.45; filter: grayscale(0.2); }
+.poster-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #161616;
+  font-size: 1.4rem;
+  background: rgba(247, 247, 245, 0.4);
+  z-index: 1;
+}
 
 @media (max-width: 1180px) {
   .kpis, .ov-low { grid-template-columns: 1fr 1fr; }

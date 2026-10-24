@@ -224,8 +224,6 @@
     return { ctx, w: canvas.width, h: canvas.height };
   }
 
-  // One shared scale (g away from each axis's mean) so a still sensor draws flat lines and
-  // the machine levels show as bigger swings. It never shrinks below ±VIB_FLOOR_G.
   const VIB_FLOOR_G = 0.05;
   let vibScale = VIB_FLOOR_G;
 
@@ -288,8 +286,6 @@
     });
     ctx.stroke();
   }
-
-  // The model's verdict arrives with the camera poll; the raw signal has its own faster feed.
   let vibModel = {};
   let vibRaw = {};
 

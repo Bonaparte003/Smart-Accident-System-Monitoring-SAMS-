@@ -6,6 +6,7 @@
   <p class="scene-lead">Upload a video of the scene. The models read everything visual; a video carries no accelerometer, so state what the machine was doing.</p>
   <form class="scene-form" method="post" action="{% url 'review_upload' %}" enctype="multipart/form-data">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}" />
     <label class="scene-file">
       <input type="file" name="video" accept="video/*" required />
       <i class="fa-solid fa-film" aria-hidden="true"></i>

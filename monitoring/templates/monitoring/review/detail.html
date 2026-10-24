@@ -43,7 +43,26 @@
     <p class="hint" id="frame-status">{{ status_label|capfirst }}. Check the server log.</p>
     {% endif %}
     {% if recording.declared %}
-    <p class="hint">Declared at upload, not measured:{% if recording.declared.machine_state %} machine {{ recording.declared.machine_state|lower }}{% endif %}{% if recording.declared.machine_state and recording.declared.vibration %} ·{% endif %}{% if recording.declared.vibration %} vibration {{ recording.declared.vibration|lower }}{% endif %}.</p>
+    <aside class="declared-card" aria-label="Declared sensor states">
+      <div class="declared-copy">
+        <strong>Declared at upload</strong>
+        <p>Not measured by the board — these stand in for the whole clip.</p>
+      </div>
+      <ul class="declared-pills">
+        {% if recording.declared.machine_state %}
+        <li>
+          <span>Machine</span>
+          <em class="{% if recording.declared.machine_state == 'RUNNING' %}is-on{% else %}is-off{% endif %}">{{ recording.declared.machine_state|title }}</em>
+        </li>
+        {% endif %}
+        {% if recording.declared.vibration %}
+        <li>
+          <span>Vibration</span>
+          <em class="{% if recording.declared.vibration == 'ABNORMAL' %}is-warn{% else %}is-ok{% endif %}">{{ recording.declared.vibration|title }}</em>
+        </li>
+        {% endif %}
+      </ul>
+    </aside>
     {% endif %}
   </div>
 </section>

@@ -21,7 +21,6 @@
       </span>
       <span class="kpi-label">Monitored videos</span>
       <strong>{{ overview.videos.value }}</strong>
-      {% if overview.videos.text %}<em class="delta {{ overview.videos.tone }}">{{ overview.videos.text }}</em>{% endif %}
     </a>
     <a class="kpi" href="{% url 'review_alerts' %}">
       <span class="kpi-top">
@@ -30,7 +29,6 @@
       </span>
       <span class="kpi-label">Total alerts</span>
       <strong>{{ overview.alerts.value }}</strong>
-      {% if overview.alerts.text %}<em class="delta {{ overview.alerts.tone }}">{{ overview.alerts.text }}</em>{% endif %}
     </a>
     <a class="kpi" href="{% url 'review_alerts' %}">
       <span class="kpi-top">
@@ -39,7 +37,6 @@
       </span>
       <span class="kpi-label">Caution events</span>
       <strong class="caution-count">{{ overview.caution.value }}</strong>
-      {% if overview.caution.text %}<em class="delta {{ overview.caution.tone }}">{{ overview.caution.text }}</em>{% endif %}
     </a>
     <a class="kpi" href="{% url 'review_alerts' %}">
       <span class="kpi-top">
@@ -48,7 +45,6 @@
       </span>
       <span class="kpi-label">Danger events</span>
       <strong>{{ overview.danger.value }}</strong>
-      {% if overview.danger.text %}<em class="delta {{ overview.danger.tone }}">{{ overview.danger.text }}</em>{% endif %}
     </a>
   </div>
 
@@ -172,22 +168,33 @@
       <a class="card-link" href="{% url 'review_archive' %}">View archive →</a>
     </header>
     {% if overview.recordings %}
-    <div class="tapes">
+    <div class="tapes"{% if overview.recordings_processing %} data-refresh-pending="1"{% endif %}>
       {% for item in overview.recordings %}
-      <a class="tape" href="{% url 'review_recording' item.id %}">
+      <a class="tape{% if item.processing %} is-processing{% endif %}" href="{% url 'review_recording' item.id %}">
         <span class="tape-still">
           {% if item.poster %}
           <img src="{{ item.poster }}" alt="" />
           {% endif %}
+          {% if item.processing %}
+          <span class="tape-loading" aria-hidden="true">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+          </span>
+          <em class="is-busy">{{ item.status_label|default:"processing" }}</em>
+          {% else %}
           <em>{{ item.duration }}</em>
+          {% endif %}
         </span>
         <span class="tape-copy">
           <strong>{{ item.title }}</strong>
-          <span>{{ item.when|date:"j M Y, H:i" }} · {{ item.duration }}</span>
+          <span>{{ item.when|date:"j M Y, H:i" }}{% if not item.processing %} · {{ item.duration }}{% endif %}</span>
           <span class="tape-pills">
+            {% if item.processing %}
+            <i class="busy">{{ item.status_label|default:"processing" }}…</i>
+            {% else %}
             <i>{{ item.events }} event{{ item.events|pluralize }}</i>
             {% if item.caution %}<i class="caution">{{ item.caution }} caution</i>{% endif %}
             {% if item.danger %}<i class="danger">{{ item.danger }} danger</i>{% endif %}
+            {% endif %}
           </span>
         </span>
       </a>
@@ -381,6 +388,10 @@
         plugins: { legend: pieLegend() },
       },
     });
+  }
+
+  if (document.querySelector(".tapes[data-refresh-pending]")) {
+    setTimeout(() => location.reload(), 5000);
   }
 </script>
 {% endblock %}
