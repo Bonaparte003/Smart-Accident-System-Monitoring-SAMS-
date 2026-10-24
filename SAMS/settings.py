@@ -20,7 +20,6 @@ def _env_list(name: str, default: list[str]) -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()] if raw else default
 
 
-# Defaults keep `python manage.py runserver` on a laptop working; docker-compose sets the rest.
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-)x83x3mr-p-crdi7_w!hg#e#af#(fwxgwi3$u-gjjke4utnmet",
@@ -31,7 +30,6 @@ DEBUG = _env_bool("DJANGO_DEBUG", True)
 ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", ["*"])
 CSRF_TRUSTED_ORIGINS = _env_list("DJANGO_CSRF_TRUSTED_ORIGINS", [])
 
-# Behind a TLS-terminating proxy (Caddy in docker-compose), trust its X-Forwarded-Proto.
 if _env_bool("SAMS_BEHIND_PROXY", False):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
@@ -111,8 +109,6 @@ LOGIN_REDIRECT_URL = "review_entrance"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
-
-# Headroom for full-resolution phone camera frames
 DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
 
@@ -133,6 +129,10 @@ LOGGING = {
             "handlers": ["console"],
             "level": "INFO",
         },
+        "celery": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
     },
 }
 
@@ -141,3 +141,19 @@ MAILERS = {
         "BACKEND": "django.core.mail.backends.console.EmailBackend",
     },
 }
+
+# Celery — background video analysis and live-session encoding.
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/1")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = int(os.environ.get("CELERY_TASK_TIME_LIMIT", "3600"))
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_ALWAYS_EAGER = _env_bool("SAMS_CELERY_EAGER", False)
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+if any(arg == "test" or arg.startswith("test") for arg in __import__("sys").argv[1:2]):
+    CELERY_TASK_ALWAYS_EAGER = True
