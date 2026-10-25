@@ -1,10 +1,9 @@
 experiment_id,group,change,weights_in,train images,imgsz,two_stage,epochs_run,best_epoch,stopped_early,precision,recall,map50,map50_95,missing_recall,minutes
-ppe_e1_full,main,"Baseline: every training image, no selection, no copies",yolov8n.pt,6676,640,False,25,25,False,0.709,0.5763,0.5674,0.3326,0.4542,15.2
-ppe_e2_curated,main,"Real images chosen per class, plus background images",yolov8n.pt,3921,640,False,5,2,True,0.6491,0.3157,0.2915,0.1594,0.2525,2.5
-ppe_e3_balanced,main,Curated set plus augmented copies for classes still short,yolov8n.pt,6295,640,False,5,2,True,0.5419,0.3573,0.3125,0.1686,0.292,3.7
-ppe_e4_imgsz_large,main,Balanced set at 960 pixels,yolov8n.pt,6295,960,False,18,15,True,0.6044,0.4531,0.4145,0.2443,0.4231,19.6
-ppe_e1_full,main,"Baseline: every training image, no selection, no copies",yolov8n.pt,6676,640,False,25,25,False,0.709,0.5763,0.5674,0.3326,0.4542,15.2
-ppe_e2_curated,main,"Real images chosen per class, plus background images",yolov8n.pt,3921,640,False,5,2,True,0.6491,0.3157,0.2915,0.1594,0.2525,2.5
-ppe_e3_balanced,main,Curated set plus augmented copies for classes still short,yolov8n.pt,6295,640,False,5,2,True,0.5419,0.3573,0.3125,0.1686,0.292,3.7
-ppe_e4_imgsz_large,main,Balanced set at 960 pixels,yolov8n.pt,6295,960,False,18,15,True,0.6044,0.4531,0.4145,0.2443,0.4231,19.6
-ppe_e5_two_stage,main,"Frozen backbone for 10 epochs, then all layers at lr0 / 10, 960 pixels",yolov8n.pt,6295,960,True,15,12,True,0.5908,0.4671,0.4275,0.2584,0.4557,24.4
+ppe_e1_full,main,"Baseline: every training image, no selection, no copies",yolov8n.pt,6676,640,False,24,21,True,0.6698,0.5595,0.5559,0.3194,0.4045,15.6
+ppe_e2_curated,main,"Real images chosen per class, plus background images",yolov8n.pt,3921,640,False,5,2,True,0.5123,0.3544,0.3102,0.169,0.2951,2.4
+ppe_e3_balanced,main,Curated set plus augmented copies for classes still short,yolov8n.pt,6295,640,False,4,2,True,0.5451,0.3452,0.3085,0.1774,0.2502,3.6
+ppe_e4_imgsz_large,main,Balanced set at 960 pixels,yolov8n.pt,6295,960,False,4,1,True,0.5273,0.3692,0.3277,0.1875,0.3538,5.1
+ppe_e5_two_stage,main,"Frozen backbone for 10 epochs, then all layers at lr0 / 10, 960 pixels",yolov8n.pt,6295,960,True,11,8,True,0.6642,0.4523,0.4252,0.256,0.4317,21.1
+ppe_e5h_adamw,main,AdamW lr0=0.001 with the recipe so far,yolov8n.pt,6295,960,True,6,3,True,0.5628,0.459,0.4163,0.2455,0.4248,15.5
+ppe_e6_teacher_labels,main,Teacher-filled labels from ppe_e5_two_stage for classes a source does not annotate,yolov8n.pt,6295,960,True,11,8,True,0.6548,0.4585,0.4179,0.2528,0.4429,25.4
+ppe_e7_yolov8s,main,"YOLOv8s with the best data, image size, fine-tuning, and optimizer so far",yolov8s.pt,6295,960,True,5,2,True,0.5033,0.5067,0.4246,0.261,0.5116,24.1

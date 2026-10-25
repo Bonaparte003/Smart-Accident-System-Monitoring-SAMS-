@@ -1,3 +1,3 @@
 class,train,val,test
-laying,80,17,17
-standing,9,1,0
+laying,400,21,15
+standing,3175,638,631

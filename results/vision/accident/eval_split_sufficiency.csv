@@ -1,3 +1,3 @@
 class,train,val,test,val has enough,test has enough
-laying,77,17,17,True,True
-standing,9,1,0,False,False
+laying,75,21,15,True,True
+standing,3151,638,631,True,True

@@ -1,3 +1,3 @@
 training data,experiment,service_pck
-crops only,pose_e2_two_stage,0.8536
-crops plus camera copies,pose_e4_camera,0.8582
+crops only,pose_e2_two_stage,0.8559
+crops plus camera copies,pose_e4_camera,0.8627

@@ -1,5 +1,5 @@
 item,value
-best aspect cut (laying if width / height is at least this),0.658
-balanced accuracy of that rule,1.0
-laying boxes below the cut (missed by the rule),0.0
+best aspect cut (laying if width / height is at least this),0.94
+balanced accuracy of that rule,0.913
+laying boxes below the cut (missed by the rule),10.0
 laying boxes in total,111.0

@@ -1,0 +1,5 @@
+item,images
+kept: nobody in view,150
+kept: upright people,1500
+skipped: a person wider than tall,464
+skipped: crowd annotation,227

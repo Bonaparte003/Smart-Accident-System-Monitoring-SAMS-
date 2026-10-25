@@ -5,20 +5,22 @@ VAL_IMAGES_PER_SOURCE,1000,Largest number of validation images taken from one so
 MIN_EVAL_BOXES,50,Fewest real boxes a SAMS class should have in val and in test
 PERSON_PSEUDO_CONF,0.5,Confidence needed to add a machine-made Person box
 EXTRA_BACKGROUND_DIR,/content/drive/MyDrive/SAMS/datasets/vision/ppe/background,Folder for your own empty site frames. Leave it empty if you have none
+SITE_DIR,/content/drive/MyDrive/SAMS/datasets/vision/ppe/site,"Your labelled SAMS frames in YOLO format, split into train, val, and test. Empty is allowed"
+TEACHER_CONF,0.6,Confidence a teacher box needs to be added as a label for a class its source does not annotate
+TEACHER_IOU,0.3,A teacher box overlapping an existing gear label this much is not added
 TARGET_BOXES_PER_CLASS,3000,Training boxes each SAMS class should reach
 MAX_IMAGES_PER_SOURCE,4000,Largest number of real training images one source may give
 BACKGROUND_FRACTION,0.06,Share of training images that have no gear at all
 MAX_COPIES_PER_IMAGE,10,Most augmented copies made from one real photo
-MAX_EPOCHS,25,Upper limit on epochs. Early stopping usually ends sooner
+MAX_EPOCHS,40,Upper limit on epochs. Early stopping usually ends sooner
 PATIENCE,3,Epochs without a val improvement before training stops
 STAGE_A_EPOCHS,10,Epochs with the backbone frozen in two-stage fine-tuning
 FREEZE_LAYERS,10,Layers frozen in stage A. 10 is the whole YOLOv8 backbone
 BATCH,-1,-1 lets Ultralytics pick the largest batch that fits the GPU
 IMGSZ_BASE,640,Default training image size
 IMGSZ_LARGE,960,Larger size tested for small gloves and shoes
-LOSO_EPOCHS,25,Epochs for each leave-one-source-out model
-MIN_RECALL_MISSING,0.8,Recall wanted on missing-gear classes when picking thresholds
+WINNER_TOLERANCE,0.005,Val mAP50-95 gap treated as a tie between two runs
+MISSING_F_BETA,2.0,Missing-gear thresholds maximise F-beta with this beta: 2 weighs recall twice as much as precision
 MATCH_IOU,0.5,Overlap needed for a prediction to count as finding a label
 ROBUST_SAMPLE,600,Val images used in the bad-conditions test
 BOOTSTRAP_ROUNDS,1000,Resampling rounds for the confidence intervals
-REPEAT_SEEDS,"[1, 2]",Extra seeds used to retrain the chosen recipe

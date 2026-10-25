@@ -1,0 +1,7 @@
+,dist_exp06_residual_log_huber,dist_exp06_residual_log_huber,dist_exp06_residual_log_huber,dist_exp01_pinhole_z0,dist_exp01_pinhole_z0,dist_exp01_pinhole_z0
+,rows,mae,mean_rel_err,rows,mae,mean_rel_err
+band,,,,,,
+"[0.0, 1.5)",1664,0.229,0.227,1664,2.415,2.292
+"[1.5, 3.0)",3989,0.292,0.144,3989,2.019,1.055
+"[3.0, 6.0)",3640,0.515,0.128,3640,2.345,0.595
+"[6.0, 100.0)",3840,0.836,0.114,3840,4.648,0.6

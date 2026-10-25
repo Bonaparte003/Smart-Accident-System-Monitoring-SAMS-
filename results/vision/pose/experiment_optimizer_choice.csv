@@ -1,3 +1,3 @@
 optimizer,experiment,service_pck
-SGD,pose_e2_two_stage,0.8536
-AdamW,pose_e3_adamw,0.8472
+SGD,pose_e2_two_stage,0.8559
+AdamW,pose_e3_adamw,0.8502

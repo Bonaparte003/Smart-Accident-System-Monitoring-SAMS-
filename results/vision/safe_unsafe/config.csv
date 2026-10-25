@@ -1,15 +1,21 @@
 setting,value,meaning
 SEED,42,"Seed for Python, NumPy and PyTorch"
 DEVICE,cuda,Training device
-MAX_FRAMES_PER_VIDEO,3,Evenly spaced frames taken from each clip
+MAX_FRAMES_PER_VIDEO,8,Evenly spaced frames taken from each clip; the video model sees all of them as one clip
 FRAME_MAX_SIDE,640,Longest side of a stored frame in pixels (1080p is downscaled)
 VAL_FRACTION,0.15,Share of each class's training clips held out for validation
-IMG_SIZE,224,Network input size (square)
+IMG_SIZE,224,Image-model input size (square)
+IMG_SIZE_LARGE,288,"Input size for ConvNeXt-Tiny, which keeps more detail such as a panel cover"
 BATCH_SIZE,32,Frames per training step
-PATIENCE,4,Epochs without a better validation macro-F1 before stopping
+BATCH_SIZE_LARGE,16,Frames per step at IMG_SIZE_LARGE
+PATIENCE,5,Epochs without a better validation clip macro-F1 before stopping
 EPOCHS_SCRATCH,12,"Epoch limit, CNN from scratch"
 EPOCHS_FROZEN,8,"Epoch limit, frozen backbones"
-EPOCHS_FINETUNE,10,"Epoch limit, full fine-tuning"
+EPOCHS_FINETUNE,20,"Epoch limit, full fine-tuning"
 LR_HEAD,0.001,AdamW learning rate when only a new head (or a small CNN) trains
-LR_FINETUNE,3e-05,AdamW learning rate when pretrained layers train too
+LR_FINETUNE,0.0001,AdamW learning rate when pretrained layers train too
 WEIGHT_DECAY,0.0001,AdamW weight decay
+LABEL_SMOOTHING,0.1,Label smoothing for the ConvNeXt and video experiments
+VIDEO_SIZE,160,Frame size for the video model
+VIDEO_BATCH_SIZE,8,Clips per training step for the video model
+EPOCHS_VIDEO,20,"Epoch limit, video model"

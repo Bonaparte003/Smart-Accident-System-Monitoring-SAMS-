@@ -1,29 +1,33 @@
 setting,value,meaning
-SEED,42,"Random seed for splitting, augmentation, and training"
+SEED,42,"Random seed for sampling, splitting, augmentation, and training"
 YOLO_DEVICE,0,"0 is the first GPU, cpu means no GPU"
-DATASET_REPO,Simuletic/CCTV_Incident_Dataset_Fall_Lying_Down_Detection,Hugging Face dataset that is downloaded
-VAL_FRACTION,0.15,Share of images held out for val (stratified by laying presence)
-TEST_FRACTION,0.15,Share of images held out for test (stratified by laying presence)
+DATASET_REPO,Simuletic/CCTV_Incident_Dataset_Fall_Lying_Down_Detection,Hugging Face dataset with the synthetic falls
+COCO_PEOPLE_IMAGES,1500,Most COCO val2017 photos of upright people to use as negatives
+COCO_EMPTY_IMAGES,150,"COCO photos with nobody in them, used as background"
+COCO_WIDE_ASPECT,1.2,"A COCO photo is skipped if any person box is wider than tall by this factor, since that person could be lying"
+EXTRA_SOURCES_DIR,/content/drive/MyDrive/SAMS/datasets/vision/accident/extra,One YOLO-format folder per extra fall dataset. Empty is allowed
+SITE_DIR,/content/drive/MyDrive/SAMS/datasets/vision/accident/site,Labelled SAMS camera frames in YOLO format. Empty is allowed
+EXTRA_BACKGROUND_DIR,/content/drive/MyDrive/SAMS/datasets/vision/accident/background,"Your own empty SAMS frames, added to training only"
+SPLIT_FOLDS,7,"Grouped folds: one is test, one is val, the rest train (about 70/15/15)"
 NEAR_DUP_HAMMING,10,Images whose 64-bit hashes differ in at most this many bits are the same scene
 SCENE_CORRELATION,0.9,Consecutive frames whose thumbnails correlate at least this much are the same scene
 MIN_EVAL_BOXES,10,Fewest real boxes a class should have in val and in test
-EXTRA_BACKGROUND_DIR,/content/drive/MyDrive/SAMS/datasets/vision/accident/background,Folder for your own empty SAMS frames. Leave it empty if you have none
-TARGET_BOXES_PER_CLASS,80,Training boxes each class should reach after balancing
-BACKGROUND_FRACTION,0.1,"Background images to add, as a share of the real training images"
-BACKGROUND_MIN_SIDE,0.25,"Smallest width and height, as a share of the image, of a person-free crop"
+TARGET_FALL_BOXES,400,Training laying boxes to reach with augmented copies
 MAX_COPIES_PER_IMAGE,6,Most augmented copies made from one real photo
-MAX_EPOCHS,25,Upper limit on epochs. Early stopping usually ends sooner
-PATIENCE,3,Epochs without a val improvement before training stops
+MAX_EPOCHS,60,Upper limit on epochs. Early stopping usually ends sooner
+PATIENCE,15,Epochs without a val improvement before training stops
 STAGE_A_EPOCHS,10,Epochs with the backbone frozen in two-stage fine-tuning
 FREEZE_LAYERS,10,Layers frozen in stage A. 10 is the whole YOLOv8 backbone
-BATCH,16,"Images per training step. Fixed, because the dataset is smaller than an automatic batch"
+BATCH,16,Images per training step
 IMGSZ_BASE,640,Default training image size
 IMGSZ_LARGE,960,Larger size tested for people far from the camera
-SELECTION_METRIC,map50_95,Val score used to choose between experiments: overall mAP50-95
+SELECTION_METRIC,fall_map50_95,Val score used to choose between experiments: mAP50-95 of the laying class
 WINNER_TOLERANCE,0.005,Runs this close to the best score count as tied. Ties go to higher laying recall
 FALL_MIN_RECALL,0.9,Recall wanted on the laying class when its threshold is chosen
+MAX_FALSE_FALL_RATE,0.02,Share of fall-free images allowed to raise a false fall at the live threshold
 MATCH_IOU,0.5,Overlap needed for a prediction to count as finding a label
 BOOTSTRAP_ROUNDS,1000,Resampling rounds for the confidence intervals
 REPEAT_SEEDS,"[1, 2]",Extra seeds used to retrain the chosen recipe
 CROP_PADDING,0.1,Extra margin around a person box when it is cropped for PCA
+CROPS_PER_CLASS,300,Most person crops per class embedded for the PCA
 TIMING_IMAGES,100,Single-image predictions timed in the export check

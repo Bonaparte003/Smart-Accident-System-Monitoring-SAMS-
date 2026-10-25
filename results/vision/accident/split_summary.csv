@@ -1,4 +1,4 @@
-split,images,share of images,images with laying,laying boxes,standing boxes
-train,77,0.694,77,77,9
-val,17,0.153,17,17,1
-test,17,0.153,17,17,0
+split,images,share of images,scene groups,images with laying,laying boxes,standing boxes
+train,1253,0.712,1241,75,75,3151
+val,257,0.146,249,21,21,638
+test,251,0.143,249,15,15,631

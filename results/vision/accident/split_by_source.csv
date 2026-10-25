@@ -1,0 +1,3 @@
+source,train,val,test
+coco,1178,236,236
+sim,75,21,15

@@ -1,2 +1,2 @@
 chosen experiment,stock model,val service PCK,val pose mAP50-95,gain over stock yolov8n-pose (PCK),runs within tolerance
-pose_e5_yolov8s,False,0.8726,0.5346,0.1109,1
+pose_e5_yolov8s,False,0.8716,0.5288,0.11,1

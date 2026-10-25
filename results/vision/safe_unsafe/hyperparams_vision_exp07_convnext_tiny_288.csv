@@ -1,0 +1,6 @@
+parameter,value,meaning
+architecture,ConvNeXt-Tiny (ImageNet),Every layer trainable
+img_size,288,Input size
+epochs_max,20,Epoch limit
+lr,0.0001,Low rate to keep the pretrained features
+loss,"class-weighted cross-entropy, label smoothing 0.1",Counters imbalance and over-confidence

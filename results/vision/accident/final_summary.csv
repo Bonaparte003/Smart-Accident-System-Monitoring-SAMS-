@@ -1,0 +1,18 @@
+item,value
+chosen experiment,fall_e5_yolov8s
+base model,yolov8s.pt
+image size,960
+two-stage fine-tuning,True
+training images,1578
+val fall mAP50-95,0.9469
+val fall recall,1.0
+live threshold (conf),0.8
+test fall mAP50-95,0.9369
+test fall recall at the live threshold,1.0
+test false falls at the live threshold,1
+test false-fall rate on fall-free images,0.0042
+real fall sources,none (synthetic falls only)
+weights,/content/drive/MyDrive/SAMS/models/vision/accident/best.pt
+metadata,/content/drive/MyDrive/SAMS/models/vision/accident/metadata.json
+model card,/content/drive/MyDrive/SAMS/models/vision/accident/model_card.md
+tables and charts,/content/drive/MyDrive/SAMS/results/vision/accident

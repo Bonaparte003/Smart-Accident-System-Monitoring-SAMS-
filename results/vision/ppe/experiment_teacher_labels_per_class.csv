@@ -1,0 +1,9 @@
+class,sources that label it,ppe_e5_two_stage mAP50-95,ppe_e6_teacher_labels mAP50-95,ppe_e5_two_stage recall,ppe_e6_teacher_labels recall
+helmet,"cpex, mend, wppe",0.357,0.351,0.626,0.648
+no_helmet,"cpex, mend, wppe",0.328,0.301,0.532,0.551
+vest,"cpex, mend",0.455,0.458,0.711,0.722
+no_vest,mend,0.268,0.253,0.624,0.647
+gloves,"cpex, wppe",0.396,0.398,0.815,0.789
+no_gloves,"cpex, wppe",0.124,0.138,0.57,0.573
+boots,"cpex, wppe",0.243,0.223,0.31,0.329
+no_boots,"cpex, wppe",0.0,0.0,0.0,0.0

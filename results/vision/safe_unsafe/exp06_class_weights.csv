@@ -1,9 +1,9 @@
 ,train_frames,loss_weight
-Authorized Intervention,59,1.678
-Carrying Overload with Forklift,123,0.805
-Closed Panel Cover,48,2.063
-Opened Panel Cover,330,0.3
-Safe Carrying,57,1.737
-Safe Walkway,125,0.792
-Safe Walkway Violation,449,0.221
-Unauthorized Intervention,245,0.404
+Authorized Intervention,159,1.666
+Carrying Overload with Forklift,328,0.807
+Closed Panel Cover,128,2.069
+Opened Panel Cover,880,0.301
+Safe Carrying,152,1.742
+Safe Walkway,335,0.791
+Safe Walkway Violation,1204,0.22
+Unauthorized Intervention,655,0.404

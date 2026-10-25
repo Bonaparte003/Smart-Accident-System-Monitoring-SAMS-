@@ -1,0 +1,7 @@
+parameter,value,meaning
+architecture,R(2+1)D-18 (Kinetics-400),Every layer trainable
+frames,8,"Frames per clip, in order"
+frame_size,160,Frame size
+epochs_max,20,Epoch limit
+lr,0.0001,Low rate to keep the pretrained features
+loss,"class-weighted cross-entropy per clip, label smoothing 0.1",Counters imbalance and over-confidence

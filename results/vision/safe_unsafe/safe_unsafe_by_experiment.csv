@@ -1,7 +1,9 @@
-experiment_id,test_binary_accuracy,test_unsafe_recall,test_unsafe_precision,test_safe_recall
-vision_exp03_resnet18_finetune,0.753,0.889,0.706,0.611
-vision_exp04_efficientnet_b0_frozen,0.648,0.963,0.597,0.317
-vision_exp05_mobilenet_v3_small,0.634,0.974,0.586,0.278
-vision_exp06_efficientnet_robust,0.575,0.984,0.547,0.144
-vision_exp02_resnet18_frozen,0.572,0.995,0.545,0.128
-vision_exp01_tinycnn_scratch,0.545,1.0,0.529,0.067
+experiment_id,test_clip_binary_accuracy,test_clip_unsafe_recall,test_clip_unsafe_precision,test_clip_safe_recall
+vision_exp08_r2plus1d_video,0.776,0.859,0.743,0.689
+vision_exp06_efficientnet_robust,0.792,0.812,0.788,0.77
+vision_exp04_efficientnet_b0_frozen,0.656,0.938,0.606,0.361
+vision_exp03_resnet18_finetune,0.76,0.859,0.724,0.656
+vision_exp07_convnext_tiny_288,0.792,0.812,0.788,0.77
+vision_exp05_mobilenet_v3_small,0.728,0.938,0.667,0.508
+vision_exp02_resnet18_frozen,0.688,0.969,0.626,0.393
+vision_exp01_tinycnn_scratch,0.576,0.984,0.548,0.148

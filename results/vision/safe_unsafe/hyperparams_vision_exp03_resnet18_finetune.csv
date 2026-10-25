@@ -1,4 +1,4 @@
 parameter,value,meaning
 architecture,ResNet18 (ImageNet),Every layer trainable
-epochs_max,10,Epoch limit
-lr,3e-05,Low rate to keep the pretrained features
+epochs_max,20,Epoch limit
+lr,0.0001,Low rate to keep the pretrained features

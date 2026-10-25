@@ -1,8 +1,8 @@
 group,pose_e0_stock_n,pose_e5_yolov8s
-head,0.842,0.931
-shoulders,0.797,0.912
-elbows,0.759,0.866
-wrists,0.712,0.817
-hips,0.711,0.83
-knees,0.688,0.819
-ankles,0.697,0.843
+head,0.842,0.93
+shoulders,0.797,0.916
+elbows,0.759,0.858
+wrists,0.712,0.812
+hips,0.711,0.838
+knees,0.688,0.817
+ankles,0.697,0.836

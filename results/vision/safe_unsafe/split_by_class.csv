@@ -1,10 +1,10 @@
 label,train clips,train frames,val clips,val frames,test clips,test frames
-Authorized Intervention,20,59,3,9,15,45
-Carrying Overload with Forklift,41,123,7,21,8,24
-Closed Panel Cover,16,48,3,9,13,38
-Opened Panel Cover,110,330,19,57,13,39
-Safe Carrying,19,57,3,9,8,24
-Safe Walkway,42,125,8,23,25,73
-Safe Walkway Violation,151,449,27,81,32,93
-Unauthorized Intervention,82,245,15,45,11,33
-total,481,1436,85,254,125,369
+Authorized Intervention,20,159,3,24,15,120
+Carrying Overload with Forklift,41,328,7,56,8,64
+Closed Panel Cover,16,128,3,24,13,103
+Opened Panel Cover,110,880,19,152,13,104
+Safe Carrying,19,152,3,24,8,64
+Safe Walkway,42,335,8,63,25,198
+Safe Walkway Violation,151,1204,27,216,32,253
+Unauthorized Intervention,82,655,15,120,11,88
+total,481,3841,85,679,125,994

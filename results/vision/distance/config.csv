@@ -1,0 +1,23 @@
+setting,value,meaning
+SEED,42,"Random seed for splits, box margins and training"
+HIDDEN,"(64, 32)",Residual MLP hidden layers (live calib.json)
+MAX_EPOCHS,150,Upper epoch limit
+PATIENCE,15,Epochs without a better held-out MAE before stopping
+LR,0.001,AdamW learning rate
+WEIGHT_DECAY,0.0001,AdamW weight decay
+BATCH_SIZE,1024,Rows per training step; the whole table sits on the GPU
+LOG_EVERY,10,Print training progress every n epochs
+FEATURES_CACHE,/content/drive/MyDrive/SAMS/datasets/vision/distance/distance_features_labeled.csv.gz,"Feature table on Drive, reused by a later session built with the same settings"
+PERSON_HEIGHT_M,1.7,"Stature in the pinhole prior, the same value the live service uses"
+TOF_NEAR_M,1.5,Range the ToF sensor owns for the person in its beam
+FY_PX_DEFAULT,753.8742631289133,Focal length if no camera matrix is read
+MOVEMENTS,"A-POSE, GAIT, RUNNING, SQUATS","Recorded movements used: standing, walking, running, crouching"
+VIRTUAL_DISTANCES,"[0.8, 1.0, 1.2, 1.5, 1.8, 2.2, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 10.0]","Distances each view is rescaled to (m), down to the close range the ToF beam misses"
+MAX_CAMERAS_PER_FRAME,12,Camera views kept per recorded frame
+FRAME_STRIDE,4,Every n-th recorded frame is used; neighbours are near-identical
+BOX_PAD_TOP,"(0.04, 0.12)","Detector box above the nose, as a share of keypoint height (random in this range)"
+BOX_PAD_BOTTOM,"(0.01, 0.05)","Detector box below the ankles, as a share of keypoint height"
+BOX_PAD_SIDE,"(0.03, 0.1)","Detector box beyond the outermost joints, as a share of keypoint width, each side"
+KPT_CONF,0.3,"Joint confidence a keypoint needs, read from the pose model's operating point"
+TEST_SUBJECTS,1,Subjects held out as the test set
+DISTANCE_BANDS_M,"[0.0, 1.5, 3.0, 6.0, 100.0]",Bands the errors are reported in

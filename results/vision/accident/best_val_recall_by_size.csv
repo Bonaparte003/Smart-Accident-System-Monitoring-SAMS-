@@ -1,3 +1,3 @@
 class,small,medium,large,small labels,medium labels,large labels
-laying,,,1.0,0,0,17
-standing,,0.0,,0,1,0
+laying,,,1.0,0,0,21
+standing,0.362,0.615,0.831,80,179,379

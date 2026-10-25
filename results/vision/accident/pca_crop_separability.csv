@@ -1,3 +1,3 @@
 features,laying crops,standing crops,folds,balanced accuracy mean,balanced accuracy std
-ResNet-18 embedding,111,10,5,1.0,0.0
-box geometry only,111,10,5,1.0,0.0
+ResNet-18 embedding,111,300,5,1.0,0.0
+box geometry only,111,300,5,0.922,0.066

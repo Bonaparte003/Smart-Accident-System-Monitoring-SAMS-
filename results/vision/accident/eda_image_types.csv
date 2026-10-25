@@ -1,5 +1,5 @@
 image_type,train,val,test
-laying only,68,16,17
-laying and standing,9,1,0
-standing only,0,0,0
-no person,0,0,0
+laying only,69,19,13
+laying and standing,6,2,2
+standing only,1072,214,214
+no person,106,22,22

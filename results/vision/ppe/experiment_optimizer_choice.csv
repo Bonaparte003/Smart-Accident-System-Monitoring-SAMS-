@@ -1,0 +1,3 @@
+optimizer,experiment,val mAP50-95
+SGD,ppe_e5_two_stage,0.256
+AdamW,ppe_e5h_adamw,0.2455

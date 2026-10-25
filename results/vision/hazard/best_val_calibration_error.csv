@@ -1,4 +1,4 @@
 class,predictions,ECE
-all classes,6400,0.049
-fire,4384,0.043
-smoke,2016,0.071
+all classes,6497,0.042
+fire,4430,0.037
+smoke,2067,0.057

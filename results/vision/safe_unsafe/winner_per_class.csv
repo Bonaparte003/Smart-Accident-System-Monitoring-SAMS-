@@ -1,9 +1,9 @@
-,group,test_frames,recall,f1,most_confused_with
-Authorized Intervention,SAFE,45,0.178,0.302,Opened Panel Cover
-Safe Walkway,SAFE,73,0.315,0.374,Safe Walkway Violation
-Unauthorized Intervention,UNSAFE,33,0.576,0.452,Safe Walkway Violation
-Opened Panel Cover,UNSAFE,39,0.769,0.556,Closed Panel Cover
-Closed Panel Cover,SAFE,38,0.737,0.644,Safe Walkway
-Safe Walkway Violation,UNSAFE,93,0.71,0.706,Unauthorized Intervention
-Carrying Overload with Forklift,UNSAFE,24,1.0,1.0,Authorized Intervention
-Safe Carrying,SAFE,24,1.0,1.0,Authorized Intervention
+,group,test_clips,recall,f1,most_confused_with
+Opened Panel Cover,UNSAFE,13,0.538,0.5,Authorized Intervention
+Unauthorized Intervention,UNSAFE,11,0.727,0.552,Safe Walkway Violation
+Authorized Intervention,SAFE,15,0.533,0.571,Opened Panel Cover
+Safe Walkway,SAFE,25,0.56,0.583,Safe Walkway Violation
+Safe Walkway Violation,UNSAFE,32,0.656,0.646,Unauthorized Intervention
+Closed Panel Cover,SAFE,13,0.538,0.7,Opened Panel Cover
+Carrying Overload with Forklift,UNSAFE,8,1.0,1.0,Authorized Intervention
+Safe Carrying,SAFE,8,1.0,1.0,Authorized Intervention

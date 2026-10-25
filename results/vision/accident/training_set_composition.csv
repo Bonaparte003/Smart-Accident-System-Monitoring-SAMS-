@@ -1,4 +1,5 @@
 ,count
-real train images,77
-augmented copies,3
-total train images,80
+real train images,1253
+augmented copies,325
+your background frames,0
+total train images,1578

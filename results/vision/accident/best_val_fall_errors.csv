@@ -1,5 +1,5 @@
 error,share of true class,count
 true laying not found (missed fall),0.0,0
-true laying read as standing (missed fall),0.529,9
+true laying read as standing (missed fall),0.0,0
 true standing read as laying (false alarm),0.0,0
-laying predicted where nobody is (false alarm),,1920
+laying predicted where nobody is (false alarm),,55

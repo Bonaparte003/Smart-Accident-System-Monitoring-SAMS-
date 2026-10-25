@@ -1,4 +1,4 @@
 class,predictions,ECE
-all classes,37,0.11
-laying,18,0.033
-standing,19,0.184
+all classes,1343,0.069
+laying,22,0.106
+standing,1321,0.069

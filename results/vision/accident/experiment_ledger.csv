@@ -1,6 +1,6 @@
 experiment_id,group,change,weights_in,train images,imgsz,two_stage,optimizer,epochs_run,best_epoch,stopped_early,precision,recall,map50,map50_95,fall_map50,fall_map50_95,fall_recall,minutes
-fall_e1_baseline,main,"Baseline YOLOv8n, 640 pixels, single-stage SGD",yolov8n.pt,80,640,False,SGD,6,3,True,0.0028,0.5,0.4892,0.4619,0.9784,0.9238,1.0,0.4
-fall_e2_imgsz960,main,YOLOv8n at 960 pixels,yolov8n.pt,80,960,False,SGD,12,9,True,1.0,0.3789,0.5009,0.4465,0.9922,0.8883,0.7578,0.6
-fall_e3_two_stage,main,"Freeze 10 layers for 10 epochs, then unfreeze at lr0/10",yolov8n.pt,80,640,True,SGD,11,8,True,1.0,0.3312,0.4975,0.4791,0.995,0.9581,0.6624,0.7
-fall_e4_adamw,main,AdamW lr0=0.001 with the recipe so far,yolov8n.pt,80,640,True,AdamW,7,4,True,1.0,0.4978,0.4975,0.4615,0.995,0.9231,0.9956,0.8
-fall_e5_yolov8s,main,"YOLOv8s with best image size, fine-tuning, and optimizer so far",yolov8s.pt,80,640,True,SGD,23,20,True,0.9985,0.5,0.498,0.4954,0.995,0.99,1.0,1.2
+fall_e1_baseline,main,"Baseline YOLOv8n, 640 pixels, single-stage SGD",yolov8n.pt,1578,640,False,SGD,16,1,True,0.8564,0.8315,0.8791,0.7049,0.995,0.8921,1.0,3.8
+fall_e2_imgsz960,main,YOLOv8n at 960 pixels,yolov8n.pt,1578,960,False,SGD,16,1,True,0.9015,0.7913,0.8863,0.7135,0.995,0.9057,1.0,6.8
+fall_e3_two_stage,main,"Freeze 10 layers for 10 epochs, then unfreeze at lr0/10",yolov8n.pt,1578,960,True,SGD,38,23,True,0.9229,0.8513,0.9035,0.7407,0.995,0.93,1.0,19.8
+fall_e4_adamw,main,AdamW lr0=0.001 with the recipe so far,yolov8n.pt,1578,960,True,AdamW,45,30,True,0.8913,0.8793,0.9022,0.7401,0.995,0.932,1.0,22.7
+fall_e5_yolov8s,main,"YOLOv8s with best image size, fine-tuning, and optimizer so far",yolov8s.pt,1578,960,True,AdamW,24,9,True,0.9155,0.8668,0.9,0.7412,0.995,0.9469,1.0,24.7

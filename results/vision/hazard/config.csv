@@ -16,7 +16,6 @@ BATCH,-1,-1 lets Ultralytics pick the largest batch that fits the GPU
 IMGSZ_BASE,640,Default training image size
 IMGSZ_LARGE,960,"Larger size tested for small, distant flames"
 CLOSE_SCORE_GAP,0.005,Val mAP50-95 gap treated as a tie when choosing the winner
-REPEAT_SEEDS,"[1, 2]",Extra seeds used to retrain the chosen recipe
 SAFETY_CLASS,fire,Class whose threshold is chosen for recall instead of F1
 MIN_RECALL_SAFETY,0.85,Recall wanted on the safety class when picking its threshold
 THRESHOLD_MIN,0.05,Lowest confidence threshold allowed for any class

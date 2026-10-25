@@ -1,2 +1,2 @@
 chosen experiment,val mAP50-95,val laying recall,val laying mAP50-95,runs within tolerance,image size,two stage,weights
-fall_e5_yolov8s,0.4954,1.0,0.99,1,640,True,/content/drive/MyDrive/SAMS/models/vision/accident/fall_e5_yolov8s_stageB_unfrozen/weights/best.pt
+fall_e5_yolov8s,0.7412,1.0,0.9469,1,960,True,/content/drive/MyDrive/SAMS/models/vision/accident/fall_e5_yolov8s_stageB_unfrozen/weights/best.pt

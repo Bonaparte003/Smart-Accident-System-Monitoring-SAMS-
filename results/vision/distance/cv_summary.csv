@@ -1,0 +1,7 @@
+,approach,cv_mae,cv_mae_std,cv_mean_rel_err,final_epochs
+dist_exp06_residual_log_huber,Residual MLP - Huber loss on log(Z),0.4044398036960993,0.20672231178273412,0.12478989877092644,92
+dist_exp05_residual_pose_only,Residual MLP - trained on pose_available rows,0.4141475252903071,0.2098544767293438,0.12673552488563872,76
+dist_exp04_absolute_mlp,Absolute MLP - direct Z regression,0.43346579879616326,0.19230230876460122,0.14697703730495912,79
+dist_exp03_residual_mlp,Residual MLP - SAMS Z=Z0*exp(delta),0.442911953639914,0.1728315121247469,0.1316394173916486,94
+dist_exp02_ridge,Ridge on features,0.6211928059594344,0.1467017203335483,0.24905978000131335,
+dist_exp01_pinhole_z0,Pinhole Z0,1.4752688811910817,0.21024950913317303,0.7250061629528104,

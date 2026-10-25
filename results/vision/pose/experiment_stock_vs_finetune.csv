@@ -1,3 +1,3 @@
 model,service_pck,pose_map50_95
-stock yolov8n-pose,0.7617,0.4452
-fine-tuned (E1),0.8534,0.4531
+stock yolov8n-pose,0.7617,0.4458
+fine-tuned (E1),0.8502,0.4653

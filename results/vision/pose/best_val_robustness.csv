@@ -1,9 +1,9 @@
 ,service PCK,service PCK,kept rate,kept rate
 model,pose_e0_stock_n,pose_e5_yolov8s,pose_e0_stock_n,pose_e5_yolov8s
 condition,,,,
-clean,0.762,0.873,0.977,0.974
-motion blur,0.599,0.748,0.954,0.977
-dark,0.588,0.73,0.978,0.982
-heavy jpeg,0.378,0.729,0.994,0.993
-low resolution,0.135,0.654,0.999,0.99
-sensor noise,0.534,0.77,0.987,0.982
+clean,0.762,0.872,0.977,0.978
+motion blur,0.599,0.755,0.952,0.983
+dark,0.588,0.736,0.978,0.988
+heavy jpeg,0.378,0.731,0.994,0.989
+low resolution,0.135,0.663,0.999,0.991
+sensor noise,0.534,0.767,0.987,0.989

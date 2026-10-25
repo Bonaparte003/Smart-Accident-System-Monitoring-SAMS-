@@ -1,6 +1,6 @@
 experiment_id,group,change,data,weights_in,train images,imgsz,two_stage,optimizer,lr0,seed,epochs_run,best_epoch,stopped_early,precision,recall,map50,map50_95,fire_recall,smoke_recall,fire_map50_95,smoke_map50_95,minutes
-hazard_e1_baseline_640,main,"YOLOv8n, single-stage fine-tuning, 640 pixels",train,yolov8n.pt,11026,640,False,SGD,0.01,42,4,1,True,0.4277,0.4409,0.3764,0.1755,0.3451,0.5368,0.1329,0.218,4.2
-hazard_e2_imgsz_960,main,"YOLOv8n, single-stage fine-tuning, 960 pixels",train,yolov8n.pt,11026,960,False,SGD,0.01,42,25,25,False,0.7326,0.6521,0.7206,0.4035,0.5806,0.7237,0.324,0.483,41.0
-hazard_e3_two_stage,main,"Two-stage fine-tuning at 960px: freeze 10 layers, then lr0/10",train,yolov8n.pt,11026,960,True,SGD,0.01,42,21,18,True,0.6931,0.6438,0.6933,0.3724,0.5733,0.7142,0.3124,0.4323,46.5
-hazard_e4_adamw,main,AdamW lr0 0.001 with the best fine-tuning choice so far,train,yolov8n.pt,11026,960,False,AdamW,0.001,42,25,25,False,0.7047,0.6657,0.7147,0.4038,0.5958,0.7356,0.3149,0.4928,40.6
-hazard_e5_yolov8s,main,"YOLOv8s with the best image size, fine-tuning, and optimizer so far",train,yolov8s.pt,11026,960,False,AdamW,0.001,42,25,25,False,0.7302,0.6763,0.7214,0.413,0.6072,0.7455,0.3296,0.4964,75.1
+hazard_e1_baseline_640,main,"YOLOv8n, single-stage fine-tuning, 640 pixels",train,yolov8n.pt,11026,640,False,SGD,0.01,42,4,1,True,0.4628,0.4108,0.3632,0.1629,0.4459,0.3757,0.1101,0.2156,4.0
+hazard_e2_imgsz_960,main,"YOLOv8n, single-stage fine-tuning, 960 pixels",train,yolov8n.pt,11026,960,False,SGD,0.01,42,25,25,False,0.7291,0.6511,0.7175,0.4026,0.5805,0.7217,0.3223,0.4829,42.2
+hazard_e3_two_stage,main,"Two-stage fine-tuning at 960px: freeze 10 layers, then lr0/10",train,yolov8n.pt,11026,960,True,SGD,0.01,42,25,25,False,0.7045,0.6427,0.6952,0.3732,0.5786,0.7067,0.3143,0.4321,54.4
+hazard_e4_adamw,main,AdamW lr0 0.001 with the best fine-tuning choice so far,train,yolov8n.pt,11026,960,False,AdamW,0.001,42,25,25,False,0.7158,0.6589,0.7177,0.4056,0.5893,0.7286,0.3177,0.4934,41.9
+hazard_e5_yolov8s,main,"YOLOv8s with the best image size, fine-tuning, and optimizer so far",train,yolov8s.pt,11026,960,False,AdamW,0.001,42,25,25,False,0.7003,0.6908,0.7292,0.4103,0.6297,0.7518,0.3263,0.4942,74.9

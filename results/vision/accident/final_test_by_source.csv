@@ -1,0 +1,3 @@
+,images,laying labels,fall_recall_at_live_conf,fall_precision_at_live_conf,fall-free images,false_fall_rate_at_live_conf
+sim,15.0,15.0,1.0,1.0,0.0,
+coco,236.0,0.0,,0.0,236.0,0.0042

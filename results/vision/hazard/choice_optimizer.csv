@@ -2,4 +2,4 @@ hyperparameter,SGD recipe,AdamW run
 optimizer,SGD,AdamW
 lr0,0.01,0.001
 momentum,0.937,0.9
-val mAP50-95,0.4035,0.4038
+val mAP50-95,0.4026,0.4056

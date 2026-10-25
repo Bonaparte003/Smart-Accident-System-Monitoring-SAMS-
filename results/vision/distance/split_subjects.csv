@@ -1,0 +1,5 @@
+subject,role,rows,height_m
+TDB_001_F,cross-validation,12893,1.6230000000000002
+TDB_002_F,cross-validation,12052,1.599
+TDB_003_M,cross-validation,11709,1.834
+TDB_004_F,test,13133,1.45
