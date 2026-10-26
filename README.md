@@ -162,12 +162,12 @@ git clone https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS-
 cd Smart-Accident-System-Monitoring-SAMS-
 
 python3.12 -m venv myenv
-source myenv/bin/activate            # Windows: myenv\Scripts\activate
+source myenv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
 python manage.py migrate
-python manage.py createsuperuser     # account for the review dashboard
+python manage.py createsuperuser
 ```
 
 ### Models
@@ -192,15 +192,8 @@ The app starts with any subset of models. A missing model shows as unavailable, 
 Video upload analysis and live-session encoding run on **Celery** (Redis broker). Start Redis, then the worker, then the web app:
 
 ```bash
-# Terminal 1 — broker (once per machine)
-brew services start redis          # or: redis-server
-
-# Terminal 2 — background worker (keep running)
+brew services start redis
 ./scripts/celery_worker.sh
-# equivalent on macOS:
-#   celery -A SAMS worker --loglevel=info --pool=solo
-
-# Terminal 3 — web app
 python manage.py runserver
 ```
 
@@ -561,24 +554,11 @@ flowchart LR
     BOX --> DASH[Dashboard in any browser on the site network]
 ```
 
-| Stage | Where it runs | What changes |
-|---|---|---|
-| **MVP (today)** | A laptop on the local Wi-Fi | `python manage.py runserver` starts everything; SQLite and `media/` store the data |
-| **Pilot** | An edge computer (mini PC or NVIDIA Jetson) by the machine | Docker image with restart-on-boot, PostgreSQL, secrets from the environment, a certificate from a local CA |
-| **Scale** | One edge box per machine plus a shared dashboard | Each box keeps its video and shares only alerts, so one officer sees every machine |
+It runs on a laptop on the local Wi-Fi: `python manage.py runserver` starts everything; SQLite and `media/` store the data.
 
 **Model updates are drop-in:** copy the new model folder into `models/` and restart.
 
----
 
-## Security notes
-
-Before running SAMS anywhere but a lab bench:
-
-- Set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=false` and an explicit `DJANGO_ALLOWED_HOSTS`.
-- Replace the self-signed certificate with one from a CA the site's devices trust.
-- Keep the server on the site network; the phone camera endpoints are protected only by the session token in the QR code.
-- Back up `db.sqlite3` and `media/`. They hold video of workers, so apply the site's retention policy.
 
 ---
 

@@ -875,60 +875,266 @@ body.has-chapters .log-list {
 .train span.kept { background: #d9f2e4; color: var(--ok); }
 .train span.excluded { background: #fde2df; color: var(--danger); }
 
+.signin-page,
+body:has(.signin) {
+  display: block;
+  min-height: 100vh;
+}
+
 .signin {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 1.5rem;
-  background: var(--bg);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 12% 8%, rgba(31, 122, 69, 0.09), transparent 42%),
+    radial-gradient(90% 80% at 92% 12%, rgba(194, 51, 42, 0.08), transparent 40%),
+    radial-gradient(70% 60% at 70% 92%, rgba(154, 107, 0, 0.08), transparent 45%),
+    linear-gradient(165deg, #f4f4f2 0%, #ecece8 48%, #e7e8e4 100%);
 }
-body:has(.signin) { display: block; }
+
+.signin-glow {
+  position: absolute;
+  inset: auto auto 8% -8%;
+  width: min(52vw, 420px);
+  height: min(52vw, 420px);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(22, 22, 22, 0.06), transparent 68%);
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: 0;
+  animation: signin-drift 14s ease-in-out infinite alternate;
+}
+
+.signin-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  background-image:
+    linear-gradient(rgba(22, 22, 22, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 22, 22, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, #000 20%, transparent 75%);
+}
+
+.signin-stage {
+  position: relative;
+  z-index: 1;
+  width: min(960px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 360px);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+}
+
+.signin-brand {
+  max-width: 34rem;
+  animation: signin-rise 0.7s ease both;
+}
+
+.signin-mark {
+  margin: 0 0 1rem;
+  letter-spacing: 0.28em;
+  font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.signin-title {
+  margin: 0;
+  font-size: clamp(1.85rem, 4.4vw, 2.85rem);
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+.signin-lede {
+  margin: 1rem 0 0;
+  max-width: 28rem;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+
+.signin-levels {
+  list-style: none;
+  margin: 1.35rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  color: #3a3a3a;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  animation: signin-rise 0.85s ease 0.08s both;
+}
+
+.signin-levels li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.signin-levels .dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+.signin-levels .dot.normal { background: var(--ok); }
+.signin-levels .dot.caution { background: var(--caution); }
+.signin-levels .dot.danger { background: var(--danger); }
+
 .gate {
-  width: min(380px, 100%);
+  width: 100%;
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  background: #ffffff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 1.4rem 1.35rem 1.3rem;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(22, 22, 22, 0.08);
+  border-radius: 12px;
+  padding: 1.45rem 1.4rem 1.35rem;
+  box-shadow: 0 18px 50px rgba(22, 22, 22, 0.06);
+  backdrop-filter: blur(8px);
+  animation: signin-rise 0.75s ease 0.12s both;
 }
-.brand {
+
+.gate-heading {
   margin: 0;
-  letter-spacing: 0.16em;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
-.gate h1 { margin: 0; font-size: 1.55rem; font-weight: 600; }
-.lede { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
 .gate label {
   display: flex;
   flex-direction: column;
-  gap: 0.28rem;
-  color: var(--muted);
+  gap: 0.32rem;
+  color: #4a4a4a;
   font-size: 0.8rem;
+  font-weight: 600;
 }
+
 .gate input {
-  border: 1px solid var(--line);
+  width: 100%;
+  border: 1px solid rgba(22, 22, 22, 0.12);
   background: #ffffff;
   color: var(--ink);
-  border-radius: var(--radius);
-  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  padding: 0.72rem 0.8rem;
   font: 400 1rem var(--font);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.gate input:focus { outline: 2px solid #161616; outline-offset: 1px; }
-.gate button {
-  margin-top: 0.2rem;
+
+.gate input::placeholder { color: #b0b0b0; }
+
+.gate input:focus {
+  outline: none;
+  border-color: #161616;
+  box-shadow: 0 0 0 3px rgba(22, 22, 22, 0.1);
+}
+
+.pass-row {
+  position: relative;
+  display: block;
+}
+
+.pass-row input { padding-right: 2.6rem; }
+
+.pass-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6a6a6a;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.pass-toggle:hover,
+.pass-toggle[aria-pressed="true"] {
+  color: var(--ink);
+  background: #f3f3f1;
+}
+
+.gate > button[type="submit"] {
+  margin-top: 0.25rem;
   border: 0;
   background: #161616;
   color: #ffffff;
-  border-radius: var(--radius);
-  padding: 0.68rem 0.85rem;
+  border-radius: 8px;
+  padding: 0.78rem 0.9rem;
   font: 600 0.95rem var(--font);
   cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
-.err { margin: 0; color: var(--danger); font-size: 0.9rem; }
+
+.gate > button[type="submit"]:hover { background: #2a2a2a; }
+.gate > button[type="submit"]:active { transform: translateY(1px); }
+
+.err {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: var(--danger);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+@keyframes signin-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes signin-drift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(18px, -12px); }
+}
+
+@media (max-width: 820px) {
+  .signin-stage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.6rem;
+  }
+
+  .signin-brand { text-align: left; max-width: none; }
+
+  .signin-levels { justify-content: flex-start; }
+
+  .gate {
+    width: min(400px, 100%);
+    justify-self: start;
+  }
+}
+
+@media (max-width: 520px) {
+  .signin { padding: 1.1rem; }
+  .signin-title { font-size: 1.7rem; }
+  .gate { padding: 1.2rem 1.1rem 1.15rem; }
+}
 
 @media (max-width: 1100px) {
   html:has(body.has-chapters),
