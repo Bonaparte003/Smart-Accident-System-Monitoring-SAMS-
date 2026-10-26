@@ -4,7 +4,7 @@
 ![Django 6.1](https://img.shields.io/badge/django-6.1-092E20)
 ![YOLOv8](https://img.shields.io/badge/vision-YOLOv8-111F68)
 ![Arduino Uno](https://img.shields.io/badge/hardware-Arduino%20Uno-00979D)
-![Tests](https://img.shields.io/badge/tests-49%20passing-2EA44F)
+![Tests](https://img.shields.io/badge/tests-57%20passing-2EA44F)
 
 SAMS warns workers **before** they get hurt near industrial machines. A phone camera watches the machine area and an accelerometer sits on the machine. Machine-learning models find each worker, estimate their distance to the machine, check their protective gear, and look for fire, smoke and falls. Other models read whether the machine is running and whether it vibrates abnormally. A fusion model turns all of it into one risk level, **NORMAL**, **CAUTION** or **DANGER**, and drives a buzzer and warning LEDs in real time.
 
@@ -23,20 +23,22 @@ Every live session is archived with the decision for each moment. Uploaded video
 
 1. [Features](#features)
 2. [System architecture](#system-architecture)
-3. [Quick start](#quick-start)
-4. [Configuration](#configuration)
-5. [Using the app](#using-the-app)
-6. [Hardware](#hardware)
-7. [Machine-learning models](#machine-learning-models)
-8. [Retraining (MLOps)](#retraining-mlops)
-9. [API](#api)
-10. [Database schema](#database-schema)
-11. [Project structure](#project-structure)
-12. [Testing](#testing)
-13. [Deployment](#deployment)
-14. [Security notes](#security-notes)
-15. [Known limitations and roadmap](#known-limitations-and-roadmap)
-16. [Designs and screenshots](#designs-and-screenshots)
+3. [Technical requirements](#technical-requirements)
+4. [Quick start](#quick-start)
+5. [Configuration](#configuration)
+6. [Using the app](#using-the-app)
+7. [Hardware](#hardware)
+8. [Machine-learning models](#machine-learning-models)
+9. [Retraining (MLOps)](#retraining-mlops)
+10. [API](#api)
+11. [Database schema](#database-schema)
+12. [Project structure](#project-structure)
+13. [Code design](#code-design)
+14. [Testing](#testing)
+15. [Deployment](#deployment)
+16. [Security notes](#security-notes)
+17. [Known limitations and roadmap](#known-limitations-and-roadmap)
+18. [Designs and screenshots](#designs-and-screenshots)
 
 ---
 
@@ -49,6 +51,7 @@ Every live session is archived with the decision for each moment. Uploaded video
 | **Worker distance** | A VL53L0X time-of-flight sensor measures close range; a pose-based neural network estimates everyone else |
 | **Worker motion** | Speed and approach are measured from each tracked worker's distance history |
 | **PPE check** | Hard hat, vest, gloves, boots and goggles per worker, each with its own tuned threshold |
+| **Safe / unsafe behaviour** | ResNet18 labels each frame as one of eight workplace behaviours, grouped SAFE or UNSAFE |
 | **Fire, smoke and falls** | YOLOv8 detectors for fire and smoke, and for a worker lying on the floor |
 | **Machine state** | The accelerometer on the machine tells STOPPED from RUNNING |
 | **Vibration monitoring** | Each accelerometer window is labelled NORMAL or ABNORMAL |
@@ -69,7 +72,7 @@ flowchart LR
         ARD["Arduino Uno: MPU6050/6500 accelerometer,<br/>VL53L0X ToF, buzzer, LEDs, vibration motors"]
     end
     subgraph SERVER["SAMS server: Django on uvicorn (HTTPS)"]
-        VIS["vision_inference<br/>PPE + pose + tracking"]
+        VIS["vision_inference<br/>PPE + pose + behaviour + tracking"]
         HAZ[hazard_inference]
         ACC[accident_inference]
         DIST[distance_estimation]
@@ -124,6 +127,26 @@ The service code only joins what the models measure. Every class name, threshold
 
 ---
 
+## Technical requirements
+
+| Layer | Requirement | Version |
+|---|---|---|
+| Language | Python | 3.12 (3.13+ unsupported: no torch 2.2.2 / numpy 1.26.4 wheels) |
+| Web | Django, uvicorn (ASGI, HTTPS), django-cors-headers | 6.1.1, 0.54.0, 4.9.0 |
+| Database | SQLite through the Django ORM | bundled with Python |
+| ML / CV | PyTorch, torchvision, Ultralytics YOLOv8, scikit-learn, XGBoost | 2.2.2, 0.17.2, 8.3+, 1.6.1, 3.4.1 |
+| Data / media | NumPy, SciPy, OpenCV (headless), Pillow, imageio-ffmpeg | 1.26.4, 1.13.1, 4.10, 12.3, 0.6.0 |
+| Hardware link | pyserial; arduino-cli for flashing | 3.5; 1.5+ |
+| Frontend | Django templates, vanilla JavaScript, CSS | any current browser |
+| Training | Google Colab (GPU), Jupyter | — |
+| Server hardware | x86-64 or Apple Silicon, 8 GB RAM; GPU optional | tested on Intel i5-8259U, macOS 15 |
+| Board | Arduino Uno (AVR, CH340 USB) with the parts in [Hardware](#hardware) | firmware in `hardware/firmware/` |
+| Camera | Android phone with a browser that allows camera access over HTTPS | same Wi-Fi as the server |
+
+Exact Python versions are pinned in [`requirements.txt`](requirements.txt).
+
+---
+
 ## Quick start
 
 ### Prerequisites
@@ -166,9 +189,22 @@ The app starts with any subset of models. A missing model shows as unavailable, 
 
 ### Run
 
+Video upload analysis and live-session encoding run on **Celery** (Redis broker). Start Redis, then the worker, then the web app:
+
 ```bash
+# Terminal 1 — broker (once per machine)
+brew services start redis          # or: redis-server
+
+# Terminal 2 — background worker (keep running)
+./scripts/celery_worker.sh
+# equivalent on macOS:
+#   celery -A SAMS worker --loglevel=info --pool=solo
+
+# Terminal 3 — web app
 python manage.py runserver
 ```
+
+On macOS use **`--pool=solo`** (the helper does this). The default prefork pool crashes with Django/PyTorch (`not enough values to unpack` in billiard). If Redis or the worker is down, SAMS falls back to a local thread so a demo still finishes.
 
 `runserver` is overridden in `manage.py`. It creates a self-signed certificate if needed and starts **uvicorn over HTTPS** on `0.0.0.0:8000`. HTTPS is required because phone browsers block the camera on plain HTTP.
 
@@ -199,6 +235,9 @@ Every variable has a default; none is needed for a first run.
 | `DJANGO_DEBUG` | `true` | Set to `false` in production |
 | `DJANGO_ALLOWED_HOSTS` | `*` | Comma-separated host names |
 | `SAMS_DB_PATH` | `db.sqlite3` | SQLite file |
+| `CELERY_BROKER_URL` | `redis://127.0.0.1:6379/1` | Celery / Redis broker (DB **1**, so it does not share DB 0 with other apps) |
+| `CELERY_RESULT_BACKEND` | same as broker | Celery result store |
+| `SAMS_CELERY_EAGER` | `false` | Run tasks in-process (no worker; used by tests) |
 | `SAMS_MEDIA_ROOT` | `media/` | Recorded videos and frames |
 | `SAMS_HW_SERIAL_PORT` | first USB serial device | Arduino port, e.g. `/dev/cu.usbserial-1410` |
 | `SAMS_HW_SERIAL_BAUD` | `115200` | Serial speed |
@@ -296,7 +335,7 @@ Each model is trained, evaluated and documented in its own Colab notebook. Every
 
 | # | Notebook | Served model | Headline result (test) |
 |---|---|---|---|
-| 01 | Safe / unsafe behaviour | ResNet18, fine-tuned | Accuracy 0.60, macro-F1 0.63 (research model, not served) |
+| 01 | Safe / unsafe behaviour | ResNet18, fine-tuned (live single-frame) | Binary accuracy 0.76, unsafe recall 0.85; video-clip winner kept for research |
 | 02 | Vibration | SVM (RBF) on 48 window features, UCI accelerometer data | Macro-F1 0.80 (validation 0.86) |
 | 02 §8 | Machine state | Random Forest on magnitude features, SAMS board recordings | STOPPED and RUNNING recall 1.0 on held-out windows |
 | 03 | Fusion risk | Random Forest, 14 inputs | DANGER recall 1.0, macro-F1 0.997; all 15 scenario checks pass |
@@ -324,6 +363,15 @@ Then:
 3. Copy the promoted model folder into `models/` and restart. The service reads the new contract from `metadata.json`.
 
 Retrain **fusion last**: notebook 03 reads the hazard model's thresholds and must match the other models' outputs.
+
+The vision notebooks also pick up optional data from `MyDrive/SAMS/` when it is there, and run without it:
+
+| Folder | Notebook | Contents |
+|---|---|---|
+| `datasets/vision/accident/extra/<name>/` | 07 Fall | A real fall dataset in YOLO format with its `data.yaml` (for example a Roboflow export); class names are mapped onto `laying` / `standing` |
+| `datasets/vision/accident/site/` | 07 Fall | Labelled SAMS frames, same layout: staged falls and normal work |
+| `datasets/vision/ppe/site/{train,val,test}/` | 05 PPE | Labelled SAMS frames in the 12-class PPE list, split by recording |
+| `datasets/vision/{accident,ppe}/background/` | 05, 07 | Empty SAMS frames, added to training as background |
 
 ---
 
@@ -414,43 +462,85 @@ erDiagram
 
 ```text
 SAMS/
-├── SAMS/                      Django project: settings, urls, asgi
-├── monitoring/                Main app
-│   ├── services/              Inference, fusion, tracking, recordings, MLOps
-│   ├── templates/monitoring/  Review dashboard and phone camera pages
+├── SAMS/                        Django project: settings, urls, asgi
+├── monitoring/                  Main app
+│   ├── services/                One module per model, plus fusion, tracking, recordings, MLOps
+│   │   ├── model_loader.py      Shared lazy, thread-safe loading (LazyModel → JoblibModel, YoloModel)
+│   │   ├── control_center.py    Joins every measurement into the fusion decision
+│   │   └── *_inference.py       PPE, pose, hazard, fall, distance, vibration, machine state, fusion
+│   ├── management/commands/     `benchmark`: per-model latency on this machine
+│   ├── templates/monitoring/    Review dashboard and phone camera pages
 │   ├── static/monitoring/
 │   ├── models.py
-│   ├── views.py               Live decision, phone camera and health API
-│   ├── review_views.py        Dashboard pages
-│   └── tests.py
-├── hardware/                  Serial stream, buzzer, LEDs, motor, ToF, phone camera
-│   ├── firmware/              Arduino sketches
-│   └── tools/                 hw.sh, recording and check scripts
-├── notebooks/                 Eight Colab training notebooks
-├── models/                    Trained weights and metadata (not in git)
-├── results/                   Figures and metric tables from the notebooks
-├── stead_dataset/mpu6050/     Board recordings for the machine-state model
-├── Design/                    Schematic and UI screenshots
+│   ├── views.py                 Live decision, phone camera and health API
+│   ├── review_views.py          Dashboard pages
+│   └── tests/                   Test modules by area, and shared fixtures
+├── hardware/                    Serial stream, buzzer, LEDs, motor, ToF, phone camera
+│   ├── firmware/                Arduino sketches
+│   └── tools/                   hw.sh, recording and check scripts
+├── notebooks/                   Eight Colab training notebooks
+├── models/                      Trained weights and metadata (not in git)
+├── results/                     Notebook figures and metrics; performance/ from `benchmark`
+├── stead_dataset/mpu6050/       Board recordings for the machine-state model
+├── docs/                        Technical report
+├── Design/                      Schematic and UI screenshots
 ├── requirements.txt
-└── manage.py                  `runserver` starts uvicorn over HTTPS
+└── manage.py                    `runserver` starts uvicorn over HTTPS
 ```
+
+---
+
+## Code design
+
+| Principle | Where |
+|---|---|
+| **Abstraction and inheritance** | `LazyModel` (abstract) defines how a model is loaded once and shared; `JoblibModel`, `YoloModel`, `PoseModel` and `DistanceNet` only implement `load()`. `AccelSource` (abstract) is implemented by `SerialMPU6050` |
+| **Polymorphism** | Every service calls `get()` / `reset()` the same way whatever the model type; `AccelStream` reads any `AccelSource` |
+| **Encapsulation** | `Buzzer`, `Leds`, `Motor`, `ToFSensor`, `BoardPresence` and `PhoneCamera` own their state and serial commands; `MotionLog` owns per-person distance histories; `LiveRecorder` owns a session's frames and cards |
+| **Separation of concerns** | Views call services; services never render HTML; hardware drivers know nothing about models |
+| **Open for extension** | Thresholds, classes, image sizes, window lengths and input order come from each model's `metadata.json`, so a retrained model is a drop-in replacement with no code change |
+| **Thread safety** | Double-checked locking in `LazyModel`; the accelerometer buffer is guarded by a lock |
+
+**Algorithms:**
+- ByteTrack for person tracking.
+- Each gear box goes to the person box that contains its centre.
+- Speed and approach are a least-squares slope (`np.polyfit`) over a time window of distances.
+- Distance is a pinhole estimate times a learned residual, Z = Z0·e^δ, from an MLP trained with Huber loss.
+- Detection thresholds are tuned per class on validation data to reach a target recall.
+- Vibration uses 48 time- and frequency-domain features per window.
+- Hazard scores are smoothed over a moving window.
+- Training splits are leakage-free, by recording, trial, video or subject.
 
 ---
 
 ## Testing
 
-```bash
-python manage.py test monitoring
-```
+| Strategy | What it checks | How to run | Result |
+|---|---|---|---|
+| **Unit** | Decision logic: PPE items and thresholds, box assignment, ToF beam, motion slopes, vibration features, fusion inputs, model loader | `python manage.py test monitoring` | 57 tests, all passing |
+| **Integration** | Database, files and services together: live session → archive, uploaded clip → fusion, trials → export that matches the notebooks | same command (Django `TestCase`) | passing |
+| **Model validation** | Leakage-free splits, selection on validation, test reported once; 15 fusion scenario checks; leave-one-recording-out for machine state | the notebooks | see [models](#machine-learning-models) |
+| **Hardware** | Accelerometer, ToF and actuators answer; recordings pass rate, gravity and constant-signal checks | `hw.sh check`, `hw.sh record-*` | see [`hardware/README.md`](hardware/README.md) |
+| **Performance** | Latency for each model and for a full frame, plus peak memory | `python manage.py benchmark` | below |
 
-49 tests cover:
+Test modules in `monitoring/tests/`: `test_vision`, `test_fusion`, `test_board`, `test_archive`, `test_model_loader`.
 
-- **Fusion contract:** the decision is the model's label as is; an unmeasured input gives no decision; an empty frame uses the model's absent-worker values; PPE, fire, smoke and falls reach the model.
-- **Models read from metadata:** per-class PPE thresholds, accelerometer window length and sample rate, class names.
-- **Vision:** gear and fall boxes go to the person holding their centre; the stronger worn or missing box decides each PPE item; ToF goes only to the person in its beam.
-- **Motion and vibration:** speed and approach from distance slopes; window features and labels.
-- **Dashboard and data:** sign-in, alerts, archive, uploads with declared inputs, trial rows, and an export that matches what the notebooks read.
-- **Hardware:** port selection, ToF presence, motor commands and health.
+### Performance
+
+From `python manage.py benchmark` on the MVP server: Intel Core i5-8259U, 8 GB RAM, CPU only, macOS 15, Python 3.12, PyTorch 2.2.2, 1280×720 frame. Results are written to `results/performance/`.
+
+| Stage | Median latency |
+|---|---|
+| PPE + person (YOLOv8n, 640 px) | 76 ms |
+| Pose (YOLOv8s-pose) | 169 ms |
+| Fire / smoke (YOLOv8s, 960 px) | 289 ms |
+| Fall (YOLOv8s) | 153 ms |
+| **Full frame, every vision model + distance** | **636 ms ≈ 1.6 frames/s** |
+| Fusion | 50 ms |
+| Machine state / vibration window | 46 / 6 ms |
+| Peak memory | ≈ 710 MB |
+
+The fire/smoke detector is the bottleneck. Running it on every second frame, exporting the detectors to ONNX/OpenVINO, or moving to a GPU edge device are the planned speed-ups.
 
 ---
 
@@ -505,6 +595,7 @@ SAMS is an MVP. The headline numbers above come from public or synthetic data an
 | Vibration | Trained on UCI data; on the SAMS board it outputs a near-constant score | Train on the SAMS board: healthy-only anomaly model first, then recorded faults |
 | Machine state | A speed left out of training is missed | Record every motor speed and more stopped sessions with disturbances |
 | Distance | No training data below 1.8 m; the phone camera differs from the dataset's | Fine-tune on ToF-labelled site rows |
+| Behaviour | Trained on one public facility; whole-frame labels miss authorisation context | Retrain on reviewed SAMS archive frames |
 
 ---
 

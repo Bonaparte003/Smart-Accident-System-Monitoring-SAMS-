@@ -11,5 +11,5 @@ mygithub
 mygithub.*
 .env
 
-# local helper scripts
 push_6_days.sh
+docs/
