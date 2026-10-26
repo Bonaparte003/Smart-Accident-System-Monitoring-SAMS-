@@ -12,4 +12,5 @@ mygithub.*
 .env
 
 push_6_days.sh
+push_one_by_one.sh
 docs/

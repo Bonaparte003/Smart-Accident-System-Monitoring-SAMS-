@@ -117,6 +117,53 @@ class AssignmentTests(SimpleTestCase):
         self.assertEqual(unowned, [boxes[2]])
 
 
+class PoseDrawTests(SimpleTestCase):
+    def test_overlay_config_comes_from_the_pose_spec(self):
+        from monitoring.services import vision_inference as vision
+
+        vision._pose.spec = {
+            "skeleton": [[5, 7], [7, 9]],
+            "keypoint_names": ["a", "b"],
+            "operating_point": {"kpt_conf": 0.4},
+        }
+        config = vision.pose_overlay_config()
+        self.assertEqual(config["skeleton"], [[5, 7], [7, 9]])
+        self.assertEqual(config["kpt_conf"], 0.4)
+        self.assertEqual(config["keypoint_names"], ["a", "b"])
+
+    def test_joints_are_painted_from_model_skeleton_only(self):
+        from PIL import Image, ImageDraw
+
+        from monitoring.services import vision_inference as vision
+
+        vision._pose.spec = {
+            "skeleton": [[0, 1]],
+            "operating_point": {"kpt_conf": 0.3},
+        }
+        image = Image.new("RGB", (40, 40), "black")
+        draw = ImageDraw.Draw(image)
+        vision._draw_pose(
+            draw,
+            [[5, 5, 0.9], [20, 20, 0.9], [30, 30, 0.1]],
+            bone_color="#00ff00",
+        )
+        # High-confidence joints and their bone leave green pixels; the low one does not.
+        self.assertEqual(image.getpixel((5, 5))[1], 255)
+        self.assertEqual(image.getpixel((20, 20))[1], 255)
+        self.assertEqual(image.getpixel((30, 30)), (0, 0, 0))
+
+    def test_no_skeleton_still_paints_visible_joints(self):
+        from PIL import Image, ImageDraw
+
+        from monitoring.services import vision_inference as vision
+
+        vision._pose.spec = {"operating_point": {"kpt_conf": 0.5}}
+        image = Image.new("RGB", (20, 20), "black")
+        draw = ImageDraw.Draw(image)
+        vision._draw_pose(draw, [[8, 8, 0.9]], bone_color="#0000ff")
+        self.assertNotEqual(image.getpixel((8, 8)), (0, 0, 0))
+
+
 class DistanceTests(SimpleTestCase):
     def test_a_partial_body_still_gets_the_network_distance(self):
         estimate = measure_person(pose({0: (150, 40, 1)}), (320, 480), box=[100, 20, 200, 200])

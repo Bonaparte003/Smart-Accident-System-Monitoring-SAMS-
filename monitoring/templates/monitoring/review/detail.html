@@ -113,8 +113,10 @@
 </aside>
 
 {{ minutes|json_script:"minute-data" }}
+{{ pose_overlay|json_script:"pose-overlay" }}
 <script>
   const minutes = JSON.parse(document.getElementById("minute-data").textContent);
+  const poseOverlay = JSON.parse(document.getElementById("pose-overlay").textContent || "{}");
   const byMinute = new Map(minutes.map((row) => [row.minute, row]));
   const clip = document.getElementById("clip");
   const overlay = document.getElementById("overlay");
@@ -171,6 +173,47 @@
     return { x: (cw - w) / 2, y: (ch - h) / 2, w, h };
   }
 
+  function jointVisible(confidence) {
+    const cutoff = poseOverlay && poseOverlay.kpt_conf;
+    if (cutoff == null || cutoff === "") {
+      return confidence == null ? true : Number(confidence) > 0;
+    }
+    if (confidence == null) return false;
+    return Number(confidence) >= Number(cutoff);
+  }
+
+  function drawPose(ctx, keypoints, color, sx, sy, ox, oy) {
+    if (!Array.isArray(keypoints) || !keypoints.length) return;
+    const points = keypoints.map((point) => {
+      if (!Array.isArray(point) || point.length < 2) return null;
+      const conf = point.length >= 3 ? point[2] : null;
+      if (!jointVisible(conf)) return null;
+      return [ox + Number(point[0]) * sx, oy + Number(point[1]) * sy];
+    });
+    const bones = (poseOverlay && poseOverlay.skeleton) || [];
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color;
+    for (const pair of bones) {
+      if (!Array.isArray(pair) || pair.length < 2) continue;
+      const a = points[pair[0]];
+      const b = points[pair[1]];
+      if (!a || !b) continue;
+      ctx.beginPath();
+      ctx.moveTo(a[0], a[1]);
+      ctx.lineTo(b[0], b[1]);
+      ctx.stroke();
+    }
+    for (const point of points) {
+      if (!point) continue;
+      ctx.beginPath();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = color;
+      ctx.arc(point[0], point[1], 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+
   function drawBoxes() {
     const rect = pictureRect();
     const dpr = window.devicePixelRatio || 1;
@@ -191,9 +234,11 @@
       ctx.strokeStyle = box.color;
       ctx.fillStyle = box.color;
       ctx.strokeRect(x, y, w, h);
+      drawPose(ctx, box.keypoints, box.color, sx, sy, rect.x, rect.y);
       const label = box.label;
       const pad = 4;
       const tw = ctx.measureText(label).width + pad * 2;
+      ctx.fillStyle = box.color;
       ctx.fillRect(x, Math.max(rect.y, y - 16), tw, 16);
       ctx.fillStyle = "#ffffff";
       ctx.fillText(label, x + pad, Math.max(rect.y, y - 16) + 12);
@@ -239,6 +284,7 @@
         xyxy: box.xyxy,
         color: box.fallen ? "#c2332a" : "#e6a100",
         label: "person " + id + metres + (box.fallen ? " FALLEN" : ""),
+        keypoints: box.keypoints || null,
       });
     }
     return drawn;

@@ -20,6 +20,7 @@ from .models import RISK_LABELS, InteractionEvent, Recording, RecordingMinute, T
 from .services import trials, video_analysis
 from .services.mlops import export_zip, kept_minutes, model_cards
 from .services.recordings import log_line
+from .services.vision_inference import pose_overlay_config
 
 PROBLEM_LEVELS = ("CAUTION", "DANGER", "DEGRADED")
 PPE_ICONS = {
@@ -658,5 +659,6 @@ def recording_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "play_url": play_url,
             "baked": baked,
             "status_label": _status_label(recording),
+            "pose_overlay": pose_overlay_config(),
         },
     )

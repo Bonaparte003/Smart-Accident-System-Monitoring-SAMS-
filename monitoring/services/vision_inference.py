@@ -130,6 +130,7 @@ class PoseModel(YoloModel):
     def load(self):
         model = super().load()
         self.spec = _load_pose_spec(_pose_weights_path())
+        self.spec = _merge_pose_model_layout(self.spec, model)
         return model
 
 
@@ -152,6 +153,95 @@ def _read_tof_m() -> float | None:
 def _pose_operating_point() -> dict[str, Any]:
     """Person cutoff and crop padding the pose notebook chose, when its metadata exists."""
     return dict(_pose.spec.get("operating_point") or {})
+
+
+def _pose_bone_pairs() -> list[tuple[int, int]]:
+    """Bone index pairs from pose metadata or the loaded YOLO layout. Empty when unknown."""
+    pairs: list[tuple[int, int]] = []
+    for pair in _pose.spec.get("skeleton") or []:
+        if not isinstance(pair, (list, tuple)) or len(pair) < 2:
+            continue
+        try:
+            a, b = int(pair[0]), int(pair[1])
+        except (TypeError, ValueError):
+            continue
+        pairs.append((a, b))
+    return pairs
+
+
+def pose_overlay_config() -> dict[str, Any]:
+    """Skeleton and joint cutoff for UI overlays. Missing fields stay empty/null."""
+    if not _pose.spec:
+        _pose.spec = _load_pose_spec(_pose_weights_path())
+    cutoff = _pose_operating_point().get("kpt_conf")
+    names = _pose.spec.get("keypoint_names") or []
+    return {
+        "skeleton": [[a, b] for a, b in _pose_bone_pairs()],
+        "kpt_conf": float(cutoff) if cutoff is not None else None,
+        "keypoint_names": [str(name) for name in names],
+    }
+
+
+def _merge_pose_model_layout(spec: dict[str, Any], model: Any) -> dict[str, Any]:
+    """Fill gaps from the YOLO model's own layout when metadata omitted them."""
+    merged = dict(spec)
+    yaml = getattr(getattr(model, "model", None), "yaml", None)
+    if not isinstance(yaml, dict):
+        yaml = {}
+    if not merged.get("skeleton") and yaml.get("skeleton"):
+        merged["skeleton"] = yaml.get("skeleton")
+    if not merged.get("kpt_shape") and yaml.get("kpt_shape"):
+        merged["kpt_shape"] = yaml.get("kpt_shape")
+    if not merged.get("flip_idx") and yaml.get("flip_idx"):
+        merged["flip_idx"] = yaml.get("flip_idx")
+    return merged
+
+
+def _joint_visible(confidence: float | None, cutoff: float | None) -> bool:
+    """Whether a joint clears the model's cutoff, or has any positive score when none is set."""
+    if confidence is None:
+        return cutoff is None
+    if cutoff is not None:
+        return float(confidence) >= float(cutoff)
+    return float(confidence) > 0.0
+
+
+def _draw_pose(
+    draw: ImageDraw.ImageDraw,
+    keypoints: list[list[float]] | None,
+    *,
+    bone_color: str,
+    joint_color: str = "#ffffff",
+) -> None:
+    """Paint bones (when the model supplies a skeleton) and joints that clear its cutoff."""
+    if not keypoints:
+        return
+    cutoff = _pose_operating_point().get("kpt_conf")
+    if cutoff is not None:
+        cutoff = float(cutoff)
+    points: list[tuple[float, float] | None] = []
+    for point in keypoints:
+        if not isinstance(point, (list, tuple)) or len(point) < 2:
+            points.append(None)
+            continue
+        conf = float(point[2]) if len(point) >= 3 else None
+        if not _joint_visible(conf, cutoff):
+            points.append(None)
+            continue
+        points.append((float(point[0]), float(point[1])))
+    for a, b in _pose_bone_pairs():
+        if a < 0 or b < 0 or a >= len(points) or b >= len(points):
+            continue
+        pa, pb = points[a], points[b]
+        if pa is None or pb is None:
+            continue
+        draw.line([pa, pb], fill=bone_color, width=2)
+    radius = 3
+    for point in points:
+        if point is None:
+            continue
+        x, y = point
+        draw.ellipse([x - radius, y - radius, x + radius, y + radius], fill=joint_color, outline=bone_color)
 
 
 def _run_pose_frame(image: Image.Image) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None:
@@ -197,6 +287,7 @@ def _draw_detections(
         x1, y1, x2, y2 = det["xyxy"]
         color = "#e03121" if det.get("is_primary") else "#fab005"
         draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
+        _draw_pose(draw, det.get("keypoints"), bone_color=color)
         dist_m = det.get("distance_m")
         src = det.get("distance_source") or ""
         if dist_m is not None:
