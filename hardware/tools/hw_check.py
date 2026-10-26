@@ -45,7 +45,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Check SAMS hardware end to end")
     parser.add_argument("--port", default="")
     parser.add_argument("--baud", type=int, default=115200)
-    parser.add_argument("--seconds", type=float, default=5.0, help="How long to sample the MPU6050")
+    parser.add_argument("--seconds", type=float, default=5.0, help="How long to sample the MPU9250/6500")
     args = parser.parse_args()
     port = args.port or os.environ.get("SAMS_HW_SERIAL_PORT", "").strip() or "/dev/cu.usbserial-1410"
 
@@ -76,7 +76,7 @@ def main() -> int:
     for note in boot_notes:
         print(f"  RX {note}")
 
-    print(f"\nSampling the MPU6050 for {args.seconds:.0f}s — tap or shake the sensor now")
+    print(f"\nSampling the MPU9250/6500 for {args.seconds:.0f}s — tap or shake the sensor now")
     samples = []
     tof = []
     notes: list[str] = []
@@ -107,13 +107,13 @@ def main() -> int:
         distinct = len(set(samples))
         print(f"  |a| mean {mean_g:.3f} g (want ~1.0), std {spread:.4f} g, {distinct} distinct readings")
         print(f"  last sample {samples[-1]}")
-        results["MPU6050 streaming ~50 Hz"] = 40 <= rate <= 60
-        results["MPU6050 reads ~1 g"] = 0.8 <= mean_g <= 1.2
-        results["MPU6050 values change"] = distinct > 1
+        results["MPU9250/6500 streaming ~50 Hz"] = 40 <= rate <= 60
+        results["MPU9250/6500 reads ~1 g"] = 0.8 <= mean_g <= 1.2
+        results["MPU9250/6500 values change"] = distinct > 1
         if spread < 0.01:
             print("  ! values barely moved — did you shake it? A frozen bus repeats one reading.")
     else:
-        results["MPU6050 streaming ~50 Hz"] = False
+        results["MPU9250/6500 streaming ~50 Hz"] = False
     for note in sorted(set(notes)):
         print(f"  RX {note}")
 

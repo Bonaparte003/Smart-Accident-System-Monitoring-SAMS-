@@ -124,7 +124,7 @@ void reportI2cBus() {
   SoftI2C swapped(MPU_SCL, MPU_SDA);
   swapped.begin();
   Serial.print(F("# I2C with SDA/SCL swapped (A3/A2) devices:"));
-  if (scanBus(swapped)) Serial.println(F("# The MPU6050 SDA and SCL wires are swapped: SDA goes to A2, SCL to A3"));
+  if (scanBus(swapped)) Serial.println(F("# The MPU9250/6500 SDA and SCL wires are swapped: SDA goes to A2, SCL to A3"));
   mpuBus.begin();
 }
 
@@ -336,7 +336,7 @@ void setup() {
   Serial.print(mpuOk ? mpuChip() : F("none"));
   Serial.println(F(" (mpu=A2/A3 buzzer=D8 motor=D9 tof=A0/A1)"));
   if (!mpuOk) {
-    Serial.println(F("# MPU6050 not found (check SDA A2, SCL A3, VCC, GND)"));
+    Serial.println(F("# IMU not found (MPU9250/6500 — check SDA A2, SCL A3, VCC, GND)"));
     reportI2cBus();
   }
   if (!tofOk) Serial.println("# TOF not found");
@@ -369,7 +369,7 @@ void loop() {
     static unsigned long lastScan = 0;
     if (millis() - lastWarn >= 1000) {
       lastWarn = millis();
-      Serial.println(F("# MPU6050 not responding (check SDA A2, SCL A3, VCC, GND)"));
+      Serial.println(F("# IMU not responding (MPU9250/6500 — check SDA A2, SCL A3, VCC, GND)"));
       if (!wakeMpu() && millis() - lastScan >= 5000) {
         lastScan = millis();
         reportI2cBus();

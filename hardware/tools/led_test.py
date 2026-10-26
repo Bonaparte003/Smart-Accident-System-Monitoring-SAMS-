@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Cycle the status LEDs on the flashed MPU6050 sketch
+Cycle the status LEDs on the flashed MPU9250/6500 sketch
 Green D2, yellow D3, red D5.
 python hardware/tools/led_test.py --port /dev/cu.usbserial-1430
 """

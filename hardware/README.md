@@ -17,7 +17,7 @@ The board side of SAMS: an Arduino Uno that streams the machine's vibration and 
 
 ![SAMS schematic: Arduino Uno with status LEDs and the 2N2222A-driven vibration motors](../Design/Schematic-Design.png)
 
-The firmware, `[firmware/mpu6050_serial/mpu6050_serial.ino](firmware/mpu6050_serial/mpu6050_serial.ino)`, is the reference for pin numbers. The tables below are taken from it.
+The firmware, [`firmware/mpu6050_serial/mpu6050_serial.ino`](firmware/mpu6050_serial/mpu6050_serial.ino), is the reference for pin numbers. The tables below are taken from it. The sketch folder name is historical; the board IMU is an **MPU9250/6500** (WHO_AM_I also recognises MPU6050 / MPU9255).
 
 ---
 
@@ -32,7 +32,7 @@ The firmware, `[firmware/mpu6050_serial/mpu6050_serial.ino](firmware/mpu6050_ser
 
 | Device                  | Pins        | Notes                                                                                                     |
 | ----------------------- | ----------- | --------------------------------------------------------------------------------------------------------- |
-| Accelerometer SDA / SCL | **A2 / A3** | Software I2C. MPU6050, MPU6500, MPU9250 and MPU9255 are read the same way; the boot banner names the chip |
+| Accelerometer SDA / SCL | **A2 / A3** | Software I2C. MPU9250 / MPU6500 (also MPU6050 / MPU9255). The boot banner names the chip |
 | Accelerometer VCC / GND | 5V / GND    | Mount it on the machine surface                                                                           |
 | VL53L0X SDA / SCL       | **A0 / A1** | Software I2C                                                                                              |
 | VL53L0X VIN / GND       | 5V / GND    | Leave XSHUT open. Aim it where the worker stands                                                          |
@@ -109,18 +109,28 @@ export SAMS_PUBLIC_BASE=https://192.168.1.198:8000
 
 ## Recording machine-state training data
 
-The machine-state model (notebook 02, section 8) learns STOPPED vs RUNNING from this board, mounted as it will stay. Stop Django, then record each state:
+The machine-state model (notebook 02, section 8) learns STOPPED vs RUNNING from this board, mounted as it will stay. Leave-one-recording-out fails when a motor speed only appears once, and STOPPED cannot be held out when there is only one quiet take. Stop Django, then fill the matrix below.
 
 ```bash
-./hardware/tools/hw.sh record-steady  --seconds 60 --name press01 --note "machine off"
-./hardware/tools/hw.sh record-running --seconds 60 --name press01 --motor medium --note "machine on"
+./hardware/tools/hw.sh coverage --next   # shows gaps and the next commands
+
+# STOPPED — at least one of each disturbance (three sessions minimum)
+./hardware/tools/hw.sh record-steady  --seconds 60 --name press01 --disturbance quiet     --note "machine off, quiet"
+./hardware/tools/hw.sh record-steady  --seconds 60 --name press01 --disturbance bumps     --note "machine off, bump the mount"
+./hardware/tools/hw.sh record-steady  --seconds 60 --name press01 --disturbance footsteps --note "machine off, walk nearby"
+
+# RUNNING — at least two takes per motor level
+./hardware/tools/hw.sh record-running --seconds 60 --name press01 --motor low
+./hardware/tools/hw.sh record-running --seconds 60 --name press01 --motor medium
+./hardware/tools/hw.sh record-running --seconds 60 --name press01 --motor high
+./hardware/tools/hw.sh record-running --seconds 60 --name press01 --motor intermittent
 ```
 
 `record-running` drives the D9 motors itself (`--motor low | medium | high | intermittent | none`), waits for the board's acknowledgement, and switches them off when it ends.
 
-Each run writes `stead_dataset/mpu6050/<time>_<name>[_running].csv` (`sample, seconds_elapsed, x, y, z` in g) and a `.json` with the state, motor setting, chip, port, measured rate and note. A run is rejected when the sensor returns identical samples, the reading is not about 1 g, or the rate is not about 50 Hz.
+Each run writes `stead_dataset/mpu6050/<time>_<name>[_quiet|_bumps|_footsteps|_running_<motor>].csv` (`sample, seconds_elapsed, x, y, z` in g) and a `.json` with the state, motor setting, disturbance, chip, port, measured rate and note. A run is rejected when the sensor returns identical samples, the reading is not about 1 g, or the rate is not about 50 Hz. After each save, the script reprints the coverage summary.
 
-Record at least three runs per state, covering every motor speed and stopped sessions with bumps and footsteps. Upload `stead_dataset/` to `MyDrive/SAMS/` and run notebook 02.
+When `./hardware/tools/hw.sh coverage` reports ready, upload `stead_dataset/` to `MyDrive/SAMS/` and re-run notebook 02 §8. Promote only if leave-one-recording-out stays high for every held-out recording.
 
 ---
 
@@ -139,8 +149,8 @@ Record at least three runs per state, covering every motor speed and stopped ses
 | `TOF:1.23`                                   | ~5 Hz        | ToF distance in metres (0.02–4 m only)                                                   |
 | `# TOF raw=… timeout=… status=…`             | ~1 Hz        | ToF alive, nothing in range                                                              |
 | `# TOF ready` / `# TOF not found model=0x..` | on (re)init  | ToF presence                                                                             |
-| `# SAMS ready chip=<name>`                   | boot         | Firmware up; chip from WHO_AM_I (0x68 MPU6050, 0x70 MPU6500, 0x71 MPU9250, 0x73 MPU9255) |
-| `# MPU6050 not found` / `not responding`     | boot / ~1 Hz | Accelerometer silent on A2/A3; followed by `# I2C A2/A3 …` diagnostics                   |
+| `# SAMS ready chip=<name>`                   | boot         | Firmware up; chip from WHO_AM_I (0x70 MPU6500, 0x71 MPU9250; also 0x68 MPU6050, 0x73 MPU9255) |
+| `# IMU not found` / `not responding`         | boot / ~1 Hz | MPU9250/6500 silent on A2/A3; followed by `# I2C A2/A3 …` diagnostics                    |
 | `# ACK <cmd>`                                | per command  | Command applied                                                                          |
 
 
@@ -187,7 +197,7 @@ The accelerometer sample rate and window length come from each model's metadata,
 
 | Symptom                      | Cause and fix                                                                                                |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `# MPU6050 not found`        | Check SDA/SCL on A2/A3 and 5V. The `# I2C` lines show which addresses answer, including with SDA/SCL swapped |
+| `# IMU not found`            | Check SDA/SCL on A2/A3 and 5V for the MPU9250/6500. The `# I2C` lines show which addresses answer, including with SDA/SCL swapped |
 | `# TOF not found model=0xFF` | Nothing answered on A0/A1: check wiring and power                                                            |
 | Buzzer ACKs but stays silent | D8 can't power it: add a transistor, or use a 3-pin module with VCC on 5V. Passive piezos are not supported  |
 | `no ACK for M120`            | Old firmware: run `hw.sh flash`                                                                              |

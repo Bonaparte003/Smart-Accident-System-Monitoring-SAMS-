@@ -64,7 +64,7 @@ int whoAmI(uint8_t addr) {
 }
 
 void report() {
-  Serial.println(F("# ---- MPU6050 diag ----"));
+  Serial.println(F("# ---- MPU9250/6500 diag ----"));
   float vSda = volts(SDA_PIN);
   float vScl = volts(SCL_PIN);
   Serial.print(F("# idle volts SDA(A2)="));
@@ -126,7 +126,7 @@ void setup() {
   while (!Serial && millis() < 2000) {}
   lineHigh(SDA_PIN);
   lineHigh(SCL_PIN);
-  Serial.println(F("# SAMS MPU6050 diag (SDA=A2 SCL=A3)"));
+  Serial.println(F("# SAMS MPU9250/6500 diag (SDA=A2 SCL=A3)"));
 }
 
 void loop() {

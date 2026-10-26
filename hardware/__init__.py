@@ -1,4 +1,4 @@
-"""Physical sensor / actuator adapters for SAMS (MPU6050, buzzer, LEDs, motor, Wi‑Fi cam, ToF)."""
+"""Physical sensor / actuator adapters for SAMS (MPU9250/6500, buzzer, LEDs, motor, Wi‑Fi cam, ToF)."""
 
 from .buzzer import get_buzzer
 from .leds import get_leds

@@ -1,4 +1,4 @@
-"""D9 motor that simulates a running machine, so the MPU6050 feels real vibration.
+"""D9 motor that simulates a running machine, so the MPU9250/6500 feels real vibration.
 
 Driven by hand from the Live page — never by the risk level, since its vibration
 feeds back into the vibration and machine-state models.

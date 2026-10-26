@@ -1,5 +1,6 @@
 """
-MPU6050 accelerometer over USB serial
+MPU9250/6500 accelerometer over USB serial (module name is historical).
+
 All serial I/O is serialized on one lock so actuator commands (buzzer/LEDs)
 are not dropped while the reader thread is mid-readline.
 """
@@ -56,7 +57,7 @@ class SerialMPU6050(AccelSource):
             import serial  # type: ignore
         except ImportError as exc:
             raise RuntimeError(
-                "pyserial is required for live MPU6050. pip install pyserial"
+                "pyserial is required for live MPU9250/6500. pip install pyserial"
             ) from exc
         if not self.port:
             raise RuntimeError(
@@ -147,7 +148,7 @@ class SerialMPU6050(AccelSource):
                 return float(parts[0]), float(parts[1]), float(parts[2])
             except ValueError:
                 continue
-        raise TimeoutError(f"No valid MPU6050 sample on {self.port}")
+        raise TimeoutError(f"No valid MPU9250/6500 sample on {self.port}")
 
 
 def iter_samples(source: AccelSource) -> Iterator[tuple[float, float, float]]:

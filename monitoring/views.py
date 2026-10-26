@@ -30,7 +30,7 @@ logger = logging.getLogger("monitoring")
 
 
 def _live_vibration_result():
-    """The vibration model's label for the latest MPU6050 window, or None without one."""
+    """The vibration model's label for the latest MPU9250/6500 window, or None without one."""
     stream = get_stream()
     size = vib.window_size()
     win = stream.latest_window(size) if size else None
@@ -177,7 +177,7 @@ def hardware_status(request):
 
 @require_GET
 def hardware_vibration(request):
-    """Raw MPU6050 window for the Live graph — independent of the camera and the model."""
+    """Raw MPU9250/6500 window for the Live graph — independent of the camera and the model."""
     stream = get_stream()
     win = stream.latest_window()
     if win is None:
@@ -201,7 +201,7 @@ def hardware_vibration(request):
 @csrf_exempt
 @require_http_methods(["POST", "GET"])
 def hardware_motor(request):
-    """Run the D9 motor as a simulated machine so the MPU6050 feels real vibration."""
+    """Run the D9 motor as a simulated machine so the MPU9250/6500 feels real vibration."""
     motor = get_motor()
     if request.method == "GET":
         return JsonResponse({"motor": motor.status()})

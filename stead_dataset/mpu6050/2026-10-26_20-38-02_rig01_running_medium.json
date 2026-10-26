@@ -1,0 +1,19 @@
+{
+  "state": "RUNNING",
+  "sensor": "MPU6500 (hardware/firmware/mpu6050_serial)",
+  "chip": "MPU6500",
+  "units": "g",
+  "firmware_sample_rate_hz": 50.0,
+  "motor": "medium",
+  "motor_command": "M180",
+  "disturbance": null,
+  "measured_sample_rate_hz": 49.99,
+  "samples": 3000,
+  "duration_s": 60.52,
+  "port": "/dev/cu.usbserial-1430",
+  "started_local": "2026-10-26T20:38:02",
+  "started_utc": "2026-10-26T18:38:02+00:00",
+  "name": "rig01",
+  "note": "take 2 of 2",
+  "check_problems": []
+}

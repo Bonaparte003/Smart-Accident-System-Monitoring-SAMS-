@@ -1,4 +1,4 @@
-"""Background MPU6050 window buffer for live inference (serial only)."""
+"""Background MPU9250/6500 window buffer for live inference (serial only)."""
 
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ def apply_risk_actuators(label: str | None, *, buzzer: bool = True, leds: bool =
 
 
 class AccelStream:
-    """Collects real MPU6050 samples into fixed-size windows for the vibration model."""
+    """Collects real MPU9250/6500 samples into fixed-size windows for the vibration model."""
 
     def __init__(self, config: HardwareConfig | None = None):
         self.config = config or load_config()
@@ -95,7 +95,7 @@ class AccelStream:
             get_buzzer().attach_writer(None)
             get_leds().attach_writer(None)
             get_motor().detach()
-            logger.warning("Failed to open MPU6050 serial: %s", exc)
+            logger.warning("Failed to open MPU9250/6500 serial: %s", exc)
             raise
         get_buzzer().attach_writer(self._source.write_line)
         get_leds().attach_writer(self._source.write_line)
@@ -145,7 +145,7 @@ class AccelStream:
                 get_presence().note_sample()
             except Exception as exc:  # noqa: BLE001
                 self._last_error = str(exc)
-                logger.warning("MPU6050 read error: %s", exc)
+                logger.warning("MPU9250/6500 read error: %s", exc)
                 time.sleep(0.2)
 
     def latest_window(self, size: int | None = None) -> np.ndarray | None:

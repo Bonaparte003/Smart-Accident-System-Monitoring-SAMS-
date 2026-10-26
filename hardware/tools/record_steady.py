@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Record the MPU6050 on a machine for the machine-state model (STOPPED or RUNNING data).
+"""Record the MPU9250/6500 on a machine for the machine-state model (STOPPED or RUNNING data).
 
 Mount the board on the machine the way it will stay in service, then record it
 switched off (the default) or running (``--state RUNNING``). RUNNING recordings
@@ -17,10 +17,17 @@ Each run writes two files to ``stead_dataset/mpu6050/``:
 - ``<time>[_name].json`` state, port, duration, sample count, and your notes
 
 Notebook 02 (section 8) trains the machine-state model from every CSV there.
+Leave-one-recording-out needs several takes per motor speed and several STOPPED
+sessions (quiet / bumps / footsteps). Check progress with::
 
-  python hardware/tools/record_steady.py --seconds 60 --name press01 --note "hydraulic press, off"
-  python hardware/tools/record_steady.py --state RUNNING --seconds 60 --name press01 --note "hydraulic press, on"
-  python hardware/tools/record_steady.py --state RUNNING --motor high --seconds 60 --name rig01
+  ./hardware/tools/hw.sh coverage --next
+
+Examples::
+
+  python hardware/tools/record_steady.py --seconds 60 --name press01 --disturbance quiet --note "off, quiet"
+  python hardware/tools/record_steady.py --seconds 60 --name press01 --disturbance bumps --note "off, bump mount"
+  python hardware/tools/record_steady.py --state RUNNING --motor low --seconds 60 --name press01
+  python hardware/tools/record_steady.py --state RUNNING --motor high --seconds 60 --name press01
 """
 
 from __future__ import annotations
@@ -44,6 +51,8 @@ STATES = ("STOPPED", "RUNNING")
 # Same firmware commands as hardware/motor.py; "none" is a real machine switched on by hand.
 MOTOR_CMDS = {"low": "M120", "medium": "M180", "high": "M255", "intermittent": "V1", "none": ""}
 MOTOR_OFF = "V0"
+# STOPPED variants so leave-one-recording-out can hold out a quiet session without losing all STOPPED data.
+DISTURBANCES = ("quiet", "bumps", "footsteps")
 BOOT_TIMEOUT_S = 6.0
 ACK_TIMEOUT_S = 1.5
 # Dropped before the clock starts: the boot glitch and the motor spinning up.
@@ -57,7 +66,7 @@ def recording_problems(rows: list[tuple[int, float, float, float, float]], durat
     """
     problems = []
     if len({(x, y, z) for _i, _t, x, y, z in rows}) == 1:
-        problems.append("every sample is identical: the MPU6050 is not answering (check SDA A2, SCL A3, VCC, GND)")
+        problems.append("every sample is identical: the MPU9250/6500 is not answering (check SDA A2, SCL A3, VCC, GND)")
     mags = [math.sqrt(x * x + y * y + z * z) for _i, _t, x, y, z in rows]
     mean = sum(mags) / len(mags)
     if not GRAVITY_RANGE_G[0] <= mean <= GRAVITY_RANGE_G[1]:
@@ -120,11 +129,18 @@ def parse_sample(line: str) -> tuple[float, float, float] | None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Record STOPPED or RUNNING machine MPU6050 windows for notebook 02")
+    parser = argparse.ArgumentParser(description="Record STOPPED or RUNNING machine MPU9250/6500 windows for notebook 02")
     parser.add_argument("--state", type=str.upper, choices=STATES, default="STOPPED", help="What the machine is doing")
     parser.add_argument(
         "--motor", type=str.lower, choices=tuple(MOTOR_CMDS), default="medium",
         help="RUNNING only: D9 motor level for the recording, or none for a real machine you switch on yourself",
+    )
+    parser.add_argument(
+        "--disturbance",
+        type=str.lower,
+        choices=DISTURBANCES,
+        default="",
+        help="STOPPED only: quiet / bumps / footsteps — kept in the JSON and file name for coverage checks",
     )
     parser.add_argument("--port", default="")
     parser.add_argument("--baud", type=int, default=115200)
@@ -133,7 +149,18 @@ def main() -> int:
     parser.add_argument("--note", default="", help="Free text kept in the JSON, e.g. machine and mounting")
     parser.add_argument("--out", type=Path, default=ROOT / "stead_dataset" / "mpu6050")
     parser.add_argument("--force", action="store_true", help="Save even when the checks say the recording is unusable")
+    parser.add_argument(
+        "--skip-coverage",
+        action="store_true",
+        help="Do not print the stead_dataset coverage summary after saving",
+    )
     args = parser.parse_args()
+
+    if args.disturbance and args.state != "STOPPED":
+        print("--disturbance is only for STOPPED recordings", file=sys.stderr)
+        return 1
+    if args.state == "STOPPED" and not args.disturbance:
+        args.disturbance = "quiet"
 
     port = args.port or os.environ.get("SAMS_HW_SERIAL_PORT", "").strip() or "/dev/cu.usbserial-1410"
     try:
@@ -155,7 +182,7 @@ def main() -> int:
     booted, chip = wait_for_samples(ser, BOOT_TIMEOUT_S)
     if not booted:
         ser.close()
-        print("No samples arrived. Is the mpu6050_serial sketch flashed and the MPU6050 wired? Try: ./hardware/tools/hw.sh flash", file=sys.stderr)
+        print("No samples arrived. Is the mpu6050_serial sketch flashed and the MPU9250/6500 wired? Try: ./hardware/tools/hw.sh flash", file=sys.stderr)
         return 1
 
     motor = args.motor if args.state == "RUNNING" else "off"
@@ -172,14 +199,25 @@ def main() -> int:
         read_line(ser)
 
     started = datetime.now()
-    tag = "" if args.state == "STOPPED" else ("_running" if motor == "none" else f"_running_{motor}")
+    if args.state == "STOPPED":
+        tag = f"_{args.disturbance}" if args.disturbance else ""
+    else:
+        tag = "_running" if motor == "none" else f"_running_{motor}"
     stem = started.strftime("%Y-%m-%d_%H-%M-%S") + (f"_{args.name}" if args.name else "") + tag
     args.out.mkdir(parents=True, exist_ok=True)
     csv_path = args.out / f"{stem}.csv"
     rows: list[tuple[int, float, float, float, float]] = []
 
-    doing = "keep the machine off" if args.state == "STOPPED" else "keep the machine running as it normally does"
-    print(f"Recording {args.seconds:.0f} s {args.state} — {doing} and the board untouched. Ctrl+C stops early.")
+    if args.state == "STOPPED":
+        hints = {
+            "quiet": "keep the machine off and the area still",
+            "bumps": "keep the machine off; lightly bump the mount once or twice during the take",
+            "footsteps": "keep the machine off; walk near the board during the take",
+        }
+        doing = hints.get(args.disturbance, "keep the machine off")
+    else:
+        doing = "keep the machine running as it normally does"
+    print(f"Recording {args.seconds:.0f} s {args.state} — {doing}. Ctrl+C stops early.")
     t0 = time.monotonic()
     next_report = 1.0
     try:
@@ -209,7 +247,7 @@ def main() -> int:
 
     duration = time.monotonic() - t0
     if not rows:
-        print("No samples arrived. Is the mpu6050_serial sketch flashed and the MPU6050 wired? Try: ./hardware/tools/hw.sh flash", file=sys.stderr)
+        print("No samples arrived. Is the mpu6050_serial sketch flashed and the MPU9250/6500 wired? Try: ./hardware/tools/hw.sh flash", file=sys.stderr)
         return 1
     problems = recording_problems(rows, duration)
     if problems and not args.force:
@@ -230,6 +268,7 @@ def main() -> int:
         "firmware_sample_rate_hz": SAMPLE_RATE_HZ,
         "motor": motor,
         "motor_command": motor_cmd or None,
+        "disturbance": args.disturbance or None,
         "measured_sample_rate_hz": round(measured_rate(rows, duration), 2),
         "samples": len(rows),
         "duration_s": round(duration, 2),
@@ -243,6 +282,17 @@ def main() -> int:
     csv_path.with_suffix(".json").write_text(json.dumps(meta, indent=2))
     windows = max(0, (len(rows) - 100) // 50 + 1)
     print(f"Saved {len(rows)} samples ({meta['measured_sample_rate_hz']} Hz, {windows} training windows) → {csv_path}")
+    if not args.skip_coverage:
+        try:
+            tools_dir = str(Path(__file__).resolve().parent)
+            if tools_dir not in sys.path:
+                sys.path.insert(0, tools_dir)
+            from steady_coverage import coverage_report, print_report
+
+            print()
+            print_report(coverage_report(args.out), show_next=True)
+        except Exception as exc:
+            print(f"(coverage summary skipped: {exc})")
     return 0
 
 

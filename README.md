@@ -69,7 +69,7 @@ Every live session is archived with the decision for each moment. Uploaded video
 flowchart LR
     subgraph EDGE["Edge devices"]
         PHONE["Android phone camera"]
-        ARD["Arduino Uno: MPU6050/6500 accelerometer,<br/>VL53L0X ToF, buzzer, LEDs, vibration motors"]
+        ARD["Arduino Uno: MPU9250/6500 accelerometer,<br/>VL53L0X ToF, buzzer, LEDs, vibration motors"]
     end
     subgraph SERVER["SAMS server: Django on uvicorn (HTTPS)"]
         VIS["vision_inference<br/>PPE + pose + behaviour + tracking"]
@@ -286,11 +286,11 @@ Pin-level details, the serial protocol and recording tools are in [`hardware/REA
 
 ![SAMS schematic: Arduino Uno with status LEDs and the 2N2222A-driven vibration motors](Design/Schematic-Design.png)
 
-The firmware ([`mpu6050_serial.ino`](hardware/firmware/mpu6050_serial/mpu6050_serial.ino)) is the reference for pin numbers; the table below is taken from it.
+The firmware ([`mpu6050_serial.ino`](hardware/firmware/mpu6050_serial/mpu6050_serial.ino)) is the reference for pin numbers; the table below is taken from it. The sketch folder name is historical; SAMS uses an **MPU9250/6500** module (and still accepts related InvenSense parts that share the same accel registers).
 
 | Arduino pin | Connects to | Notes |
 |---|---|---|
-| A2 / A3 | Accelerometer SDA / SCL | Software I2C. MPU6050, MPU6500, MPU9250 and MPU9255 all work; the board reports the chip at boot |
+| A2 / A3 | Accelerometer SDA / SCL | Software I2C. MPU9250 / MPU6500 (also MPU6050 / MPU9255). The board reports the chip at boot |
 | A0 / A1 | VL53L0X SDA / SCL | Software I2C; leave XSHUT open |
 | 5V / GND | Accelerometer and ToF power | Common ground for every part |
 | D2 / D3 / D5 | Green / yellow / red LED anodes | Each through a series resistor (220 Ω–1 kΩ), cathode to GND |
@@ -304,7 +304,7 @@ The firmware ([`mpu6050_serial.ino`](hardware/firmware/mpu6050_serial/mpu6050_se
 | Part | Qty | Role |
 |---|---|---|
 | Arduino Uno (AVR + CH340) | 1 | Reads sensors, drives actuators, USB serial at 115200 baud |
-| MPU6050 / MPU6500 / MPU9250 module | 1 | Machine vibration and machine state, 50 Hz |
+| MPU9250 / MPU6500 module | 1 | Machine vibration and machine state, 50 Hz |
 | VL53L0X time-of-flight module | 1 | Close-range worker distance |
 | Active buzzer | 1 | Audible caution / danger patterns |
 | LEDs (green, yellow, red) + resistors | 3 | Visual risk level |
@@ -321,8 +321,9 @@ The firmware ([`mpu6050_serial.ino`](hardware/firmware/mpu6050_serial/mpu6050_se
 ./hardware/tools/hw.sh flash            # compile and upload the main firmware
 ./hardware/tools/hw.sh check            # verify accelerometer, ToF and actuators
 ./hardware/tools/hw.sh test-leds        # LED cycle
-./hardware/tools/hw.sh record-steady    # record the machine STOPPED (training data)
-./hardware/tools/hw.sh record-running --motor medium   # record it RUNNING
+./hardware/tools/hw.sh coverage --next  # what STOPPED/RUNNING takes are still missing
+./hardware/tools/hw.sh record-steady --disturbance quiet   # machine STOPPED (quiet|bumps|footsteps)
+./hardware/tools/hw.sh record-running --motor low   # machine RUNNING (repeat per motor level)
 ./hardware/tools/hw.sh certs            # regenerate the HTTPS certificate after an IP change
 ./hardware/tools/hw.sh run              # start SAMS with the board
 ```
@@ -481,7 +482,7 @@ SAMS/
 ├── notebooks/                   Eight Colab training notebooks
 ├── models/                      Trained weights and metadata (not in git)
 ├── results/                     Notebook figures and metrics; performance/ from `benchmark`
-├── stead_dataset/mpu6050/       Board recordings for the machine-state model
+├── stead_dataset/mpu6050/       Board recordings for the machine-state model (folder name historical; sensor is MPU9250/6500)
 ├── docs/                        Technical report
 ├── Design/                      Schematic and UI screenshots
 ├── requirements.txt
@@ -494,7 +495,7 @@ SAMS/
 
 | Principle | Where |
 |---|---|
-| **Abstraction and inheritance** | `LazyModel` (abstract) defines how a model is loaded once and shared; `JoblibModel`, `YoloModel`, `PoseModel` and `DistanceNet` only implement `load()`. `AccelSource` (abstract) is implemented by `SerialMPU6050` |
+| **Abstraction and inheritance** | `LazyModel` (abstract) defines how a model is loaded once and shared; `JoblibModel`, `YoloModel`, `PoseModel` and `DistanceNet` only implement `load()`. `AccelSource` (abstract) is implemented by `SerialMPU6050` (serial reader for the MPU9250/6500 board) |
 | **Polymorphism** | Every service calls `get()` / `reset()` the same way whatever the model type; `AccelStream` reads any `AccelSource` |
 | **Encapsulation** | `Buzzer`, `Leds`, `Motor`, `ToFSensor`, `BoardPresence` and `PhoneCamera` own their state and serial commands; `MotionLog` owns per-person distance histories; `LiveRecorder` owns a session's frames and cards |
 | **Separation of concerns** | Views call services; services never render HTML; hardware drivers know nothing about models |
