@@ -13,7 +13,7 @@ Every live session is archived with the decision for each moment. Uploaded video
 | | |
 |---|---|
 | **Repository** | <https://github.com/Bonaparte003/Smart-Accident-System-Monitoring-SAMS-> |
-| **Video demo** | <https://www.youtube.com/watch?v=tkwJFKNSVD8> |
+| **Video demo** | <https://www.youtube.com/watch?v=UcWIbsf9-XQ> |
 | **Track** | ML track (models, notebooks, metrics) with a full-stack web MVP and hardware integration |
 | **Training** | Eight Colab notebooks in [`notebooks/`](notebooks/), one per model |
 

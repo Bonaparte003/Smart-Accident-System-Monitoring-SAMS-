@@ -78,8 +78,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "SAMS.wsgi.application"
 ASGI_APPLICATION = "SAMS.asgi.application"
 
-# PostgreSQL for the app. Tests use an in-memory SQLite DB so `manage.py test`
-# does not require a running server (same idea as SAMS_CELERY_EAGER for tests).
 _RUNNING_TESTS = any(
     arg == "test" or arg.startswith("test") for arg in __import__("sys").argv[1:2]
 )
@@ -95,7 +93,7 @@ else:
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.environ.get("SAMS_DB_NAME", "sams"),
-            "USER": os.environ.get("SAMS_DB_USER", "sams"),
+            "USER": os.environ.get("SAMS_DB_USER", "postgres"),
             "PASSWORD": os.environ.get("SAMS_DB_PASSWORD", "sams"),
             "HOST": os.environ.get("SAMS_DB_HOST", "127.0.0.1"),
             "PORT": os.environ.get("SAMS_DB_PORT", "5432"),
