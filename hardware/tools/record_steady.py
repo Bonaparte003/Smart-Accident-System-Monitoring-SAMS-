@@ -44,18 +44,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SAMPLE_RATE_HZ = 50.0
-# A still board always feels gravity, about 1 g, and the firmware sends 50 lines a second.
 GRAVITY_RANGE_G = (0.8, 1.2)
 RATE_TOLERANCE = 0.1
 STATES = ("STOPPED", "RUNNING")
-# Same firmware commands as hardware/motor.py; "none" is a real machine switched on by hand.
 MOTOR_CMDS = {"low": "M120", "medium": "M180", "high": "M255", "intermittent": "V1", "none": ""}
 MOTOR_OFF = "V0"
-# STOPPED variants so leave-one-recording-out can hold out a quiet session without losing all STOPPED data.
 DISTURBANCES = ("quiet", "bumps", "footsteps")
 BOOT_TIMEOUT_S = 6.0
 ACK_TIMEOUT_S = 1.5
-# Dropped before the clock starts: the boot glitch and the motor spinning up.
 SETTLE_S = 1.5
 
 
