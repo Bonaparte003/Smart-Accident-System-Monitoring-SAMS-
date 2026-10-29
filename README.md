@@ -80,7 +80,7 @@ flowchart LR
         VIB[vibration_inference]
         CC["control_center + fusion_inference"]
         REC[recordings]
-        DB[(SQLite + media/)]
+        DB[(PostgreSQL + media/)]
     end
     UI["Review dashboard and Live view"]
 
@@ -133,7 +133,7 @@ The service code only joins what the models measure. Every class name, threshold
 |---|---|---|
 | Language | Python | 3.12 (3.13+ unsupported: no torch 2.2.2 / numpy 1.26.4 wheels) |
 | Web | Django, uvicorn (ASGI, HTTPS), django-cors-headers | 6.1.1, 0.54.0, 4.9.0 |
-| Database | SQLite through the Django ORM | bundled with Python |
+| Database | PostgreSQL through the Django ORM | 14+ (psycopg 3) |
 | ML / CV | PyTorch, torchvision, Ultralytics YOLOv8, scikit-learn, XGBoost | 2.2.2, 0.17.2, 8.3+, 1.6.1, 3.4.1 |
 | Data / media | NumPy, SciPy, OpenCV (headless), Pillow, imageio-ffmpeg | 1.26.4, 1.13.1, 4.10, 12.3, 0.6.0 |
 | Hardware link | pyserial; arduino-cli for flashing | 3.5; 1.5+ |
@@ -152,6 +152,7 @@ Exact Python versions are pinned in [`requirements.txt`](requirements.txt).
 ### Prerequisites
 
 - **Python 3.12.** Python 3.13+ will not work: `torch==2.2.2` and `numpy==1.26.4` have no wheels for it. On macOS, `brew install python@3.12`.
+- **PostgreSQL 14+**, running locally (or reachable from the laptop). Defaults expect a database/user/password all named `sams` on `127.0.0.1:5432`.
 - **OpenSSL**, for the self-signed HTTPS certificate (preinstalled on macOS and most Linux distributions).
 - For live sensing: an Arduino Uno with the parts under [Hardware](#hardware), [`arduino-cli`](https://arduino.github.io/arduino-cli/), and an Android phone on the same Wi-Fi.
 
@@ -165,7 +166,29 @@ python3.12 -m venv myenv
 source myenv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+```
 
+Create the database once (Homebrew example; adjust if your Postgres install differs):
+
+```bash
+brew install postgresql@16
+brew services start postgresql@16
+createuser -s sams 2>/dev/null || true
+psql postgres -c "ALTER USER sams WITH PASSWORD 'sams';" 2>/dev/null || \
+  psql postgres -c "CREATE USER sams WITH PASSWORD 'sams' CREATEDB;"
+psql postgres -c "CREATE DATABASE sams OWNER sams;" 2>/dev/null || true
+```
+
+Or with Docker:
+
+```bash
+docker run -d --name sams-postgres -e POSTGRES_USER=sams -e POSTGRES_PASSWORD=sams \
+  -e POSTGRES_DB=sams -p 5432:5432 postgres:16
+```
+
+Then migrate and create an admin user:
+
+```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
@@ -227,7 +250,12 @@ Every variable has a default; none is needed for a first run.
 | `DJANGO_SECRET_KEY` | development key | **Set in production** |
 | `DJANGO_DEBUG` | `true` | Set to `false` in production |
 | `DJANGO_ALLOWED_HOSTS` | `*` | Comma-separated host names |
-| `SAMS_DB_PATH` | `db.sqlite3` | SQLite file |
+| `SAMS_DB_NAME` | `sams` | PostgreSQL database name |
+| `SAMS_DB_USER` | `sams` | PostgreSQL user |
+| `SAMS_DB_PASSWORD` | `sams` | PostgreSQL password |
+| `SAMS_DB_HOST` | `127.0.0.1` | PostgreSQL host |
+| `SAMS_DB_PORT` | `5432` | PostgreSQL port |
+| `SAMS_DB_CONN_MAX_AGE` | `60` | Persistent DB connections (seconds); `0` disables |
 | `CELERY_BROKER_URL` | `redis://127.0.0.1:6379/1` | Celery / Redis broker (DB **1**, so it does not share DB 0 with other apps) |
 | `CELERY_RESULT_BACKEND` | same as broker | Celery result store |
 | `SAMS_CELERY_EAGER` | `false` | Run tasks in-process (no worker; used by tests) |
@@ -554,7 +582,7 @@ flowchart LR
     BOX --> DASH[Dashboard in any browser on the site network]
 ```
 
-It runs on a laptop on the local Wi-Fi: `python manage.py runserver` starts everything; SQLite and `media/` store the data.
+It runs on a laptop on the local Wi-Fi: `python manage.py runserver` starts everything; PostgreSQL and `media/` store the data.
 
 **Model updates are drop-in:** copy the new model folder into `models/` and restart.
 

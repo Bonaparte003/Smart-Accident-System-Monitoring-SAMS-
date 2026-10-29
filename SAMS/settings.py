@@ -78,12 +78,30 @@ TEMPLATES = [
 WSGI_APPLICATION = "SAMS.wsgi.application"
 ASGI_APPLICATION = "SAMS.asgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("SAMS_DB_PATH", str(BASE_DIR / "db.sqlite3")),
+# PostgreSQL for the app. Tests use an in-memory SQLite DB so `manage.py test`
+# does not require a running server (same idea as SAMS_CELERY_EAGER for tests).
+_RUNNING_TESTS = any(
+    arg == "test" or arg.startswith("test") for arg in __import__("sys").argv[1:2]
+)
+if _RUNNING_TESTS:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("SAMS_DB_NAME", "sams"),
+            "USER": os.environ.get("SAMS_DB_USER", "sams"),
+            "PASSWORD": os.environ.get("SAMS_DB_PASSWORD", "sams"),
+            "HOST": os.environ.get("SAMS_DB_HOST", "127.0.0.1"),
+            "PORT": os.environ.get("SAMS_DB_PORT", "5432"),
+            "CONN_MAX_AGE": int(os.environ.get("SAMS_DB_CONN_MAX_AGE", "60")),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -155,5 +173,5 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
-if any(arg == "test" or arg.startswith("test") for arg in __import__("sys").argv[1:2]):
+if _RUNNING_TESTS:
     CELERY_TASK_ALWAYS_EAGER = True
