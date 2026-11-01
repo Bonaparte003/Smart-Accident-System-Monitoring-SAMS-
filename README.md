@@ -392,7 +392,7 @@ The vision notebooks also pick up optional data from `MyDrive/SAMS/` when it is 
 |---|---|---|
 | `datasets/vision/accident/extra/<name>/` | 07 Fall | A real fall dataset in YOLO format with its `data.yaml` (for example a Roboflow export); class names are mapped onto `laying` / `standing` |
 | `datasets/vision/accident/site/` | 07 Fall | Labelled SAMS frames, same layout: staged falls and normal work |
-| `datasets/vision/ppe/site/{train,val,test}/` | 05 PPE | Labelled SAMS frames in the 12-class PPE list, split by recording |
+| `SAMS/onsite/{train,val,test}/` | 05 PPE | Labelled SAMS frames in the 12-class PPE list, split by recording |
 | `datasets/vision/{accident,ppe}/background/` | 05, 07 | Empty SAMS frames, added to training as background |
 
 ---

@@ -7,7 +7,7 @@ weight_decay,0.0005,"Penalty on large weights, reduces overfitting"
 warmup_epochs,3.0,Epochs where the learning rate ramps up from a small value
 cos_lr,False,Cosine learning-rate decay instead of linear
 box,7.5,Weight of the box position loss
-cls,0.5,Weight of the class loss
+cls,1.0,Weight of the class loss
 dfl,1.5,Weight of the distribution focal loss for box edges
 hsv_h,0.015,Random hue change during training
 hsv_s,0.7,Random saturation change during training

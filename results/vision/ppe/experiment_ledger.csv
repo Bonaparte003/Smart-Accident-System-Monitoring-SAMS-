@@ -1,9 +1,9 @@
 experiment_id,group,change,weights_in,train images,imgsz,two_stage,epochs_run,best_epoch,stopped_early,precision,recall,map50,map50_95,missing_recall,minutes
-ppe_e1_full,main,"Baseline: every training image, no selection, no copies",yolov8n.pt,6676,640,False,24,21,True,0.6698,0.5595,0.5559,0.3194,0.4045,15.6
-ppe_e2_curated,main,"Real images chosen per class, plus background images",yolov8n.pt,3921,640,False,5,2,True,0.5123,0.3544,0.3102,0.169,0.2951,2.4
-ppe_e3_balanced,main,Curated set plus augmented copies for classes still short,yolov8n.pt,6295,640,False,4,2,True,0.5451,0.3452,0.3085,0.1774,0.2502,3.6
-ppe_e4_imgsz_large,main,Balanced set at 960 pixels,yolov8n.pt,6295,960,False,4,1,True,0.5273,0.3692,0.3277,0.1875,0.3538,5.1
-ppe_e5_two_stage,main,"Frozen backbone for 10 epochs, then all layers at lr0 / 10, 960 pixels",yolov8n.pt,6295,960,True,11,8,True,0.6642,0.4523,0.4252,0.256,0.4317,21.1
-ppe_e5h_adamw,main,AdamW lr0=0.001 with the recipe so far,yolov8n.pt,6295,960,True,6,3,True,0.5628,0.459,0.4163,0.2455,0.4248,15.5
-ppe_e6_teacher_labels,main,Teacher-filled labels from ppe_e5_two_stage for classes a source does not annotate,yolov8n.pt,6295,960,True,11,8,True,0.6548,0.4585,0.4179,0.2528,0.4429,25.4
-ppe_e7_yolov8s,main,"YOLOv8s with the best data, image size, fine-tuning, and optimizer so far",yolov8s.pt,6295,960,True,5,2,True,0.5033,0.5067,0.4246,0.261,0.5116,24.1
+ppe_e1_full,main,"Baseline: every training image, no selection, no copies",yolov8n.pt,6676,640,False,4,1,True,0.5702,0.3629,0.3522,0.1926,0.285,4.0
+ppe_e2_curated,main,"Real images chosen per class, plus background images",yolov8n.pt,4186,640,False,5,2,True,0.5434,0.3484,0.3345,0.19,0.2379,2.5
+ppe_e3_balanced,main,Curated set plus augmented copies for classes still short,yolov8n.pt,8023,640,False,5,2,True,0.5605,0.3825,0.333,0.182,0.3347,4.7
+ppe_e4_imgsz_large,main,Balanced set at 960 pixels,yolov8n.pt,8023,960,False,17,14,True,0.6618,0.4558,0.4119,0.2412,0.4235,24.0
+ppe_e5_two_stage,main,"Frozen backbone for 10 epochs, then all layers at lr0 / 10, 960 pixels",yolov8n.pt,8023,960,True,12,9,True,0.5917,0.4566,0.4247,0.2526,0.4396,28.5
+ppe_e5h_adamw,main,AdamW lr0=0.001 with the recipe so far,yolov8n.pt,8023,960,True,8,5,True,0.6684,0.456,0.4153,0.2484,0.4455,23.2
+ppe_e6_teacher_labels,main,Teacher-filled labels from ppe_e5_two_stage for classes a source does not annotate,yolov8n.pt,8023,960,True,11,8,True,0.6415,0.4626,0.4167,0.2512,0.4507,29.6
+ppe_e7_yolov8s,main,"YOLOv8s with the best data, image size, fine-tuning, and optimizer so far",yolov8s.pt,8023,960,True,5,2,True,0.6109,0.4679,0.4202,0.2554,0.4402,29.5

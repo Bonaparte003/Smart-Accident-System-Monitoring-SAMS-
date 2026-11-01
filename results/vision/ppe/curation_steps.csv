@@ -1,9 +1,9 @@
-step,class,train pool boxes,boxes already selected before this step,images added in this step,boxes after this step
-1,no_boots,88,0,28,88
-2,no_vest,830,0,516,830
-3,boots,1217,6,520,1217
-4,no_helmet,1351,511,475,1351
-5,vest,2330,812,838,2330
-6,helmet,3265,2267,384,3001
-7,no_gloves,4493,433,755,3000
-8,gloves,4730,1687,405,3001
+step,class,target,train pool boxes,boxes already selected before this step,images added in this step,boxes after this step
+1,no_boots,4500,88,0,28,88
+2,no_vest,4000,830,0,516,830
+3,boots,4500,1217,6,520,1217
+4,no_helmet,4000,1351,511,475,1351
+5,vest,3000,2330,812,838,2330
+6,helmet,3000,3265,2267,384,3001
+7,no_gloves,4000,4493,433,1292,4000
+8,gloves,3000,4730,2541,133,3003

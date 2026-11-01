@@ -1,9 +1,9 @@
 class,train pool boxes,after real-image selection,after augmentation,target,copies made for this class,real photos copied,status
-helmet,3265,3007,5129,3000,0,0,reached target
-no_helmet,1351,1351,3002,3000,59,59,reached target
-vest,2330,2330,3392,3000,0,0,reached target
-no_vest,830,830,3004,3000,1327,516,reached target
-gloves,4730,3001,4155,3000,0,0,reached target
-no_gloves,4493,3182,3814,3000,0,0,reached target
-boots,1217,1217,3000,3000,708,520,reached target
-no_boots,88,88,963,3000,280,28,short: not enough real photos to copy
+helmet,3265,3005,6532,3000,0,0,reached target
+no_helmet,1351,1351,4000,4000,193,193,reached target
+vest,2330,2330,4295,3000,0,0,reached target
+no_vest,830,830,4083,4000,1938,516,reached target
+gloves,4730,3003,5289,3000,0,0,reached target
+no_gloves,4493,4019,4835,4000,0,0,reached target
+boots,1217,1217,4501,4500,1370,520,reached target
+no_boots,88,88,1135,4500,336,28,short: not enough real photos to copy

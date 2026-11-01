@@ -1,0 +1,13 @@
+class,threshold,boxes,median confidence
+helmet,0.259,90,0.553
+gloves,0.457,2,0.593
+vest,0.42,64,0.684
+boots,0.373,1,0.521
+goggles,0.05,11,0.084
+none,0.247,0,
+Person,0.467,139,0.828
+no_helmet,0.242,8,0.541
+no_goggle,0.063,0,
+no_gloves,0.274,1,0.356
+no_boots,0.05,9,0.072
+no_vest,0.223,21,0.444
