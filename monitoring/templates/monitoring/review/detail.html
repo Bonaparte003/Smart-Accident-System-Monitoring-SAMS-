@@ -64,6 +64,13 @@
       </ul>
     </aside>
     {% endif %}
+    {% if recording.render_status != "pending" %}
+    <form class="delete-recording" method="post" action="{% url 'review_recording_delete' recording.pk %}"
+          onsubmit="return confirm('Delete this recording for good? The video, the annotated copy and every saved frame are erased.');">
+      {% csrf_token %}
+      <button type="submit"><i class="fa-solid fa-trash" aria-hidden="true"></i> Delete recording</button>
+    </form>
+    {% endif %}
   </div>
 </section>
 

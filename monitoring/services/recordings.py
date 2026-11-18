@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 _DISTANCE_LABEL = {"tof": "sensor", "vision": "body"}
@@ -247,3 +248,21 @@ def encode_clip(frames: list[tuple[float, bytes | Path]], dest, *, fps: float = 
     finally:
         writer.close()
     return end_t
+
+
+def delete_recording(recording) -> None:
+    """Erase a recording for good: both videos, every log-card frame, leftover live frames, then the rows.
+
+    Used by the Delete button (a person asks for their footage to be erased) and by
+    ``purge_recordings`` (footage older than the retention period).
+    """
+    from .live_recorder import frames_dir
+
+    for mark in recording.minutes.all():
+        if mark.snapshot:
+            mark.snapshot.delete(save=False)
+    for field in (recording.video, recording.framed):
+        if field:
+            field.delete(save=False)
+    shutil.rmtree(frames_dir(recording.pk), ignore_errors=True)
+    recording.delete()

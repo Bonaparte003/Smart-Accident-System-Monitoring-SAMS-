@@ -2072,3 +2072,19 @@ body.mlops-page .stage {
   .q-row { grid-template-columns: minmax(0, 1fr); }
   .q-row form { display: grid; grid-template-columns: 1fr 1fr 1fr; }
 }
+
+/* Privacy notice and terms (/privacy/) */
+.policy { max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 3rem; color: var(--ink); line-height: 1.6; }
+.policy h1 { font-size: 1.6rem; margin: 0.2rem 0 0.8rem; }
+.policy h2 { font-size: 1.05rem; margin: 1.8rem 0 0.4rem; }
+.policy ul { padding-left: 1.2rem; }
+.policy li { margin: 0.3rem 0; }
+.policy-kicker { color: var(--muted); font-size: 0.85rem; margin: 0; }
+.policy-lede { color: var(--muted); }
+.policy-promise { border-left: 3px solid var(--danger); padding: 0.4rem 0.8rem; background: var(--panel); }
+.policy-foot { margin-top: 2rem; }
+.delete-recording { margin-top: 1rem; }
+.delete-recording button { background: none; border: 1px solid var(--danger); color: var(--danger); border-radius: var(--radius); padding: 0.45rem 0.9rem; font: inherit; cursor: pointer; }
+.delete-recording button:hover { background: var(--danger); color: #fff; }
+.signin-privacy { margin-top: 0.9rem; font-size: 0.85rem; text-align: center; }
+.signin-privacy a { color: var(--muted); }

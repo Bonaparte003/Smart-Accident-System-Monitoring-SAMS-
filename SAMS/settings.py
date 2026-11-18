@@ -119,6 +119,10 @@ STATICFILES_DIRS = []
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(os.environ.get("SAMS_MEDIA_ROOT", str(BASE_DIR / "media")))
 
+# Footage older than this is erased by `manage.py purge_recordings` (Law N° 058/2021, Art. 37(5°)).
+# Moments a safety officer kept for training are the only exception.
+SAMS_RETENTION_DAYS = int(os.environ.get("SAMS_RETENTION_DAYS", "30"))
+
 LOGIN_URL = "review_entrance"
 LOGIN_REDIRECT_URL = "review_entrance"
 

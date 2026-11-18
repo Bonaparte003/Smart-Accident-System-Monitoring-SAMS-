@@ -15,7 +15,7 @@ The board side of SAMS: an Arduino Uno that streams the machine's vibration and 
 
 ## Schematic
 
-![SAMS schematic: Arduino Uno with status LEDs and the 2N2222A-driven vibration motors](../Design/Schematic-Design.png)
+![SAMS schematic: Arduino Uno with status LEDs, the D8 active buzzer and the 2N2222A-driven vibration motors](../Design/Schematic-Design.png)
 
 The firmware, [`firmware/mpu6050_serial/mpu6050_serial.ino`](firmware/mpu6050_serial/mpu6050_serial.ino), is the reference for pin numbers. The tables below are taken from it. The sketch folder name is historical; the board IMU is an **MPU9250/6500** (WHO_AM_I also recognises MPU6050 / MPU9255).
 

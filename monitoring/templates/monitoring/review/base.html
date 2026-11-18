@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-  <link rel="stylesheet" href="{% static 'monitoring/css/review.css' %}?v=37" />
+  <link rel="stylesheet" href="{% static 'monitoring/css/review.css' %}?v=38" />
   <script>
     try {
       if (localStorage.getItem("sams-nav") === "open") document.documentElement.classList.add("nav-open");
@@ -46,6 +46,10 @@
         <span class="rail-label">MLOps</span>
       </a>
       <span class="rail-gap"></span>
+      <a class="rail-link{% if nav == 'privacy' %} is-on{% endif %}" href="{% url 'review_privacy' %}" title="Privacy and terms"{% if nav == 'privacy' %} aria-current="page"{% endif %}>
+        <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+        <span class="rail-label">Privacy</span>
+      </a>
       {% if user.is_authenticated %}
       <form method="post" action="{% url 'review_logout' %}">
         {% csrf_token %}

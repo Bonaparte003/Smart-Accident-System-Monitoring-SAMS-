@@ -71,6 +71,8 @@
     }
     .err-box { background: #2a1215; color: #ffb4b4; }
     .warn-box { background: #2a2412; color: #ffd38a; }
+    .notice { font-size: 0.8rem; opacity: 0.8; padding: 0 1rem 1rem; line-height: 1.4; }
+    .notice a { color: inherit; }
   </style>
 </head>
 <body>
@@ -95,6 +97,8 @@
     <button type="button" id="start">Start camera</button>
     <button type="button" class="ghost" id="stop" disabled>Stop</button>
   </div>
+  <p class="notice">This camera records the machine area for SAMS safety warnings. Video stays on the site server and is deleted after a set period.
+    <a href="{% url 'review_privacy' %}" target="_blank" rel="noopener">Privacy notice</a></p>
   <script>
     const token = "{{ token|escapejs }}";
     const statusEl = document.getElementById("status");

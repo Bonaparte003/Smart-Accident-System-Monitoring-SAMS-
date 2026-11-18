@@ -19,6 +19,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from .models import RISK_LABELS, InteractionEvent, Recording, RecordingMinute, Trial
 from .services import trials, video_analysis
 from .services.mlops import export_zip, kept_minutes, model_cards
+from .services.recordings import delete_recording as erase_recording
 from .services.recordings import log_line
 from .services.vision_inference import pose_overlay_config
 
@@ -661,4 +662,25 @@ def recording_detail(request: HttpRequest, pk: int) -> HttpResponse:
             "status_label": _status_label(recording),
             "pose_overlay": pose_overlay_config(),
         },
+    )
+
+
+@login_required(login_url="review_entrance")
+@require_POST
+def delete_recording(request: HttpRequest, pk: int) -> HttpResponse:
+    """Erase one recording and every frame taken from it (right to erasure)."""
+    recording = get_object_or_404(Recording, pk=pk)
+    if recording.render_status == "pending":
+        # A live session still writing frames, or a clip still being analysed.
+        return redirect("review_recording", pk=pk)
+    erase_recording(recording)
+    return redirect("review_archive")
+
+
+def privacy(request: HttpRequest) -> HttpResponse:
+    """Privacy notice and terms of use. Public, so workers and phone users can read it without an account."""
+    return render(
+        request,
+        "monitoring/review/privacy.html",
+        {"nav": "privacy", "retention_days": settings.SAMS_RETENTION_DAYS},
     )
