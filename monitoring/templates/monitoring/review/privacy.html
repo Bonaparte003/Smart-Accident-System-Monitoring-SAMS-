@@ -1,0 +1,86 @@
+{% extends "monitoring/review/base.html" %}
+{% block title %}Privacy and terms — SAMS{% endblock %}
+{% block main %}
+<article class="policy" aria-labelledby="policy-title">
+  <p class="policy-kicker">Version 1.0 · 15 November 2026</p>
+  <h1 id="policy-title">Privacy notice and terms of use</h1>
+  <p class="policy-lede">
+    SAMS films the area around a machine to warn workers before they get hurt.
+    This page explains, in plain words, what it records, why, who can see it, how long it is kept,
+    and what you can ask us to do. It follows Rwanda's Law N° 058/2021 on the protection of personal data and privacy.
+  </p>
+
+  <section>
+    <h2>1. Who is responsible</h2>
+    <p>
+      The site that installs SAMS is the data controller: it decides to monitor the machine area and answers for the footage.
+      During the capstone pilot the controller is the host site, and the developer (UTERAMAHORO Avellin Bonaparte, ALU)
+      runs the system on its behalf. Questions and requests go to the site safety officer named on the notice posted at the machine.
+    </p>
+  </section>
+
+  <section>
+    <h2>2. What SAMS records</h2>
+    <ul>
+      <li><strong>Video</strong> from one phone camera pointed at the machine area. Anyone who walks into view is filmed.</li>
+      <li><strong>What the models saw</strong> for each moment: person boxes, distance to the machine, protective gear worn or missing, fire, smoke, falls.</li>
+      <li><strong>Machine readings</strong> from the board: vibration and whether the machine is running. These are not about people.</li>
+      <li><strong>Operator accounts</strong>: username and a hashed password for staff who sign in. SAMS never stores a password in plain text.</li>
+    </ul>
+    <p>SAMS does <strong>not</strong> recognise faces, store names of filmed workers, or record sound.</p>
+  </section>
+
+  <section>
+    <h2>3. Why, and what it will never be used for</h2>
+    <p>Footage is used for three things only: the live warning (buzzer and lights), reviewing a CAUTION or DANGER moment afterwards, and improving the safety models.</p>
+    <p class="policy-promise">
+      It must not be used to rate, discipline, or dismiss a worker, or to track attendance or productivity.
+      A SAMS decision is a warning for a person to check, never a final judgement about anyone.
+    </p>
+  </section>
+
+  <section>
+    <h2>4. Who can see it</h2>
+    <ul>
+      <li>Only signed-in staff (operator and safety officer) can open the dashboard, archive, alerts and training desk.</li>
+      <li>Video travels from the phone to the server over HTTPS on the site's own Wi-Fi. It is not sent to any cloud service to run.</li>
+      <li>Footage is stored on the site server, in Rwanda. If moments are exported to train a new model, they are exported only
+        after a safety officer has reviewed them, and storing them outside Rwanda needs the authorisation required by Articles 48 and 50 of the law.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>5. How long it is kept</h2>
+    <p>
+      Recordings are deleted automatically after <strong>{{ retention_days }} days</strong>.
+      The only exception is a moment a safety officer has marked <em>Keep</em> for training; its recording stays until that mark is removed or it is deleted by hand.
+    </p>
+  </section>
+
+  <section>
+    <h2>6. Your rights</h2>
+    <ul>
+      <li><strong>Be told</strong>: a printed notice at the machine says that the area is filmed and links to this page.</li>
+      <li><strong>See</strong> the moments in which you appear, with the safety officer.</li>
+      <li><strong>Erase</strong>: ask for a recording to be deleted. Staff press <em>Delete recording</em> on that recording, which removes the video, the annotated copy and every saved frame.</li>
+      <li><strong>Object or withdraw consent</strong> to your footage being used for training. The moment is marked <em>Exclude</em> and never exported.</li>
+      <li><strong>Complain</strong> to the National Cyber Security Authority (Data Protection and Privacy Office) if you think your data was misused.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>7. Terms of use for operators</h2>
+    <ul>
+      <li>SAMS is a research prototype. It can miss a hazard or raise a false alarm. It does not replace machine guards, lock-out procedures, protective equipment or a supervisor.</li>
+      <li>When an input is missing (no camera, no board, a model offline) SAMS shows <em>No decision</em> instead of guessing. Treat that as "not monitored".</li>
+      <li>Post the camera notice before going live. Do not point the camera at toilets, changing areas or places outside the machine zone.</li>
+      <li>Do not share or copy footage outside SAMS. Use the archive, and delete what is no longer needed.</li>
+      <li>SAMS uses open-source components under their own licences, including Ultralytics YOLOv8 (AGPL-3.0); see the project README.</li>
+    </ul>
+  </section>
+
+  <p class="policy-foot">
+    {% if user.is_authenticated %}<a href="{% url 'review_entrance' %}">Back to SAMS</a>{% else %}<a href="{% url 'review_entrance' %}">Sign in</a>{% endif %}
+  </p>
+</article>
+{% endblock %}
