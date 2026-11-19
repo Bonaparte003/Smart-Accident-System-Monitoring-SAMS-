@@ -1,3 +1,6 @@
+// Adapted from Pololu's VL53L0X library for Arduino (https://github.com/pololu/vl53l0x-arduino).
+// Copyright (c) 2017-2022 Pololu Corporation (MIT License); parts derived from the ST VL53L0X API,
+// Copyright (c) 2016 STMicroelectronics International N.V. (BSD-3-Clause). Full terms: LICENSE-VL53L0X.txt
 #ifndef VL53L0X_h
 #define VL53L0X_h
 
